@@ -1,49 +1,48 @@
-import React, { useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import aidConnectLogo from '../assets/aidconnect-logo.jpg';
-import AuthActions from './AuthActions.jsx';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import aidConnectLogo from '../src/assets/brand/aidconnect-logo.jpg';
+import { useAuth } from '../src/context/AuthContext.jsx';
 import Container from './Container.jsx';
 import ThemeSwitch from './ThemeSwitch.jsx';
+import CardNav from './react-bits/CardNav.jsx';
 
-const links = [
-  { to: '/', label: 'Home' },
-  { to: '/opportunities', label: 'Find opportunities' },
-  { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
-];
+function RouterLink({ href, ...props }) {
+  return <Link to={href} {...props} />;
+}
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const [openPath, setOpenPath] = useState(null);
-  const open = openPath === pathname;
-  const close = () => setOpenPath(null);
+  const { user, logout } = useAuth();
+  const accountLinks = user
+    ? [{ label: 'Dashboard', href: '/dashboard' }, { label: 'Log out' }]
+    : [{ label: 'Login', href: '/login' }, { label: 'Register', href: '/register' }];
+  const items = [
+    { label: 'Home', className: 'card-nav__card--home', description: 'Back to the AidConnect homepage.', links: [{ label: 'Go to Home', href: '/' }] },
+    { label: 'Volunteer', description: 'Find a role close to home.', links: [{ label: 'Browse opportunities', href: '/opportunities' }] },
+    { label: 'Organizations', description: 'Share a role with local volunteers.', links: [{ label: 'Post an opportunity', href: '/organizations/register' }, { label: 'Organization login', href: '/organizations/login' }] },
+    { label: 'AidConnect', description: 'Get to know the project.', links: [{ label: 'About', href: '/about' }, { label: 'Contact us', href: '/contact' }] },
+    { label: 'Account', links: accountLinks },
+  ];
 
   return (
     <header className="site-header">
-      <Container className="relative flex min-h-20 items-center justify-between gap-3">
-        <Link to="/" onClick={close} className="brand shrink-0">
-          <img src={aidConnectLogo} alt="" width="32" height="32" className="rounded-full" />
-          AidConnect
-        </Link>
-
-        <div className="flex items-center gap-2 lg:order-last">
-          <ThemeSwitch />
-          <button type="button" aria-expanded={open} aria-controls="site-navigation"
-            onClick={() => setOpenPath(open ? null : pathname)}
-            className="min-h-11 rounded-md border border-current bg-transparent px-2 text-inherit lg:hidden">
-            {open ? 'Close' : 'Menu'}
-          </button>
+      <Container className="flex min-h-20 items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <CardNav key={pathname} items={items} ariaLabel="Main navigation"
+            logo={<span className="flex items-center gap-2 font-bold"><img src={aidConnectLogo} alt="" width="28" height="28" className="aid-nav-logo rounded-full" />AidConnect</span>}
+            logoAlt="AidConnect home" logoHref="/" maxWidth={1120} intro={false}
+            surface="solid" openOn="click" accentColor="#c6f432" linkComponent={RouterLink}
+            style={{
+              '--cn-panel': 'var(--nav-panel)',
+              '--cn-tile': 'var(--panel)',
+              '--cn-text': 'var(--text)',
+              '--cn-muted': 'var(--muted)',
+              '--cn-ring': '#c6f432',
+            }}
+            cta={user ? { label: 'Dashboard', href: '/dashboard' } : { label: 'Login', href: '/login' }}
+            onLinkClick={(link) => { if (link.label === 'Log out') logout(); }} />
         </div>
-
-        <nav id="site-navigation" aria-label="Main navigation"
-          className={`${open ? 'flex' : 'hidden'} absolute inset-x-4 top-full z-10 max-h-[75vh] flex-col gap-2 overflow-auto rounded-md bg-aid-footer p-4 text-white lg:static lg:flex lg:max-h-none lg:flex-row lg:items-center lg:overflow-visible lg:bg-transparent lg:p-0 lg:text-inherit`}>
-          {links.map(({ to, label }) => (
-            <NavLink key={to} to={to} onClick={close} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              {label}
-            </NavLink>
-          ))}
-          <AuthActions onImage={pathname === '/'} onNavigate={close} />
-        </nav>
+        <ThemeSwitch />
       </Container>
     </header>
   );

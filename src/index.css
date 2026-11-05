@@ -2,22 +2,36 @@
   font-family: Inter, 'Segoe UI', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #e8ecf5;
-  background: #0b1020;
+  color: var(--text);
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --bg: #0b1020;
-  --panel: #121a2d;
-  --panel-soft: #1a2338;
-  --primary: #7c9cff;
-  --primary-strong: #5a7cff;
-  --text: #edf3ff;
-  --muted: #a3b0c4;
-  --line: rgba(255,255,255,0.1);
-  --card-shadow: 0 20px 45px rgba(5, 10, 20, 0.4);
+  --bg: #f7f4eb;
+  --panel: #fffaf0;
+  --panel-soft: #eee8db;
+  --nav-panel: #f3eddf;
+  --primary: #1f6b4a;
+  --primary-strong: #154a36;
+  --text: #163e30;
+  --muted: #4f5d52;
+  --line: #d9d3c5;
+  --card-shadow: 0 16px 36px rgba(27, 49, 37, 0.1);
+}
+
+:root.dark {
+  --bg: #101a15;
+  --panel: #1a2a21;
+  --panel-soft: #21372b;
+  --nav-panel: #15392c;
+  --primary: #92d2a9;
+  --primary-strong: #b6e2c7;
+  --text: #e6efe8;
+  --muted: #b4c6bb;
+  --line: #3b5044;
+  --card-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
 }
 
 * {
@@ -32,7 +46,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #0b1020 0%, #111827 100%);
+  background: var(--bg);
   color: var(--text);
 }
 
@@ -76,7 +90,7 @@ main {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(10px);
-  background: rgba(12, 17, 28, 0.7);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 
@@ -102,7 +116,7 @@ main {
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--primary), #8bd3ff);
+  background: #c6f432;
   color: #08111f;
   font-weight: 900;
 }
@@ -123,7 +137,7 @@ main {
 .nav-link:hover,
 .nav-link.active {
   color: var(--text);
-  background: rgba(124, 156, 255, 0.12);
+  background: var(--panel-soft);
 }
 
 .hero {
@@ -139,7 +153,7 @@ main {
 
 .eyebrow {
   margin: 0 0 0.75rem;
-  color: #8bb1ff;
+  color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.72rem;
@@ -199,7 +213,7 @@ h3 {
 }
 
 .button.primary {
-  background: linear-gradient(135deg, var(--primary), #8bd3ff);
+  background: #c6f432;
   color: #08111f;
 }
 
@@ -211,7 +225,7 @@ h3 {
 
 .hero-card,
 .feature-card {
-  background: rgba(18, 26, 45, 0.8);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 22px;
   box-shadow: var(--card-shadow);
@@ -303,7 +317,7 @@ h3 {
 .contact-form {
   display: grid;
   gap: 1rem;
-  background: rgba(18, 26, 45, 0.85);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 22px;
   padding: 1.5rem;
@@ -328,7 +342,7 @@ h3 {
 
 .contact-form input:focus,
 .contact-form textarea:focus {
-  outline: 2px solid rgba(124, 156, 255, 0.45);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 

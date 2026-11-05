@@ -1,5 +1,205 @@
 # Changelog
 
+## 2026-11-06 — Hero image attribution in alt text
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Moved the hero photographer credit into the descriptive alt text and removed the visible badge. | The credit is available with the image description while the hero is visually clear. |
+| `pages/home.css` | Removed the unused hero badge styles. | The shared photo caption styling remains available for other photos. |
+| `CHANGELOG.md` | Recorded the hero attribution change. | Teammates can trace the update. |
+
+## 2026-11-06 — Consolidated source assets
+
+**Author** Hassan El-Tawil
+
+| File or folder | What changed | Why it improves the project |
+| --- | --- | --- |
+| `src/assets/brand/` and `src/assets/photos/` | Moved AidConnect artwork and stock photos out of the root assets folder. | All source images now live under one directory, grouped by purpose. |
+| `pages/HomePage.jsx` | Updated image imports to the new folders. | Vite can resolve the homepage images after the move. |
+| `components/Navbar.jsx` | Updated the desktop logo import. | CardNav uses the shared brand asset. |
+| `components/AdaptiveNavbar.jsx` | Updated the mobile logo import. | BubbleMenu uses the same brand asset as desktop. |
+| `README.md` | Documented the three asset categories. | Teammates know where to put new images. |
+| `CHANGELOG.md` | Recorded the move and import changes. | Teammates can trace the old and new paths. |
+
+## 2026-11-06 — Visible photo credits and homepage accessibility
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Added linked photographer credits to the hero and cause images and used h3 headings for the causes. | Readers can see attribution without hovering and navigate the gallery by heading. |
+| `components/HomeExtras.jsx` | Added credits and descriptions for the photo band and organization panel, and hid the decorative effect from assistive technology. | Screen readers can describe the photo without announcing the canvas. |
+| `components/PhotoCredit.jsx` | Added a reusable linked figure caption. | Credits use consistent semantic markup. |
+| `src/main.jsx` | Added a skip link and focusable main landmark. | Keyboard users can bypass the navbar. |
+| `pages/home.css` | Styled visible credits, the photo panel, and the skip link. | Attribution and keyboard navigation remain usable across screen sizes. |
+| `index.html` | Updated the title, description, and social preview metadata. | Search engines and link previews have clearer homepage information. |
+| `CHANGELOG.md` | Recorded the accessibility and attribution changes. | Teammates can trace the update. |
+
+## 2026-11-06 — Distinct homepage photos
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Assigned separate photos to the expanding band and organization panel. | The food-packing photo appears only in its cause card. |
+| `components/HomeExtras.jsx` | Updated the expanding photo's alt text. | The description matches the new image. |
+| `assets/volunteer-food-distribution.jpg` | Added [Lagos Food Bank Initiative's volunteer photo](https://www.pexels.com/photo/happy-volunteers-carrying-boxes-8061641/). | The expanding band shows volunteers distributing food. |
+| `assets/community-donation-sorting.jpg` | Added [Julia M Cameron's donation sorting photo](https://www.pexels.com/photo/people-sorting-donations-6994963/). | The organization panel shows a different volunteer activity. |
+| `CHANGELOG.md` | Recorded the image changes and sources. | Teammates can trace the asset credits. |
+
+## 2026-11-06 — Refined homepage summary and organization panel
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Grouped the three demo figures in a definition list and supplied a photo for the organization panel. | The numbers are easier to scan and the CTA has a relevant visual. |
+| `components/HomeExtras.jsx` | Used the photo as the panel's base layer. | The panel has a complete appearance even when PixelTrail is off. |
+| `pages/home.css` | Replaced lime backgrounds with theme-aware surfaces and styled the stats and photo. | Both sections blend with the page in either theme. |
+| `CHANGELOG.md` | Recorded the design update. | Teammates can trace the changes. |
+
+## 2026-11-06 — React Bits integration handoff
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Added the demo summary, mission reveal, and mid-page photo band while retaining the hero and cause gallery. | The homepage follows the requested content order. |
+| `components/HomeExtras.jsx` | Updated LogoLoop, added ScrollExpand, and gated the lazy PixelTrail to desktop fine pointers with motion enabled. | Platform links and photo content remain usable with reduced motion. |
+| `components/AdaptiveNavbar.jsx` | Added a breakpoint-based choice between CardNav and BubbleMenu. | Each viewport has one main navigation. |
+| `components/ThemeSwitch.jsx` | Connected the switch to shared theme state. | The button and visual effects respond to the same preference. |
+| `src/main.jsx` | Mounted the adaptive navbar and theme provider. | Theme and navigation work across routes. |
+| `src/context/ThemeContext.jsx` | Applied the root theme class in a layout effect. | Colors are available before paint. |
+| `src/hooks/useMediaQuery.js` | Added a live media query subscription. | Navigation and effects respond to device changes. |
+| `src/hooks/useReducedMotion.js` | Added a shared reduced-motion hook. | Effects can honor the system preference consistently. |
+| `src/hooks/useCssVar.js` | Added computed token reads that refresh when the theme class changes. | WebGL effects receive resolved colors. |
+| `src/components/fx/LogoLoop/LogoLoop.jsx`, `LogoLoop.css` | Added the shared loop source and layered styles. | Tailwind can override the vendor styling. |
+| `src/components/fx/ScrollReveal/ScrollReveal.jsx`, `ScrollReveal.css` | Added the shared reveal and layered styles. | The mission heading can use Tailwind typography. |
+| `src/components/fx/ScrollExpand/ScrollExpand.jsx`, `ScrollExpand.css` | Added the expanding photo and made its hidden controls inert. | Keyboard users only reach the photo CTA after it appears. |
+| `src/components/fx/PixelTrail/PixelTrail.jsx`, `PixelTrail.css` | Added the shared decorative pointer effect and layered styles. | The organization CTA can lazy-load the effect away from its text. |
+| `src/components/fx/BubbleMenu/BubbleMenu.jsx`, `BubbleMenu.css` | Added router links, keyboard focus management, a theme action slot, and layered styles. | The mobile menu supports keyboard and touch navigation. |
+| `src/components/fx/GradientASCII/GradientASCII.jsx`, `GradientASCII.css` | Added the shared ASCII effect and layered styles. | The 404 owner can reuse the effect. |
+| `src/components/fx/GradientASCII/NotFoundEffect.jsx`, `NotFoundEffect.css` | Added a standalone 404 implementation for handoff. | The 404 owner can integrate it without rebuilding the effect. |
+| `src/assets/logos/nahno.png`, `anera.svg`, `volunteers-ae.png` | Moved the existing platform marks to the requested source asset folder. | The directory can discover the marks by slug. |
+| `pages/home.css` | Ordered CSS layers and styled the new mobile menu and effect sections. | Tailwind utilities can override vendor defaults and text remains readable. |
+| `README.md` | Added credits, numbered modification snippets, and integration notes. | Teammates can review or reuse the effects. |
+| `CHANGELOG.md` | Recorded each integration file. | Teammates can trace the work. |
+
+## 2026-11-06 — Hero photo, cause gallery, and account routes
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Put the donation photo in the hero, moved the cedar wordmark to the middle, and added ten causes in a scrollable gallery. | The homepage gives the photo and brand their own space and lets visitors browse more causes without a long grid. |
+| `pages/home.css` | Replaced the hero gradient with a flat overlay, tightened the wordmark crop, and styled the gallery, card lift, distinct colors, and Home card hit area. | Hero copy stays readable, five cards fit on wide screens, and hover motion respects reduced-motion preferences. |
+| `components/HomeExtras.jsx` | Removed the standalone donation photo section. | The photo has one home in the hero. |
+| `components/OpportunityGrid.jsx` | Added four mock listings in Tripoli, Sidon, Zahle, and Byblos, with distinct cause colors and a hover lift. | Visitors can compare examples from more parts of Lebanon. |
+| `components/Navbar.jsx` | Added the Home card, renamed Contact us, and linked posting to organization registration. | Navigation labels and account destinations are clearer. |
+| `components/react-bits/CardNav.jsx` | Allowed a card-specific class for the Home tile. | The entire Home tile can act as one link. |
+| `components/Footer.jsx` | Renamed Contact to Contact us. | The footer uses the same wording as the navbar. |
+| `pages/ContactPage.jsx` | Renamed the page eyebrow to Contact us. | The destination matches its link label. |
+| `components/ThemeSwitch.jsx` | Styled the sun black on white and the moon white on black. | The current theme is easier to recognize. |
+| `pages/JoinPages.jsx` | Added role choices for Login and Register and an Under progress message on each portal. | Volunteers and organizations can reach their own placeholders. |
+| `src/main.jsx` | Added volunteer and organization registration routes. | Both choices open valid pages. |
+| `assets/coastal-cleanup.jpg` | Replaced the photo with a [beach cleanup scene](https://www.pexels.com/photo/people-on-beach-holding-white-sack-9035238/). | The Environment card shows cleanup work. |
+| `assets/food-packing.jpg` | Replaced the close-up with a [wider food packing photo](https://www.pexels.com/photo/people-preparing-food-rations-in-the-box-6590928/). | The Food support card shows a group working together. |
+| `assets/student-tutoring.jpg` | Added a [library tutoring photo](https://www.pexels.com/photo/teacher-and-student-in-a-library-8342278/). | The Education card shows reading support. |
+| `assets/community-health.jpg` | Added a [health screening photo](https://www.pexels.com/photo/healthcare-professional-checking-patient-blood-pressure-35645526/). | The Health card has a relevant image. |
+| `assets/animal-welfare.jpg` | Added a [rescue shelter photo](https://www.pexels.com/photo/volunteer-feeding-rescued-dogs-at-animal-shelter-35231857/). | The Animal welfare card shows hands-on shelter work. |
+| `assets/community-gardening.jpg` | Added a [community garden photo](https://www.pexels.com/photo/community-gardening-project-in-bloomington-39778110/). | The Community support card shows people caring for a shared space. |
+| `assets/senior-support.jpg` | Added a [senior support photo](https://www.pexels.com/photo/elderly-caregiver-assisting-senior-woman-at-home-29372727/). | The Senior support card has a relevant image. |
+| `assets/arts-workshop.jpg` | Added an [art workshop photo](https://www.pexels.com/photo/people-in-an-art-workshop-6146655/). | The Arts and culture card shows a group activity. |
+| `assets/youth-sports.jpg` | Added a [youth soccer photo](https://www.pexels.com/photo/children-playing-soccer-2898317/). | The Youth sports card shows a familiar activity. |
+| `assets/accessibility-support.jpg` | Added a [wheelchair assistance photo](https://www.pexels.com/photo/a-woman-pushing-a-wheelchair-with-man-8415522/). | The Accessibility card has a relevant image. |
+| `CHANGELOG.md` | Recorded the changes and stock photo sources. | Teammates can trace the update and credits. |
+
+## 2026-11-06 — Full-width photography and matching themes
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Added the cedar wordmark beside the hero copy and three illustrated cause entries. | The hero identifies AidConnect and each cause has a concrete visual example. |
+| `components/HomeExtras.jsx` | Made the donation photo full width from the start of ScrollExpand and in its static fallback. | The photo reaches both sides on desktop, mobile, and reduced-motion settings. |
+| `pages/home.css` | Applied shared palette variables to the hero, sections, and footer, and added the wordmark crop and photo sizing. | The page reads as one continuous canvas in both themes. |
+| `src/index.css` | Defined beige and deep-green theme palettes with matching text, borders, and surfaces. | Shared components switch colors together. |
+| `components/Navbar.jsx` | Connected CardNav to the shared palette. | The floating navbar matches the selected theme. |
+| `components/Footer.jsx` | Connected the footer background and text to the shared palette. | The footer continues the page canvas. |
+| `assets/aidconnect-wordmark-sheet.jpg` | Added the supplied wordmark sheet and displayed only the AidConnect row. | The original cedar branding appears in the hero. |
+| `assets/coastal-cleanup.jpg` | Added [Inna Rabotyagina’s beach cleanup photo](https://www.pexels.com/photo/people-carrying-black-trash-bag-while-walking-on-the-shore-of-a-beach-8018592/). | The Environment cause shows a shoreline cleanup. |
+| `assets/food-packing.jpg` | Added [Gustavo Fring’s donation packing photo](https://www.pexels.com/photo/a-man-packing-donations-7156159/). | The Food support cause shows supplies being packed. |
+| `assets/student-tutoring.jpg` | Added [Ahmet Kurt’s classroom photo](https://www.pexels.com/photo/teacher-helping-student-with-homework-in-classroom-35745582/). | The Education cause shows one-on-one learning support. |
+| `CHANGELOG.md` | Recorded the asset and theme changes. | Teammates can trace the update and photo sources. |
+
+## 2026-11-06 — Regional LogoLoop styling
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `components/HomeExtras.jsx` | Replaced the regional cards with a logo strip and configured a faster leftward loop, larger marks, edge fades, and hover emphasis. | The section reads as a moving logo carousel and keeps its pause control and reduced-motion layout. |
+| `CHANGELOG.md` | Recorded the regional carousel update. | Teammates can trace the styling change. |
+
+## 2026-11-06 — Floating navigation and consistent gradients
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/home.css` | Fixed CardNav to the top of the homepage during scrolling and shared one forest-green gradient between the hero and expanding photo. | Navigation stays within reach and the image sections use the same fade. |
+| `src/index.css` | Replaced the old blue template gradients with solid forest and lime colors. | Shared surfaces follow the AidConnect palette. |
+| `CHANGELOG.md` | Recorded the navigation and palette changes. | Teammates can trace the update. |
+
+## 2026-11-06 — Remove the homepage demo strip
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Removed the three-item demo strip. | The homepage moves directly from the hero to the featured listings. |
+| `pages/home.css` | Removed the unused strip styles and color variable. | The stylesheet stays focused on the current layout. |
+| `CHANGELOG.md` | Recorded the removal. | Teammates can trace the change. |
+
+## 2026-11-06 — ASCII hero, CardNav, and logo carousel
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Replaced the hero photo background with the supplied GradientASCII effect and removed the duplicate quick-links menu. | The hero gains a distinct visual identity while the main actions stay readable. |
+| `components/react-bits/GradientASCII.jsx` | Added the supplied React Bits renderer. | It draws the animated ASCII background and respects reduced motion. |
+| `components/react-bits/GradientASCII.css` | Added the supplied canvas layout. | The effect covers the hero without taking up space in the content layout. |
+| `components/Navbar.jsx` | Made CardNav the main navbar, applied the forest-green palette, and set the AidConnect logo dimensions. | The selected menu is available on every route, and the logo stays proportionate across screen widths. |
+| `components/HomeExtras.jsx` | Enabled the regional carousel with a pause control and a static list for reduced motion. | Visitors can scan the rotating brands or stop the motion and browse all five links. |
+| `assets/logos/nahno.png` | Added the logo from Nahno's official site. | The carousel identifies Nahno visually. |
+| `assets/logos/anera.svg` | Added the logo from Anera's official site. | The carousel identifies Anera visually. |
+| `assets/logos/volunteers-ae.png` | Added the site icon from Volunteers.ae. | The carousel identifies Volunteers.ae visually. |
+| `pages/home.css` | Added the hero contrast layer, carousel spacing, and explicit logo sizing. | The text remains legible and the navbar and carousel have stable dimensions. |
+| `CHANGELOG.md` | Recorded the visual and navigation changes. | Teammates can trace the update. |
+
+## 2026-11-06 — React Bits and regional volunteering resources
+
+**Author** Hassan El-Tawil
+
+| File | What changed | Why it improves the project |
+| --- | --- | --- |
+| `pages/HomePage.jsx` | Placed the reveal heading, quick-links menu, expanding photo, regional directory, and pointer effect in their homepage sections. | Visitors can discover roles, shortcuts, and independent regional resources. |
+| `components/HomeExtras.jsx` | Configured the supplied components, official regional links, optional local logo files, and motion-aware alternatives. | The directory works with text labels and the page stays usable on touch devices and with reduced motion. |
+| `components/OpportunityGrid.jsx` | Added pastel cause chips and sticker-style cards. | Visitors can distinguish causes at a glance. |
+| `pages/home.css` | Added scoped lime accents, chip colors, card borders, logo styles, and typography. | AidConnect gets a consistent visual update while course templates retain their existing styles. |
+| `components/react-bits/ScrollReveal.jsx` and `ScrollReveal.css` | Added the supplied text reveal and supported a heading ID. | The animated heading still labels its section. |
+| `components/react-bits/ScrollExpand.jsx` and `ScrollExpand.css` | Added the supplied expanding image frame. | The volunteer photo can expand with normal page scroll. |
+| `components/react-bits/LogoLoop.jsx` and `LogoLoop.css` | Added the supplied component with a static list mode for the directory. | All five links remain visible and stationary. |
+| `components/react-bits/PixelTrail.jsx` and `PixelTrail.css` | Added the supplied pointer effect. | The organization section has a local decorative interaction. |
+| `components/react-bits/CardNav.jsx` and `CardNav.css` | Added the supplied quick-links menu. | Visitors can open grouped links without changing the main navbar. |
+| `index.html` | Added the supplied font stylesheet with system fallbacks in CSS. | The homepage uses the requested display and body fonts when available. |
+| `package.json` | Added GSAP and Hugeicons dependencies used by the supplied components. | The reveal and menu can build through Vite. |
+| `package-lock.json` | Recorded the dependency versions. | Team installs can resolve the same dependency tree. |
+| `CHANGELOG.md` | Recorded the component and style integration. | Teammates can trace the changes. |
+
 ## 2026-11-06 — Responsive navbar account actions
 
 **Author** Hassan El-Tawil

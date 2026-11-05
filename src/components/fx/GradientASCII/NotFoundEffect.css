@@ -1,0 +1,10 @@
+.aid-missing { position: relative; isolation: isolate; min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+.aid-missing-effect { position: absolute; inset: 0; }
+.aid-missing-card {
+  position: relative;
+  padding: 2rem;
+  border: 2px solid var(--text);
+  box-shadow: 4px 4px 0 var(--text);
+  background: var(--panel);
+  color: var(--text);
+}

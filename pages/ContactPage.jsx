@@ -3,7 +3,7 @@ const ContactPage = () => {
     <section className="section page-section">
       <div className="container contact-layout">
         <div>
-          <p className="eyebrow">Contact</p>
+          <p className="eyebrow">Contact us</p>
           <h2>Let’s build something great together.</h2>
           <p className="lead compact">
             Use this page as a starting point for your contact form, project inquiry, or business request.
