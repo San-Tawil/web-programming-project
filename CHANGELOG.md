@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-06 — Login button color
+
+Changed the desktop navigation’s account button to the site’s forest green.
+
+## 2026-11-06 — Accessibility and wider homepage
+
+- Widened homepage content on large screens to give cause cards and the organization carousel more room.
+- Improved route focus, heading levels, the sitewide skip link, and contact field autocomplete.
+- Added a compact, keyboard-accessible carousel playback control and respected reduced motion by default.
+
+## 2026-11-06 — Browse opportunities by cause
+
+Homepage cause cards now animate on hover and open the matching opportunities view. Causes without sample listings show an empty state and a link back to the full catalog.
+
+## 2026-11-06 — Homepage updates and slow-connection loading
+
+| Area | What changed | Why it improves the project |
+| --- | --- | --- |
+| Page loading | Split routes into on-demand bundles and added a loading skeleton in the main content area. | The site loads the requested page while keeping navigation available. |
+| Homepage photos | Added image skeletons and lazy loading for secondary photos and the wordmark. Kept the hero photo at high priority. | Large images farther down the page can wait while the main photo loads. |
+| Branding and credits | Replaced the homepage wordmark with a transparent SVG and moved photo credits into hover and focus overlays on pointer devices. | The wordmark blends into both themes and credits remain accessible. |
+| Opportunities | Featured three listings on the homepage and kept all seven on the catalog page. Added staggered entrances, card hover styling, and a green hover state for the hero's posting button. | Visitors can scan the featured listings and browse the full catalog separately. |
+| Causes and organizations | Hid the cause gallery scrollbar, enabled continuous LogoLoop playback, added Lebanese organizations, and applied theme colors to the available SVG marks. | The galleries keep their scroll behavior and show more local organizations. |
+
 ## 2026-11-06 — Hero image attribution in alt text
 
 **Author** Hassan El-Tawil

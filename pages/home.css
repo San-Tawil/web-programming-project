@@ -154,22 +154,15 @@
 }
 
 
-/* Show only the AidConnect row from the supplied three-wordmark sheet. */
 .aid-wordmark {
-  position: relative;
   width: min(100%, 25rem);
-  aspect-ratio: 1385 / 285;
-  overflow: hidden;
-  border-radius: 0.5rem;
 }
 .aid-wordmark img {
-  position: absolute;
-  top: -239.3%;
-  left: -5.78%;
-  width: 110.9%;
-  max-width: none;
+  display: block;
+  width: 100%;
   height: auto;
 }
+.dark .aid-wordmark img { filter: brightness(1.8); }
 
 .aid-footer-theme {
   background: var(--bg);
@@ -195,14 +188,60 @@
   grid-auto-columns: 85%;
   gap: 1rem;
   overflow-x: auto;
+  scrollbar-width: none;
   overscroll-behavior-inline: contain;
   padding: 0.75rem 0 1rem;
   scroll-snap-type: x mandatory;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .aid-opportunity-grid[data-animate="true"] > li {
+    animation: aid-opportunity-enter 400ms ease-out both;
+  }
+
+  @keyframes aid-opportunity-enter {
+    from { opacity: 0; transform: translateX(1rem); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
+
+@media (hover: hover) {
+  .aid-opportunity-grid > li:hover > .aid-card {
+    border-color: var(--color-aid-primary);
+    box-shadow: 7px 5px 0 var(--color-aid-primary);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .aid-opportunity-grid > li:hover > .aid-card {
+    transform: translateX(-8px);
+  }
+}
+
+.aid-cause-gallery::-webkit-scrollbar {
+  display: none;
+}
+
 .aid-cause-gallery > li {
+  position: relative;
   scroll-snap-align: start;
   border-top: 5px solid var(--cause-color);
+}
+
+.aid-cause-link::after { content: ""; position: absolute; inset: 0; }
+.aid-cause-link:focus-visible::after { outline: 2px solid currentColor; outline-offset: -3px; }
+.aid-cause-gallery .aid-photo-credit { position: relative; z-index: 1; }
+
+@media (hover: hover) {
+  .aid-cause-gallery .aid-photo-credit { position: absolute; }
+  .aid-cause-card:hover .aid-photo-credit {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aid-cause-card:is(:hover, :focus-within) { transform: translateX(-5px) translateY(-4px); }
 }
 
 @media (min-width: 640px) {
@@ -293,7 +332,7 @@
 .aid-mobile-nav .bubble-menu-items { pointer-events: auto; padding-top: 5rem; }
 .aid-mobile-nav .bubble-menu-items .pill-list { row-gap: 0.5rem; padding-bottom: 1rem; }
 .aid-mobile-nav .bubble-menu-items .pill-link { min-height: 3rem; padding-block: 0.5rem; }
-.aid-platform-loop img { filter: brightness(0); opacity: 0.7; }
+.aid-platform-loop img { filter: brightness(0) saturate(100%) invert(30%) sepia(31%) saturate(1165%) hue-rotate(103deg) brightness(92%); }
 .dark .aid-platform-loop img { filter: brightness(0) invert(1); }
 
 @media (max-width: 767px) {
@@ -304,15 +343,38 @@
 
 .aid-photo-credit { padding: 0.4rem 0.75rem; font-size: 0.75rem; color: var(--muted); }
 .aid-photo-credit a { text-decoration: underline; text-underline-offset: 0.15em; }
-.aid-organization-photo .aid-trail-panel { display: block; position: relative; height: 13rem; overflow: hidden; border-radius: 0.75rem; }
-.aid-skip-link {
-  position: fixed;
-  z-index: 100;
-  top: 0.75rem;
-  left: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: var(--panel);
-  color: var(--text);
-  transform: translateY(-200%);
+
+@media (hover: hover) {
+  figure:has(> .aid-photo-credit) { position: relative; }
+
+  .aid-photo-credit {
+    position: absolute;
+    inset: auto 0 0;
+    z-index: 1;
+    color: white;
+    background: rgb(0 0 0 / 80%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  figure:hover > .aid-photo-credit,
+  figure:focus-within > .aid-photo-credit {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
-.aid-skip-link:focus { transform: translateY(0); }
+.aid-organization-photo .aid-trail-panel { display: block; position: relative; height: 13rem; overflow: hidden; border-radius: 0.75rem; }
+
+@media (min-width: 80rem) {
+  .aid-home .aid-container { max-width: 90rem; }
+}
+
+.aid-carousel-control {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  cursor: pointer;
+}

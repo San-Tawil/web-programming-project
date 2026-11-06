@@ -387,3 +387,48 @@ h3 {
     padding-top: 3rem;
   }
 }
+
+.aid-skeleton {
+  background-color: var(--line);
+}
+
+.aid-page-skeleton {
+  min-height: 65vh;
+  max-width: 70rem;
+  margin-inline: auto;
+  padding: 5rem 1.25rem;
+}
+
+.aid-page-skeleton > div {
+  height: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.aid-page-skeleton > div:first-of-type {
+  width: min(70%, 24rem);
+  height: 2.5rem;
+}
+
+.aid-page-skeleton > div:last-child { width: 65%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .aid-skeleton { animation: aid-loading 1.4s ease-in-out infinite alternate; }
+
+  @keyframes aid-loading {
+    to { background-color: var(--muted); }
+  }
+}
+
+.aid-skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--panel);
+  color: var(--text);
+  transform: translateY(-200%);
+}
+
+.aid-skip-link:focus { transform: translateY(0); }

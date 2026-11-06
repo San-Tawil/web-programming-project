@@ -1,3 +1,4 @@
+import LoadingImage from './LoadingImage.jsx';
 import React, { lazy, Suspense, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Container from './Container.jsx';
@@ -12,6 +13,16 @@ import ScrollExpand from '../src/components/fx/ScrollExpand/ScrollExpand.jsx';
 const platforms = [
   { slug: 'nahno', title: 'Nahno Volunteers', region: 'Lebanon', href: 'https://www.nahno-volunteers.com/' },
   { slug: 'volunteer-circle', title: 'The Volunteer Circle', region: 'Lebanon', href: 'https://www.thevolunteercircle.com/' },
+  { slug: 'offre-joie', title: 'Offre Joie', region: 'Lebanon', href: 'https://offrejoie.org/volunteers/' },
+  { slug: 'lebanese-food-bank', title: 'Lebanese Food Bank', region: 'Lebanon', href: 'https://lebanesefoodbank.org/take-action/volunteer/' },
+  { slug: 'arcenciel', title: 'arcenciel', region: 'Lebanon', href: 'https://www.arcenciel.org/faq' },
+  { slug: 'animals-lebanon', title: 'Animals Lebanon', region: 'Lebanon', href: 'https://www.animalslebanon.org/get-involved/volunteer' },
+  { slug: 'injaz-lebanon', title: 'INJAZ Lebanon', region: 'Lebanon', href: 'https://www.injaz-lebanon.org/' },
+  { slug: 'embrace', title: 'Embrace', region: 'Lebanon', href: 'https://embracelebanon.org/' },
+  { slug: 'ahla-fawda', title: 'Ahla Fawda', region: 'Lebanon', href: 'https://ahlafawda.org/' },
+  { slug: 'abaad', title: 'ABAAD', region: 'Lebanon', href: 'https://www.abaadmena.org/' },
+  { slug: 'ajialouna', title: 'Ajialouna', region: 'Lebanon', href: 'https://ajialouna.org/' },
+  { slug: 'mmkn', title: 'MMKN', region: 'Lebanon', href: 'https://www.mmkn.org/' },
   { slug: 'anera', title: 'Anera', region: 'Lebanon · MENA', href: 'https://www.anera.org/' },
   { slug: 'volunteers-ae', title: 'Volunteers.ae', region: 'UAE', href: 'https://volunteers.ae/' },
   { slug: 'takatof', title: 'Takatof', region: 'UAE', href: 'https://secure.takatof.ae/en/programsandinitiatives/takatof' },
@@ -22,46 +33,31 @@ const logos = import.meta.glob('../src/assets/logos/*.{svg,png}', { eager: true,
 
 const logoFor = (platform) => logos['../src/assets/logos/' + platform.slug + '.svg'] ?? logos['../src/assets/logos/' + platform.slug + '.png'];
 
-function PlatformMark(platform) {
-  const logo = logoFor(platform);
-  return (
-    <span className="flex min-h-24 min-w-40 flex-col items-center justify-center gap-2 px-2 py-3 text-center">
-      {logo ? <img src={logo} alt={platform.title} className="aid-platform-logo h-8 max-w-40 object-contain" /> : <strong>{platform.title}</strong>}
-      <span className="aid-muted text-sm">{platform.region}</span>
-    </span>
-  );
-}
-
-function PlatformLink(platform) {
-  return <a href={platform.href} className="block h-full hover:underline">{PlatformMark(platform)}</a>;
-}
-
 export function RegionalPlatforms() {
   const reducedMotion = useReducedMotion();
-  const [paused, setPaused] = useState(false);
+  const [playback, setPlayback] = useState(null);
+  const playing = playback ?? !reducedMotion;
   return (
     <section aria-labelledby="region-title" className="aid-surface">
       <Container className="py-12 md:py-16">
-        <h2 id="region-title">Volunteering across Lebanon and the region</h2>
-        <p className="aid-muted max-w-2xl">Platforms and programs worth knowing. AidConnect is a student project and is not affiliated with any of them. Logos belong to their owners.</p>
-        {!reducedMotion && (
-          <button type="button" onClick={() => setPaused(!paused)} className="mb-4 cursor-pointer rounded-md border border-current bg-transparent px-3 py-2 text-inherit">
-            {paused ? 'Resume logo carousel' : 'Pause logo carousel'}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="region-title">Volunteering across Lebanon and the region</h2>
+          <button type="button" className="aid-carousel-control"
+            aria-controls="regional-logo-carousel" aria-label={playing ? 'Pause organization carousel' : 'Play organization carousel'}
+            onClick={() => setPlayback(!playing)}>
+            <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
           </button>
-        )}
-        {reducedMotion || paused ? (
-          <ul aria-label="Volunteering platforms across Lebanon and the region" className="grid list-none gap-4 p-0 sm:grid-cols-3 lg:grid-cols-5">
-            {platforms.map(platform => <li key={platform.slug}>{PlatformLink(platform)}</li>)}
-          </ul>
-        ) : (
+        </div>
+        <div id="regional-logo-carousel">
           <LogoLoop logos={platforms.map(platform => {
             const src = logoFor(platform);
             return src ? { src, alt: platform.title, href: platform.href }
               : { node: <span className="font-display font-extrabold text-ink">{platform.title}</span>, title: platform.title, href: platform.href };
           })} ariaLabel="Volunteering platforms across Lebanon and the region"
-            speed={50} direction="left" logoHeight={32} gap={56} hoverSpeed={0}
+            speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={56} pauseOnHover={false}
+            respectReducedMotion={false}
             intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="aid-platform-loop" />
-        )}
+        </div>
       </Container>
     </section>
   );
@@ -97,7 +93,7 @@ export function OrganizationTrail({ photo }) {
   return (
     <figure className="m-0 aid-organization-photo">
     <div className="aid-trail-panel">
-      <img src={photo} alt="Volunteers sorting clothes and food at a donation center" loading="lazy" className="aid-trail-photo" />
+      <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" loading="lazy" className="aid-trail-photo" />
       {!reduced && fine && color && trailColor && (
         <Suspense fallback={null}>
           <div aria-hidden="true" className="absolute inset-0">

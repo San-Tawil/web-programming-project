@@ -1,3 +1,4 @@
+import LoadingImage from '../../../../components/LoadingImage.jsx';
 // Source: React Bits (reactbits.dev)
 import React from 'react';
 'use client';
@@ -203,7 +204,7 @@ const ScrollExpand = ({
         playsInline
       />
     ) : (
-      <img ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} draggable={false} />
+      <LoadingImage ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} draggable={false} />
     );
 
   return (

@@ -31,7 +31,7 @@ export default function Navbar() {
           <CardNav key={pathname} items={items} ariaLabel="Main navigation"
             logo={<span className="flex items-center gap-2 font-bold"><img src={aidConnectLogo} alt="" width="28" height="28" className="aid-nav-logo rounded-full" />AidConnect</span>}
             logoAlt="AidConnect home" logoHref="/" maxWidth={1120} intro={false}
-            surface="solid" openOn="click" accentColor="#c6f432" linkComponent={RouterLink}
+            surface="solid" openOn="click" accentColor="#1f6b4a" linkComponent={RouterLink}
             style={{
               '--cn-panel': 'var(--nav-panel)',
               '--cn-tile': 'var(--panel)',

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 // Phase 1 mock listings. The IDs can carry over to the team's shared opportunity data.
-const featured = [
+const opportunities = [
   { id: 'coastal-cleanup', cause: 'Environment', title: 'Coastal cleanup', location: 'Ramlet el Baida, Beirut', time: '2 hours · One shift', description: 'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.' },
   { id: 'food-packing', cause: 'Food support', title: 'Community food packing', location: 'Beirut', time: '3 hours · One shift', description: 'Sort pantry staples and assemble grocery boxes for families in the community.' },
   { id: 'homework-club', cause: 'Education', title: 'After-school homework club', location: 'Hamra, Beirut', time: '1 hour · Weekly', description: 'Help students work through homework and build confidence by reading together.' },
@@ -22,13 +22,13 @@ const causeColors = {
   'Arts and culture': 'aid-chip-lilac',
 };
 
-function OpportunityCard({ opportunity }) {
+function OpportunityCard({ opportunity, heading: Heading }) {
   const { cause, title, location, time, description } = opportunity;
 
   return (
     <article className="aid-card aid-sticker aid-lift flex h-full flex-col p-6">
       <p className={`aid-chip self-start ${causeColors[cause] ?? ""}`}>{cause}</p>
-      <h3 className="mt-3 text-xl font-bold">{title}</h3>
+      <Heading className="mt-3 text-xl font-bold">{title}</Heading>
       <p className="aid-muted">{description}</p>
       <dl className="aid-details mt-auto grid gap-2 pt-4 text-sm">
         <div><dt>Location</dt><dd>{location}</dd></div>
@@ -38,11 +38,31 @@ function OpportunityCard({ opportunity }) {
   );
 }
 
-export default function OpportunityGrid() {
+export default function OpportunityGrid({ featured = false, cause }) {
+  const matching = cause ? opportunities.filter(opportunity => opportunity.cause === cause) : opportunities;
+  const listings = featured ? matching.slice(0, 3) : matching;
+  const gridRef = useRef(null);
+  const [entered, setEntered] = useState(false);
+
+  useEffect(() => {
+    if (!featured || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setEntered(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(gridRef.current);
+    return () => observer.disconnect();
+  }, [featured]);
+
+  if (!listings.length) return <p className="aid-muted mt-6">No sample opportunities are listed for this cause yet.</p>;
+
   return (
-    <ul className="mt-6 grid list-none gap-4 p-0 md:grid-cols-3">
-      {featured.map((opportunity) => (
-        <li key={opportunity.id}><OpportunityCard opportunity={opportunity} /></li>
+    <ul ref={gridRef} data-animate={!featured || entered} className="aid-opportunity-grid mt-6 grid list-none gap-4 p-0 md:grid-cols-3">
+      {listings.map((opportunity, index) => (
+        <li key={opportunity.id} style={{ animationDelay: `${index * 65}ms` }}><OpportunityCard opportunity={opportunity} heading={featured ? "h3" : "h2"} /></li>
       ))}
     </ul>
   );

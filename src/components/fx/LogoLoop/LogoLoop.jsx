@@ -113,7 +113,7 @@ const createEngine = (root, track, config, setLayout) => {
     active: null,
     raf: 0,
     last: 0,
-    reduced: !!query?.matches,
+    reduced: config.current.respectReducedMotion && !!query?.matches,
     destroyed: false
   };
 
@@ -786,7 +786,7 @@ const createEngine = (root, track, config, setLayout) => {
   };
 
   const onMotion = () => {
-    st.reduced = !!query?.matches;
+    st.reduced = config.current.respectReducedMotion && !!query?.matches;
     wake();
   };
 
@@ -903,6 +903,7 @@ export const LogoLoop = memo(
     labels = 'none',
     draggable = true,
     scrollBoost = 0,
+    respectReducedMotion = true,
     intro = true,
     renderItem,
     ariaLabel = 'Partner logos',
@@ -931,6 +932,7 @@ export const LogoLoop = memo(
       step,
       draggable,
       scrollBoost,
+      respectReducedMotion,
       intro,
       scaleOnHover,
       labels,

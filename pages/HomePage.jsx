@@ -1,7 +1,8 @@
+import LoadingImage from '../components/LoadingImage.jsx';
 import React, { lazy, Suspense, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import volunteerPhoto from '../src/assets/photos/volunteers-packing-donations.jpg';
-import wordmark from '../src/assets/brand/aidconnect-wordmark-sheet.jpg';
+import wordmark from '../src/assets/brand/aidconnect-wordmark.svg';
 import cleanupPhoto from '../src/assets/photos/coastal-cleanup.jpg';
 import packingPhoto from '../src/assets/photos/food-packing.jpg';
 import distributionPhoto from '../src/assets/photos/volunteer-food-distribution.jpg';
@@ -51,8 +52,8 @@ export default function HomePage() {
     <div className="aid-home">
       <section aria-labelledby="home-title" className="aid-hero">
         <div className="aid-hero-media">
-          <img src={volunteerPhoto} alt="Three volunteers sorting donations into cardboard boxes. Photo by Gustavo Fring on Pexels."
-            fetchPriority="high" className="h-full w-full object-cover object-center" />
+          <LoadingImage src={volunteerPhoto} alt="Three volunteers sorting donations into cardboard boxes. Photo by Gustavo Fring on Pexels."
+            loading="eager" fetchPriority="high" className="h-full w-full object-cover object-center" />
         </div>
         <Container className="aid-hero-content flex items-center pb-12 text-white md:pb-20">
           <div className="max-w-2xl">
@@ -69,7 +70,7 @@ export default function HomePage() {
               <Link to="/opportunities" className="rounded-md bg-aid-primary px-5 py-3 font-semibold text-white hover:bg-white hover:text-aid-primary">
                 Browse opportunities
               </Link>
-              <Link to="/organizations/register" className="rounded-md border border-current px-5 py-3 font-semibold hover:underline">
+              <Link to="/organizations/register" className="rounded-md bg-white px-5 py-3 font-semibold text-aid-primary transition-colors hover:bg-aid-primary hover:text-white focus-visible:bg-aid-primary focus-visible:text-white">
                 Post an opportunity
               </Link>
             </div>
@@ -97,9 +98,9 @@ export default function HomePage() {
       </section>
       <section aria-labelledby="featured-title">
         <Container className="py-12 md:py-16">
-          <h2 id="featured-title">Got two hours? Someone needs them.</h2>
+          <h2 id="featured-title">Featured opportunities</h2>
           <p className="aid-muted">Sample listings for the course demo</p>
-          <OpportunityGrid />
+          <OpportunityGrid featured />
           <Link to="/opportunities" className="mt-4 inline-block font-semibold underline">See all opportunities</Link>
         </Container>
       </section>
@@ -119,7 +120,7 @@ export default function HomePage() {
 
       <Container className="flex justify-center py-10 md:py-16">
         <div className="aid-wordmark">
-          <img src={wordmark} alt="AidConnect cedar wordmark" width="1536" height="1024" />
+          <LoadingImage src={wordmark} alt="AidConnect cedar wordmark" width="1366" height="285" />
         </div>
       </Container>
 
@@ -138,12 +139,14 @@ export default function HomePage() {
             {causes.map(({ name, description, image, alt, credit }, index) => (
               <li key={name} className="aid-cause-card aid-lift overflow-hidden rounded-lg" style={{ "--cause-color": causeColors[index] }}>
                 <figure className="m-0">
-                  <img src={image} alt={alt} loading="lazy" width="800" height="533"
+                  <LoadingImage src={image} alt={alt} loading="lazy" width="800" height="533"
                     className="aspect-video h-auto w-full object-cover" />
                   <PhotoCredit {...credit} />
                 </figure>
                 <div className="p-4">
-                  <h3 className="m-0 text-base font-bold">{name}</h3>
+                  <h3 className="m-0 text-base font-bold">
+                    <Link className="aid-cause-link" to={'/opportunities?cause=' + encodeURIComponent(name)}>{name}</Link>
+                  </h3>
                   <p className="aid-muted m-0 mt-2">{description}</p>
                 </div>
               </li>

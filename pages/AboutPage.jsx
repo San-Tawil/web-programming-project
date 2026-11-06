@@ -19,7 +19,7 @@ const AboutPage = () => {
       <div className="container narrow">
         <div className="section-heading align-left">
           <p className="eyebrow">About us</p>
-          <h2>We design simple experiences with real purpose.</h2>
+          <h1>We design simple experiences with real purpose.</h1>
         </div>
 
         <div className="story-block">
@@ -36,7 +36,7 @@ const AboutPage = () => {
         <div className="feature-grid alt-grid">
           {values.map((value) => (
             <article className="feature-card" key={value.title}>
-              <h3>{value.title}</h3>
+              <h2>{value.title}</h2>
               <p>{value.text}</p>
             </article>
           ))}
