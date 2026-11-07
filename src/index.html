@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="
+<html lang="en" class="motion-safe:scroll-smooth
   [--bg:#f7f4eb] dark:[--bg:#101a15]
   [--panel:#fffaf0] dark:[--panel:#1a2a21]
   [--nav-panel:#f3eddf] dark:[--nav-panel:#15392c]
@@ -36,33 +36,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
-    <style>
-      .aid-page-skeleton { min-height: 65vh; max-width: 70rem; margin-inline: auto; padding: 2rem 1.25rem; }
-      .aid-startup { min-height: 100vh; color: var(--text, #163e30); background: var(--bg, #f7f4eb); font: 1rem system-ui; }
-      .aid-page-skeleton :is(.aid-skeleton-nav, .aid-skeleton-title, .aid-skeleton-line, .aid-skeleton-button, .aid-skeleton-card) {
-        display: block; border-radius: .65rem; background: var(--placeholder, #e4ded1);
-      }
-      .aid-skeleton-nav { height: 3rem; margin-bottom: 2rem; }
-      .aid-skeleton-title { width: min(75%, 27rem); height: 2.5rem; margin-bottom: 1rem; }
-      .aid-skeleton-line { width: min(90%, 34rem); height: 1rem; }
-      .aid-skeleton-button { width: 10rem; height: 2.75rem; margin-top: 1.5rem; }
-      .aid-skeleton-hero { display: grid; align-content: center; min-height: 55vh; padding: 1.5rem; border: 1px solid var(--placeholder, #e4ded1); border-radius: 1rem; }
-      .aid-skeleton-grid { display: grid; gap: 1rem; margin-top: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-      .aid-skeleton-card { min-height: 11rem; }
-    </style>
+    <link rel="stylesheet" href="/styles/index.css" />
   </head>
-  <body>
-    <div id="root">
-      <div class="aid-startup">
-        <div class="aid-page-skeleton">
-          <div class="aid-skeleton-nav" aria-hidden="true"></div>
+  <body class="m-0 min-h-screen min-w-80 bg-(--bg) text-(--text)">
+    <div id="root" class="min-h-screen">
+      <div class="min-h-screen font-sans">
+        <div class="mx-auto min-h-[65vh] max-w-[70rem] px-5 py-8">
+          <div class="mb-8 h-12 rounded-lg bg-(--placeholder)" aria-hidden="true"></div>
           <p role="status">Loading AidConnect…</p>
-          <div class="aid-skeleton-title" aria-hidden="true"></div>
-          <div class="aid-skeleton-line" aria-hidden="true"></div>
-          <div class="aid-skeleton-grid" aria-hidden="true">
-            <div class="aid-skeleton-card"></div>
-            <div class="aid-skeleton-card"></div>
-            <div class="aid-skeleton-card"></div>
+          <div class="mb-4 h-10 w-[min(75%,27rem)] rounded-lg bg-(--placeholder)" aria-hidden="true"></div>
+          <div class="h-4 w-[min(90%,34rem)] rounded-lg bg-(--placeholder)" aria-hidden="true"></div>
+          <div class="mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-4" aria-hidden="true">
+            <div class="min-h-44 rounded-lg bg-(--placeholder)"></div>
+            <div class="min-h-44 rounded-lg bg-(--placeholder)"></div>
+            <div class="min-h-44 rounded-lg bg-(--placeholder)"></div>
           </div>
         </div>
       </div>

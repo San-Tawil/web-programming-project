@@ -26,7 +26,7 @@ function OpportunityCard({ opportunity, heading: Heading }) {
   const { cause, title, location, time, description } = opportunity;
 
   return (
-    <article className="aid-card flex h-full flex-col rounded-xl border border-(--aid-rule) bg-(--aid-surface) p-4 sm:p-5 motion-safe:transition-transform">
+    <article className="flex group-hover/listing:border-(--primary) motion-safe:group-hover/listing:-translate-x-1 h-full flex-col rounded-xl border border-(--aid-rule) bg-(--aid-surface) p-4 sm:p-5 motion-safe:transition-transform">
       <p className={`mb-0 self-start rounded-full px-2.5 py-0.5 text-xs font-semibold text-[#11201a] ${causeColors[cause] ?? "bg-[#f6ef9a]"}`}>{cause}</p>
       <Heading className="mt-3 mb-2 text-lg font-bold">{title}</Heading>
       <p className="mb-3 text-sm leading-relaxed text-(--muted) sm:text-base">{description}</p>
@@ -60,9 +60,9 @@ export default function OpportunityGrid({ featured = false, cause }) {
   if (!listings.length) return <p className="text-(--muted) mt-6">No sample opportunities are listed for this cause yet.</p>;
 
   return (
-    <ul ref={gridRef} data-animate={!featured || entered} className="aid-opportunity-grid mt-6 grid list-none gap-4 p-0 md:grid-cols-3">
+    <ul ref={gridRef} data-animate={!featured || entered} className="mt-6 motion-safe:data-[animate=true]:[&>li]:animate-opportunity-enter grid list-none gap-4 p-0 md:grid-cols-3">
       {listings.map((opportunity, index) => (
-        <li key={opportunity.id} style={{ animationDelay: `${index * 65}ms` }}><OpportunityCard opportunity={opportunity} heading={featured ? "h3" : "h2"} /></li>
+        <li className="group/listing" key={opportunity.id} style={{ animationDelay: `${index * 65}ms` }}><OpportunityCard opportunity={opportunity} heading={featured ? "h3" : "h2"} /></li>
       ))}
     </ul>
   );

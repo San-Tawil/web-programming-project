@@ -58,9 +58,9 @@ export function RegionalPlatforms() {
         <div id="regional-logo-carousel">
           <DeferredContent fallback={
             <div className="flex min-h-[3.25rem] items-center justify-around gap-4 [&>span]:h-8 [&>span]:w-[min(25%,8rem)] [&>span]:rounded-lg" aria-hidden="true">
-              <span className="aid-skeleton" />
-              <span className="aid-skeleton" />
-              <span className="aid-skeleton" />
+              <span className="bg-(--line) motion-safe:animate-skeleton" />
+              <span className="bg-(--line) motion-safe:animate-skeleton" />
+              <span className="bg-(--line) motion-safe:animate-skeleton" />
             </div>
           }>
             <LogoLoop logos={platformLogos} ariaLabel="Volunteering platforms across Lebanon and the region"
@@ -89,10 +89,10 @@ export function VolunteerPhotoBand({ src }) {
     <section aria-labelledby="volunteer-photo-title">
       <DeferredContent rootMargin="1200px 0px" fallback={
         <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}vh` }}>
-          <div className="aid-skeleton sticky top-0 grid min-h-screen place-items-center p-4 text-center">{message}</div>
+          <div className="sticky bg-(--line) motion-safe:animate-skeleton top-0 grid min-h-screen place-items-center p-4 text-center">{message}</div>
         </div>
       }>
-        <figure className="m-0">
+        <figure className="group/photo relative m-0">
           <ScrollExpand src={src} alt="Volunteers carrying boxes of food for distribution" title="Show up."
             useWindowScroll startWidth={46} startHeight={60} startRadius={24} mediaZoom={1.2}
             scrollDistance={scrollDistance} holdDistance={holdDistance} startOffset={0.35} smoothing={0.04}
@@ -113,7 +113,7 @@ export function OrganizationTrail({ photo }) {
   const trailColor = useCssVar('--primary');
 
   return (
-    <figure className="m-0">
+    <figure className="group/photo relative m-0">
       <div className="relative block h-52 overflow-hidden rounded-xl md:bg-(--primary)">
         <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" className="absolute inset-0 size-full object-cover" />
         {!reduced && fine && color && trailColor && (

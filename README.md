@@ -7,7 +7,7 @@ The app source lives under `src/`.
 
 - `src/index.html` is the single HTML entry. `src/main.jsx` starts React and defines the routes.
 - `src/pages/` holds the route views, and `src/components/` holds shared components. React Bits effects and their styles live together in `src/components/fx/`.
-- `src/styles/` holds the base and homepage styles, including the Tailwind configuration.
+- `src/styles/index.css` holds Tailwind's theme, shared defaults, and animation definitions. Page and component styles use Tailwind classes in JSX.
 - `src/assets/`, `src/context/`, and `src/hooks/` hold images, shared state, and hooks.
 
 Run `npm run dev`, `npm run build`, or `npm run preview` from the project folder. Vite writes the production site to `dist/`.

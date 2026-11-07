@@ -22,7 +22,6 @@ import PhotoCredit from '../components/PhotoCredit.jsx';
 import OpportunityGrid from '../components/OpportunityGrid.jsx';
 import { OrganizationTrail, RegionalPlatforms, VolunteerPhotoBand } from '../components/HomeExtras.jsx';
 
-import '../styles/home.css';
 
 const ScrollReveal = lazy(() => import('../components/fx/ScrollReveal/ScrollReveal.jsx'));
 const mission = 'Lebanon runs on people who show up. AidConnect makes it easier to find the shift that fits your week.';
@@ -51,7 +50,7 @@ export default function HomePage() {
     if (card) rail.scrollBy({ left: direction * (card.offsetWidth + parseFloat(getComputedStyle(rail).columnGap)) });
   }
   return (
-    <div className="aid-home flex flex-1 flex-col">
+    <div className="aid-home flex flex-1 flex-col font-body [&_:is(h1,h2,h3)]:font-display [&_:is(h1,h2,h3)]:tracking-[-0.02em] [&_:focus-visible]:outline-2 [&_:focus-visible]:outline-offset-4">
       <section aria-labelledby="home-title" className="relative isolate flex flex-1 flex-col bg-(--bg) text-(--text)">
         <div className="absolute inset-0 after:pointer-events-none after:absolute after:inset-0 after:bg-aid-scrim/65 after:content-['']">
           <LoadingImage src={volunteerPhoto} srcSet={`${volunteerPhotoSmall} 768w, ${volunteerPhoto} 1440w`} sizes="100vw"
@@ -138,10 +137,10 @@ export default function HomePage() {
                 className="min-h-11 min-w-11 cursor-pointer rounded-full border border-current bg-transparent text-inherit">→</button>
             </div>
           </div>
-          <ul id="cause-gallery" ref={gallery} aria-label="Volunteer causes" tabIndex={0} className="aid-cause-gallery grid list-none auto-cols-[85%] grid-flow-col snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden motion-safe:scroll-smooth sm:auto-cols-[calc((100%-1rem)/2)] md:auto-cols-[calc((100%-2rem)/3)] lg:auto-cols-[calc((100%-4rem)/5)]">
+          <ul id="cause-gallery" ref={gallery} aria-label="Volunteer causes" tabIndex={0} className="grid list-none auto-cols-[85%] grid-flow-col snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden motion-safe:scroll-smooth sm:auto-cols-[calc((100%-1rem)/2)] md:auto-cols-[calc((100%-2rem)/3)] lg:auto-cols-[calc((100%-4rem)/5)]">
             {causes.map(({ name, description, image, alt, credit }, index) => (
-              <li key={name} className="aid-cause-card aid-lift relative snap-start overflow-hidden rounded-lg border border-(--aid-rule) border-t-[5px] border-t-(--cause-color) bg-(--aid-surface)" style={{ "--cause-color": causeColors[index] }}>
-                <figure className="m-0">
+              <li key={name} className="group/cause relative motion-safe:transition-[translate,box-shadow] motion-safe:duration-200 motion-safe:hover:-translate-x-[5px] motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-[0_12px_22px_-12px_var(--aid-pop)] motion-safe:focus-within:-translate-x-[5px] motion-safe:focus-within:-translate-y-1 snap-start overflow-hidden rounded-lg border border-(--aid-rule) border-t-[5px] border-t-(--cause-color) bg-(--aid-surface)" style={{ "--cause-color": causeColors[index] }}>
+                <figure className="group/photo relative m-0">
                   <LoadingImage src={image} alt={alt} loading="lazy" width="800" height="533"
                     className="aspect-video h-auto w-full object-cover" />
                   <PhotoCredit {...credit} />

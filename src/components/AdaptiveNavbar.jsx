@@ -24,13 +24,13 @@ export default function AdaptiveNavbar() {
   const reduced = useReducedMotion();
   if (desktop) return <Suspense fallback={navigationFallback}><Navbar /></Suspense>;
 
-  return <div className="aid-mobile-nav">
+  return <div className="min-h-20">
     <Suspense fallback={navigationFallback}>
       <BubbleMenu useFixedPosition items={items} menuBg="var(--panel)" menuContentColor="var(--text)"
         animationDuration={reduced ? 0.01 : 0.18} staggerDelay={reduced ? 0 : 0.025}
-        logo={<Link to="/" aria-label="AidConnect home"><img src={logo} alt="" width="32" height="32" /></Link>}
+        logo={<Link to="/" aria-label="AidConnect home"><img className="rounded-full" src={logo} alt="" width="32" height="32" /></Link>}
         leadingAction={<ThemeSwitch />}
-        actions={<AuthActions />} />
+        actions={<div className="justify-self-end"><AuthActions /></div>} />
     </Suspense>
   </div>;
 }

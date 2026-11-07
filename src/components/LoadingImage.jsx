@@ -7,7 +7,7 @@ export default forwardRef(function LoadingImage({ src, className = '', loading =
   return (
     <img {...props} ref={ref} src={src} loading={loading} decoding="async"
       fetchPriority={fetchPriority ?? (loading === 'lazy' ? 'low' : undefined)}
-      className={settledSrc === src ? className : className + ' aid-skeleton'}
+      className={settledSrc === src ? className : className + ' bg-(--line) motion-safe:animate-skeleton'}
       onLoad={settle} onError={settle} />
   );
 });

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-07 — Consolidated app styling in Tailwind
+
+Moved the remaining homepage, navigation, photo-credit, and loading styles into Tailwind utilities. The startup HTML links the Tailwind stylesheet directly so the skeleton can appear before React. React Bits keeps its component styles for the effects.
+
 ## 2026-11-07 — Quieter mobile header and opportunity cards
 
 Made Sign up the only filled account action, simplified the menu and theme controls, and replaced bright card shadows with a subtle border.
