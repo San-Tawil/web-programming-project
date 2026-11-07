@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="aid-footer-theme">
+    <footer className="border-t border-(--line) bg-(--bg) text-(--text)">
       <Container className="py-8">
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-current pb-6">
           <Link to="/" className="text-xl font-bold hover:underline">AidConnect</Link>

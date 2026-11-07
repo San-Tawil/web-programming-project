@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-07 — Quieter mobile header and opportunity cards
+
+Made Sign up the only filled account action, simplified the menu and theme controls, and replaced bright card shadows with a subtle border.
+
+## 2026-11-07 — Aligned desktop and mobile navigation
+
+Placed the hamburger on the left, centered the logo, and grouped Sign up and Log in on the right on both layouts. Mobile menu links now animate in from the left.
+
+## 2026-11-07 — Account links and simpler app structure
+
+Added shared Sign up and Log in buttons and consolidated the account placeholders into one page component. The theme switch now displays a sun or moon. Removed the unused authentication stub and layout wrapper, and simplified route loading and navigation.
+
+## 2026-11-07 — Simplified dark mode
+
+Replaced the animated theme switch with a labeled button. Theme styling uses Tailwind's `dark:` variant, and the toggle still saves the selected mode.
+
+## 2026-11-07 — Replaced layout CSS with Tailwind utilities
+
+Moved homepage sections, opportunity cards, secondary pages, the contact form, and the shared layout to Tailwind utilities. Removed the corresponding stylesheet rules and unused template styles. Custom animation, photo-credit interactions, and React Bits styles remain in CSS.
+
+## 2026-11-07 — Earlier photo reveal
+
+The second homepage photo starts loading sooner and begins expanding before the section reaches the top of the screen. The animation follows scrolling more closely and gives the finished panel more time in view.
+
 ## 2026-11-07 — Tailwind theme colors
 
 Moved light and dark theme colors and logo filters to Tailwind utilities. The existing toggle still controls and remembers the selected theme.

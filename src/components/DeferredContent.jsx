@@ -1,6 +1,6 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 
-export default function DeferredContent({ children, fallback = null, className }) {
+export default function DeferredContent({ children, fallback = null, className, rootMargin = '200px 0px' }) {
   const region = useRef(null);
   const [nearViewport, setNearViewport] = useState(false);
 
@@ -15,10 +15,10 @@ export default function DeferredContent({ children, fallback = null, className }
         setNearViewport(true);
         observer.disconnect();
       }
-    }, { rootMargin: '200px 0px' });
+    }, { rootMargin });
     observer.observe(region.current);
     return () => observer.disconnect();
-  }, []);
+  }, [rootMargin]);
 
   return (
     <div ref={region} className={className}>

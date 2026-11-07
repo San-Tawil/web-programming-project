@@ -51,14 +51,14 @@ export default function HomePage() {
     if (card) rail.scrollBy({ left: direction * (card.offsetWidth + parseFloat(getComputedStyle(rail).columnGap)) });
   }
   return (
-    <div className="aid-home">
-      <section aria-labelledby="home-title" className="aid-hero">
-        <div className="aid-hero-media">
+    <div className="aid-home flex flex-1 flex-col">
+      <section aria-labelledby="home-title" className="relative isolate flex flex-1 flex-col bg-(--bg) text-(--text)">
+        <div className="absolute inset-0 after:pointer-events-none after:absolute after:inset-0 after:bg-aid-scrim/65 after:content-['']">
           <LoadingImage src={volunteerPhoto} srcSet={`${volunteerPhotoSmall} 768w, ${volunteerPhoto} 1440w`} sizes="100vw"
             alt="Three volunteers sorting donations into cardboard boxes. Photo by Gustavo Fring on Pexels."
             loading="eager" fetchPriority="high" className="h-full w-full object-cover object-center" />
         </div>
-        <Container className="aid-hero-content flex items-center pb-12 text-white md:pb-20">
+        <Container className="pointer-events-none relative z-10 flex min-h-[70vh] flex-1 items-center pt-8 pb-12 text-white md:pt-28 md:pb-20">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold uppercase tracking-widest">Volunteering in Lebanon</p>
             <h1 id="home-title" className="mt-4 text-4xl font-bold leading-tight md:text-5xl">
@@ -81,9 +81,9 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section aria-label="What the demo covers" className="aid-demo-band">
+      <section aria-label="What the demo covers" className="border-y border-(--line) bg-(--panel) text-(--text)">
         <Container className="py-5">
-          <dl className="aid-demo-stats">
+          <dl className="m-0 grid grid-cols-3 text-center [&>div]:flex [&>div]:flex-col-reverse [&>div]:gap-1 [&>div]:px-2 [&>div+div]:border-s [&>div+div]:border-(--line) [&_dt]:text-sm [&_dt]:text-(--muted) [&_dd]:m-0 [&_dd]:text-[1.75rem] [&_dd]:font-extrabold [&_dd]:text-(--primary)">
             <div><dt>Causes to explore</dt><dd>10</dd></div>
             <div><dt>Sample opportunities</dt><dd>7</dd></div>
             <div><dt>Lebanese cities represented</dt><dd>5</dd></div>
@@ -102,7 +102,7 @@ export default function HomePage() {
       <section aria-labelledby="featured-title">
         <Container className="py-12 md:py-16">
           <h2 id="featured-title">Featured opportunities</h2>
-          <p className="aid-muted">Sample listings for the course demo</p>
+          <p className="text-(--muted)">Sample listings for the course demo</p>
           <OpportunityGrid featured />
           <Link to="/opportunities" className="mt-4 inline-block font-semibold underline">See all opportunities</Link>
         </Container>
@@ -110,7 +110,7 @@ export default function HomePage() {
 
       <VolunteerPhotoBand src={distributionPhoto} />
 
-      <section aria-labelledby="how-title" className="aid-surface">
+      <section aria-labelledby="how-title" className="border-t border-(--aid-rule)">
         <Container className="py-12">
           <h2 id="how-title">Pick a cause. Show up. Log your hours.</h2>
           <ol className="grid gap-6 pl-5 sm:grid-cols-3">
@@ -122,8 +122,8 @@ export default function HomePage() {
       </section>
 
       <Container className="flex justify-center py-10 md:py-16">
-        <div className="aid-wordmark">
-          <LoadingImage src={wordmark} alt="AidConnect cedar wordmark" className="[.dark_&]:brightness-[1.8]" width="1366" height="285" />
+        <div className="w-full max-w-[25rem]">
+          <LoadingImage src={wordmark} alt="AidConnect cedar wordmark" className="block h-auto w-full dark:brightness-[1.8]" width="1366" height="285" />
         </div>
       </Container>
 
@@ -138,9 +138,9 @@ export default function HomePage() {
                 className="min-h-11 min-w-11 cursor-pointer rounded-full border border-current bg-transparent text-inherit">→</button>
             </div>
           </div>
-          <ul id="cause-gallery" ref={gallery} aria-label="Volunteer causes" tabIndex={0} className="aid-cause-gallery list-none">
+          <ul id="cause-gallery" ref={gallery} aria-label="Volunteer causes" tabIndex={0} className="aid-cause-gallery grid list-none auto-cols-[85%] grid-flow-col snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain pt-3 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden motion-safe:scroll-smooth sm:auto-cols-[calc((100%-1rem)/2)] md:auto-cols-[calc((100%-2rem)/3)] lg:auto-cols-[calc((100%-4rem)/5)]">
             {causes.map(({ name, description, image, alt, credit }, index) => (
-              <li key={name} className="aid-cause-card aid-lift overflow-hidden rounded-lg" style={{ "--cause-color": causeColors[index] }}>
+              <li key={name} className="aid-cause-card aid-lift relative snap-start overflow-hidden rounded-lg border border-(--aid-rule) border-t-[5px] border-t-(--cause-color) bg-(--aid-surface)" style={{ "--cause-color": causeColors[index] }}>
                 <figure className="m-0">
                   <LoadingImage src={image} alt={alt} loading="lazy" width="800" height="533"
                     className="aspect-video h-auto w-full object-cover" />
@@ -148,9 +148,9 @@ export default function HomePage() {
                 </figure>
                 <div className="p-4">
                   <h3 className="m-0 text-base font-bold">
-                    <Link className="aid-cause-link" to={'/opportunities?cause=' + encodeURIComponent(name)}>{name}</Link>
+                    <Link className="after:absolute after:inset-0 after:content-[''] focus-visible:after:outline-2 focus-visible:after:-outline-offset-3" to={'/opportunities?cause=' + encodeURIComponent(name)}>{name}</Link>
                   </h3>
-                  <p className="aid-muted m-0 mt-2">{description}</p>
+                  <p className="text-(--muted) m-0 mt-2">{description}</p>
                 </div>
               </li>
             ))}
@@ -160,8 +160,8 @@ export default function HomePage() {
 
       <RegionalPlatforms />
 
-      <section aria-labelledby="organization-title" className="aid-organization-band">
-        <Container className="aid-organization-layout py-12">
+      <section aria-labelledby="organization-title" className="border-y border-(--line) bg-(--panel) text-(--text)">
+        <Container className="grid items-center gap-8 py-12 md:grid-cols-[1.25fr_1fr]">
           <div className="relative z-10">
           <h2 id="organization-title">Run a drive or a cleanup? Post it here.</h2>
           <p>Tell local volunteers what you need, where to show up, and how much time to set aside.</p>

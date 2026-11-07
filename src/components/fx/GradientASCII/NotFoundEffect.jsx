@@ -7,14 +7,14 @@ import './NotFoundEffect.css';
 const GradientASCII = lazy(() => import('./GradientASCII.jsx'));
 
 export default function NotFoundEffect() {
-  const { theme } = useTheme();
+  const { dark } = useTheme();
   const primary = useCssVar('--primary');
   const green = useCssVar('--primary-strong');
   const accent = useCssVar('--fx-accent');
   const ink = useCssVar('--text');
   const mint = useCssVar('--fx-chip-mint');
   const accentInk = useCssVar('--fx-on-accent');
-  const light = theme === 'light';
+  const light = !dark;
   const colors = light ? [mint, primary, accentInk] : [primary, green, accent, ink];
 
   return (
@@ -27,7 +27,7 @@ export default function NotFoundEffect() {
       </div>
       <div className="aid-missing-card">
         <h1 id="missing-title">That page took the day off.</h1>
-        <Link className="aid-accent-button" to="/">Back to Home</Link>
+        <Link className="inline-flex rounded-lg bg-(--primary) px-4 py-3 font-bold text-(--bg)" to="/">Back to Home</Link>
       </div>
     </section>
   );

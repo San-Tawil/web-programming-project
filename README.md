@@ -12,6 +12,13 @@ The app source lives under `src/`.
 
 Run `npm run dev`, `npm run build`, or `npm run preview` from the project folder. Vite writes the production site to `dist/`.
 
+## How the app works
+
+- `src/main.jsx` contains the page routes and shows a skeleton while a page loads.
+- `AuthActions.jsx` supplies the same Sign up and Log in links on desktop and mobile. Both routes use `AccountPage.jsx` for the placeholders.
+- `ThemeSwitch.jsx` flips a single dark-mode setting. Tailwind's `dark:` classes change the colors, and the browser remembers the choice.
+- `DeferredContent.jsx` waits until a homepage effect is close to view before loading it.
+
 ## React Bits handoff
 
 The app already had GSAP. ScrollReveal uses its bundled ScrollTrigger plugin, and BubbleMenu uses GSAP for its opening transition. This integration adds no dependencies.

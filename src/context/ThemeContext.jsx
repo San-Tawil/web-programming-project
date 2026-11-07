@@ -3,15 +3,15 @@ import React, { createContext, useContext, useLayoutEffect, useState } from 'rea
 const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
 
   useLayoutEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    try { localStorage.setItem('aidconnect-theme', theme); } catch { /* Storage is optional. */ }
-  }, [theme]);
+    document.documentElement.classList.toggle('dark', dark);
+    try { localStorage.setItem('aidconnect-theme', dark ? 'dark' : 'light'); } catch { /* Storage is optional. */ }
+  }, [dark]);
 
-  const toggle = () => setTheme(current => current === 'dark' ? 'light' : 'dark');
-  return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
+  const toggle = () => setDark(current => !current);
+  return <ThemeContext.Provider value={{ dark, toggle }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

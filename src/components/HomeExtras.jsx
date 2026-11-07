@@ -32,18 +32,24 @@ const platforms = [
 // Optional approved marks belong in src/assets/logos. Text labels work without those files.
 const logos = import.meta.glob('../assets/logos/*.{svg,png}', { eager: true, query: '?url', import: 'default' });
 
-const logoFor = (platform) => logos['../assets/logos/' + platform.slug + '.svg'] ?? logos['../assets/logos/' + platform.slug + '.png'];
+const platformLogos = platforms.map(({ slug, title, href }) => {
+  const path = '../assets/logos/' + slug;
+  const src = logos[path + '.svg'] ?? logos[path + '.png'];
+  return src
+    ? { src, alt: title, href }
+    : { node: <span className="font-display font-extrabold text-ink">{title}</span>, title, href };
+});
 
 export function RegionalPlatforms() {
   const reducedMotion = useReducedMotion();
   const [playback, setPlayback] = useState(null);
   const playing = playback ?? !reducedMotion;
   return (
-    <section aria-labelledby="region-title" className="aid-surface">
+    <section aria-labelledby="region-title" className="border-t border-(--aid-rule)">
       <Container className="py-12 md:py-16">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="region-title">Volunteering across Lebanon and the region</h2>
-          <button type="button" className="aid-carousel-control"
+          <button type="button" className="inline-grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full border border-current"
             aria-controls="regional-logo-carousel" aria-label={playing ? 'Pause organization carousel' : 'Play organization carousel'}
             onClick={() => setPlayback(!playing)}>
             <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
@@ -51,20 +57,16 @@ export function RegionalPlatforms() {
         </div>
         <div id="regional-logo-carousel">
           <DeferredContent fallback={
-            <div className="aid-logo-placeholder" aria-hidden="true">
+            <div className="flex min-h-[3.25rem] items-center justify-around gap-4 [&>span]:h-8 [&>span]:w-[min(25%,8rem)] [&>span]:rounded-lg" aria-hidden="true">
               <span className="aid-skeleton" />
               <span className="aid-skeleton" />
               <span className="aid-skeleton" />
             </div>
           }>
-            <LogoLoop logos={platforms.map(platform => {
-              const src = logoFor(platform);
-              return src ? { src, alt: platform.title, href: platform.href }
-                : { node: <span className="font-display font-extrabold text-ink">{platform.title}</span>, title: platform.title, href: platform.href };
-            })} ariaLabel="Volunteering platforms across Lebanon and the region"
+            <LogoLoop logos={platformLogos} ariaLabel="Volunteering platforms across Lebanon and the region"
               speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={56} pauseOnHover={false}
               respectReducedMotion={false}
-              intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="aid-platform-loop [&_img]:[filter:brightness(0)_saturate(100%)_invert(30%)_sepia(31%)_saturate(1165%)_hue-rotate(103deg)_brightness(92%)] [.dark_&]:[&_img]:[filter:brightness(0)_invert(1)]" />
+              intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="pt-2 pb-3 [&_.logoloop__node]:block [&_img]:[filter:brightness(0)_saturate(100%)_invert(30%)_sepia(31%)_saturate(1165%)_hue-rotate(103deg)_brightness(92%)] dark:[&_img]:[filter:brightness(0)_invert(1)]" />
           </DeferredContent>
         </div>
       </Container>
@@ -77,23 +79,23 @@ export function VolunteerPhotoBand({ src }) {
   const scrollDistance = reduced ? 0 : 0.8;
   const holdDistance = reduced ? 0 : 0.15;
   const message = (
-    <div className="aid-photo-message">
+    <div className="m-auto max-w-xl rounded-xl bg-(--panel) p-6 text-(--text)">
       <h2 id="volunteer-photo-title">Two hours. One shift. Real people.</h2>
       <p>Find a local shift that fits the time you have.</p>
-      <Link to="/opportunities" className="aid-accent-button">Browse opportunities</Link>
+      <Link to="/opportunities" className="inline-flex rounded-lg bg-(--primary) px-4 py-3 font-bold text-(--bg)">Browse opportunities</Link>
     </div>
   );
   return (
     <section aria-labelledby="volunteer-photo-title">
-      <DeferredContent fallback={
+      <DeferredContent rootMargin="1200px 0px" fallback={
         <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}vh` }}>
-          <div className="aid-photo-pending-frame aid-skeleton">{message}</div>
+          <div className="aid-skeleton sticky top-0 grid min-h-screen place-items-center p-4 text-center">{message}</div>
         </div>
       }>
         <figure className="m-0">
           <ScrollExpand src={src} alt="Volunteers carrying boxes of food for distribution" title="Show up."
             useWindowScroll startWidth={46} startHeight={60} startRadius={24} mediaZoom={1.2}
-            scrollDistance={scrollDistance} holdDistance={holdDistance}
+            scrollDistance={scrollDistance} holdDistance={holdDistance} startOffset={0.35} smoothing={0.04}
             enabled={!reduced} overlayScrim={0.6}>
             {message}
           </ScrollExpand>
@@ -111,9 +113,9 @@ export function OrganizationTrail({ photo }) {
   const trailColor = useCssVar('--primary');
 
   return (
-    <figure className="m-0 aid-organization-photo">
-      <div className="aid-trail-panel">
-        <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" className="aid-trail-photo" />
+    <figure className="m-0">
+      <div className="relative block h-52 overflow-hidden rounded-xl md:bg-(--primary)">
+        <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" className="absolute inset-0 size-full object-cover" />
         {!reduced && fine && color && trailColor && (
           <div aria-hidden="true" className="absolute inset-0">
             <DeferredContent className="h-full">

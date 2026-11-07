@@ -185,18 +185,22 @@
   filter: var(--cn-cta-hover);
 }
 
-.card-nav[data-narrow] .card-nav__bar {
+.card-nav[data-actions] .card-nav__bar {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.card-nav[data-narrow]:not([data-actions]) .card-nav__bar {
   grid-template-columns: auto 1fr auto;
 }
 
-.card-nav[data-narrow] .card-nav__logo {
+.card-nav[data-narrow]:not([data-actions]) .card-nav__logo {
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
   padding-left: 14px;
 }
 
-.card-nav[data-narrow] .card-nav__menu {
+.card-nav[data-narrow]:not([data-actions]) .card-nav__menu {
   grid-column: 3;
   grid-row: 1;
   justify-self: end;

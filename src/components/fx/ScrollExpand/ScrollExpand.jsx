@@ -3,7 +3,7 @@ import LoadingImage from '../../LoadingImage.jsx';
 import React from 'react';
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 
 import './ScrollExpand.css';
 
@@ -28,6 +28,7 @@ const ScrollExpand = ({
   mediaZoom = 1.35,
   scrollDistance = 1.2,
   holdDistance = 0.35,
+  startOffset = 0,
   smoothing = 0.1,
   overlayScrim = 0.45,
   useWindowScroll = false,
@@ -56,6 +57,7 @@ const ScrollExpand = ({
     mediaZoom,
     scrollDistance,
     holdDistance,
+    startOffset,
     smoothing,
     overlayScrim,
     useWindowScroll,
@@ -101,7 +103,7 @@ const ScrollExpand = ({
     }
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = rootRef.current;
     const track = trackRef.current;
     const stage = stageRef.current;
@@ -132,7 +134,7 @@ const ScrollExpand = ({
       const span = stageH * Math.max(0.01, c.scrollDistance);
       if (c.useWindowScroll) {
         const top = track.getBoundingClientRect().top;
-        return clamp(-top / span, 0, 1);
+        return clamp((stageH * c.startOffset - top) / span, 0, 1);
       }
       return clamp(root.scrollTop / span, 0, 1);
     };
@@ -189,7 +191,7 @@ const ScrollExpand = ({
       window.removeEventListener('resize', onResize);
       ro.disconnect();
     };
-  }, [applyProgress, useWindowScroll]);
+  }, [applyProgress, useWindowScroll, scrollDistance, holdDistance, startOffset, enabled]);
 
   const media =
     mediaType === 'video' ? (
@@ -204,7 +206,7 @@ const ScrollExpand = ({
         playsInline
       />
     ) : (
-      <LoadingImage ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} draggable={false} />
+      <LoadingImage ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} loading="eager" draggable={false} />
     );
 
   return (

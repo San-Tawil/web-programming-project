@@ -132,6 +132,7 @@ const CardNav = ({
   logoHref = '#',
   items = DEFAULT_ITEMS,
   cta,
+  actions,
   theme = 'dark',
   surface = 'glass',
   openOn = 'click',
@@ -425,6 +426,7 @@ const CardNav = ({
       data-open={open ? '' : undefined}
       data-shown={shown || open ? '' : undefined}
       data-narrow={narrow ? '' : undefined}
+      data-actions={actions ? '' : undefined}
       style={{ ...vars, ...style }}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
@@ -463,7 +465,7 @@ const CardNav = ({
             </LinkComponent>
           )}
 
-          {cta && !narrow && ctaButton(cta, false)}
+          {actions ?? (cta && !narrow && ctaButton(cta, false))}
         </div>
 
         <div ref={contentRef} id={contentId} className={CONTENT} aria-hidden={!open}>
