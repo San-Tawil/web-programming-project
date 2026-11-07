@@ -1,0 +1,31 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import Container from '../components/Container.jsx';
+
+const roles = [
+  { path: 'volunteer', label: 'a volunteer' },
+  { path: 'organizations', label: 'an organization' },
+];
+
+export default function AccountPage({ signUp = false, audience }) {
+  const action = signUp ? 'Sign up' : 'Log in';
+  const path = signUp ? 'register' : 'login';
+
+  return (
+    <Container className="py-12">
+      <h1>{audience ? `${action} as ${audience}` : action}</h1>
+      <p>This page is a placeholder.</p>
+      {audience ? (
+        <Link className="underline" to={`/${path}`}>Back to account options</Link>
+      ) : (
+        <div className="flex flex-wrap gap-4">
+          {roles.map(role => (
+            <Link key={role.path} className="underline" to={`/${role.path}/${path}`}>
+              {action} as {role.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </Container>
+  );
+}

@@ -1,0 +1,54 @@
+/* Compile site utilities without Tailwind's global reset. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" source(none);
+@source "../index.html";
+@source "../main.jsx";
+@source "../pages";
+@source "../components/*.jsx";
+@source "../components/fx/GradientASCII/NotFoundEffect.jsx";
+@source "../components/fx/BubbleMenu/BubbleMenu.jsx";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant hover-capable (@media (hover: hover));
+
+@theme {
+  --color-aid-primary: #1f6b4a;
+  --color-aid-footer: #193b30;
+  --color-aid-scrim: #0b1f15;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --animate-skeleton: skeleton 1.4s ease-in-out infinite alternate;
+  --animate-opportunity-enter: opportunity-enter 400ms ease-out both;
+
+  @keyframes skeleton {
+    to { background-color: var(--muted); }
+  }
+
+  @keyframes opportunity-enter {
+    from { opacity: 0; transform: translateX(1rem); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+}
+
+@theme inline {
+  --color-ink: var(--text);
+  --font-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  :root {
+    @apply bg-(--bg) font-sans text-base font-normal leading-normal text-(--text) antialiased;
+    --fx-accent: #c6f432;
+    --fx-on-accent: #11201a;
+    --fx-chip-mint: #bff0cf;
+  }
+
+  * { @apply box-border; }
+  a { @apply text-inherit no-underline; }
+  img { @apply block max-w-full; }
+  button, input, textarea { font: inherit; }
+  h1, h2, h3, p { @apply mt-0; }
+  h1 { @apply mb-4 text-[clamp(2.5rem,5vw,4.2rem)] leading-[1.05]; }
+  h2 { @apply mb-4 text-[clamp(2rem,3vw,2.8rem)] leading-[1.1]; }
+  h3 { @apply mb-2 text-[1.2rem]; }
+}
