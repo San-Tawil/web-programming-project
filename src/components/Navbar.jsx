@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import aidConnectLogo from '../src/assets/brand/aidconnect-logo.jpg';
-import { useAuth } from '../src/context/AuthContext.jsx';
+import aidConnectLogo from '../assets/brand/aidconnect-logo.webp';
+import { useAuth } from '../context/AuthContext.jsx';
 import Container from './Container.jsx';
 import ThemeSwitch from './ThemeSwitch.jsx';
-import CardNav from './react-bits/CardNav.jsx';
+import CardNav from './fx/CardNav/CardNav.jsx';
 
 function RouterLink({ href, ...props }) {
   return <Link to={href} {...props} />;

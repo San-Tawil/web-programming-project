@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../src/context/ThemeContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 export default function ThemeSwitch() {
   const { theme, toggle } = useTheme();

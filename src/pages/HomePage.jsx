@@ -1,28 +1,30 @@
 import LoadingImage from '../components/LoadingImage.jsx';
-import React, { lazy, Suspense, useRef } from 'react';
+import React, { lazy, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import volunteerPhoto from '../src/assets/photos/volunteers-packing-donations.jpg';
-import wordmark from '../src/assets/brand/aidconnect-wordmark.svg';
-import cleanupPhoto from '../src/assets/photos/coastal-cleanup.jpg';
-import packingPhoto from '../src/assets/photos/food-packing.jpg';
-import distributionPhoto from '../src/assets/photos/volunteer-food-distribution.jpg';
-import sortingPhoto from '../src/assets/photos/community-donation-sorting.jpg';
-import tutoringPhoto from '../src/assets/photos/student-tutoring.jpg';
-import healthPhoto from '../src/assets/photos/community-health.jpg';
-import animalPhoto from '../src/assets/photos/animal-welfare.jpg';
-import communityPhoto from '../src/assets/photos/community-gardening.jpg';
-import seniorPhoto from '../src/assets/photos/senior-support.jpg';
-import artsPhoto from '../src/assets/photos/arts-workshop.jpg';
-import sportsPhoto from '../src/assets/photos/youth-sports.jpg';
-import accessibilityPhoto from '../src/assets/photos/accessibility-support.jpg';
+import volunteerPhoto from '../assets/photos/volunteers-packing-donations.webp';
+import volunteerPhotoSmall from '../assets/photos/volunteers-packing-donations-768.webp';
+import wordmark from '../assets/brand/aidconnect-wordmark.svg';
+import cleanupPhoto from '../assets/photos/coastal-cleanup.webp';
+import packingPhoto from '../assets/photos/food-packing.webp';
+import distributionPhoto from '../assets/photos/volunteer-food-distribution.webp';
+import sortingPhoto from '../assets/photos/community-donation-sorting.webp';
+import tutoringPhoto from '../assets/photos/student-tutoring.webp';
+import healthPhoto from '../assets/photos/community-health.webp';
+import animalPhoto from '../assets/photos/animal-welfare.webp';
+import communityPhoto from '../assets/photos/community-gardening.webp';
+import seniorPhoto from '../assets/photos/senior-support.webp';
+import artsPhoto from '../assets/photos/arts-workshop.webp';
+import sportsPhoto from '../assets/photos/youth-sports.webp';
+import accessibilityPhoto from '../assets/photos/accessibility-support.webp';
 import Container from '../components/Container.jsx';
+import DeferredContent from '../components/DeferredContent.jsx';
 import PhotoCredit from '../components/PhotoCredit.jsx';
 import OpportunityGrid from '../components/OpportunityGrid.jsx';
 import { OrganizationTrail, RegionalPlatforms, VolunteerPhotoBand } from '../components/HomeExtras.jsx';
 
-import './home.css';
+import '../styles/home.css';
 
-const ScrollReveal = lazy(() => import('../src/components/fx/ScrollReveal/ScrollReveal.jsx'));
+const ScrollReveal = lazy(() => import('../components/fx/ScrollReveal/ScrollReveal.jsx'));
 const mission = 'Lebanon runs on people who show up. AidConnect makes it easier to find the shift that fits your week.';
 
 const causes = [
@@ -52,7 +54,8 @@ export default function HomePage() {
     <div className="aid-home">
       <section aria-labelledby="home-title" className="aid-hero">
         <div className="aid-hero-media">
-          <LoadingImage src={volunteerPhoto} alt="Three volunteers sorting donations into cardboard boxes. Photo by Gustavo Fring on Pexels."
+          <LoadingImage src={volunteerPhoto} srcSet={`${volunteerPhotoSmall} 768w, ${volunteerPhoto} 1440w`} sizes="100vw"
+            alt="Three volunteers sorting donations into cardboard boxes. Photo by Gustavo Fring on Pexels."
             loading="eager" fetchPriority="high" className="h-full w-full object-cover object-center" />
         </div>
         <Container className="aid-hero-content flex items-center pb-12 text-white md:pb-20">
@@ -89,11 +92,11 @@ export default function HomePage() {
       </section>
       <section aria-label="AidConnect mission">
         <Container className="py-12">
-          <Suspense fallback={<h2>{mission}</h2>}>
+          <DeferredContent fallback={<h2 className="mx-auto max-w-4xl">{mission}</h2>}>
             <ScrollReveal mode="enter" splitBy="words" effect="rise" stagger={0.04} duration={0.6}
               baseRotation={0} enableBlur={false} baseOpacity={0.15}
               textClassName="font-display font-extrabold text-ink" containerClassName="mx-auto max-w-4xl">{mission}</ScrollReveal>
-          </Suspense>
+          </DeferredContent>
         </Container>
       </section>
       <section aria-labelledby="featured-title">
@@ -120,7 +123,7 @@ export default function HomePage() {
 
       <Container className="flex justify-center py-10 md:py-16">
         <div className="aid-wordmark">
-          <LoadingImage src={wordmark} alt="AidConnect cedar wordmark" width="1366" height="285" />
+          <LoadingImage src={wordmark} alt="AidConnect cedar wordmark" className="[.dark_&]:brightness-[1.8]" width="1366" height="285" />
         </div>
       </Container>
 

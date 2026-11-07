@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import OpportunityGrid from '../components/OpportunityGrid.jsx';
-import './home.css';
+import '../styles/home.css';
 
 export default function OpportunitiesPage() {
   const [params] = useSearchParams();

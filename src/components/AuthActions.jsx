@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../src/context/AuthContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const base = 'inline-flex min-h-11 items-center justify-center rounded-md px-4 text-sm font-semibold';
 

@@ -1,4 +1,4 @@
-import LoadingImage from '../../../../components/LoadingImage.jsx';
+import LoadingImage from '../../LoadingImage.jsx';
 // Source: React Bits (reactbits.dev)
 import React from 'react';
 'use client';

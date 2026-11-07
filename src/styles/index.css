@@ -1,3 +1,23 @@
+/* Compile site utilities without Tailwind's global reset. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" source(none);
+@source "../index.html";
+@source "../main.jsx";
+@source "../pages";
+@source "../components/*.jsx";
+
+@theme {
+  --color-aid-primary: #1f6b4a;
+  --color-aid-footer: #193b30;
+  --color-aid-scrim: #0b1f15;
+}
+
+@theme inline {
+  --color-ink: var(--text);
+  --font-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
+}
+
 :root {
   font-family: Inter, 'Segoe UI', sans-serif;
   line-height: 1.5;
@@ -8,30 +28,6 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  --bg: #f7f4eb;
-  --panel: #fffaf0;
-  --panel-soft: #eee8db;
-  --nav-panel: #f3eddf;
-  --primary: #1f6b4a;
-  --primary-strong: #154a36;
-  --text: #163e30;
-  --muted: #4f5d52;
-  --line: #d9d3c5;
-  --card-shadow: 0 16px 36px rgba(27, 49, 37, 0.1);
-}
-
-:root.dark {
-  --bg: #101a15;
-  --panel: #1a2a21;
-  --panel-soft: #21372b;
-  --nav-panel: #15392c;
-  --primary: #92d2a9;
-  --primary-strong: #b6e2c7;
-  --text: #e6efe8;
-  --muted: #b4c6bb;
-  --line: #3b5044;
-  --card-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
 }
 
 * {
@@ -391,26 +387,6 @@ h3 {
 .aid-skeleton {
   background-color: var(--line);
 }
-
-.aid-page-skeleton {
-  min-height: 65vh;
-  max-width: 70rem;
-  margin-inline: auto;
-  padding: 5rem 1.25rem;
-}
-
-.aid-page-skeleton > div {
-  height: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 0.5rem;
-}
-
-.aid-page-skeleton > div:first-of-type {
-  width: min(70%, 24rem);
-  height: 2.5rem;
-}
-
-.aid-page-skeleton > div:last-child { width: 65%; }
 
 @media (prefers-reduced-motion: no-preference) {
   .aid-skeleton { animation: aid-loading 1.4s ease-in-out infinite alternate; }

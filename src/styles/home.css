@@ -1,31 +1,10 @@
-/* Compile homepage utilities without Tailwind's global reset. */
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" source(none);
-@source "./HomePage.jsx";
-@source "./JoinPages.jsx";
-@source "./OpportunitiesPage.jsx";
-@source "../components/OpportunityGrid.jsx";
-@source "../components/Footer.jsx";
-@source "../components/Container.jsx";
-@source "../components/Navbar.jsx";
-@source "../components/HomeExtras.jsx";
-@source "../components/AuthActions.jsx";
-@source "../components/ThemeSwitch.jsx";
-
-@theme {
-  --color-aid-primary: #1f6b4a;
-  --color-aid-footer: #193b30;
-  --color-aid-scrim: #0b1f15;
-}
+@reference "./index.css";
 
 .aid-home, main:has(.aid-opportunities, .aid-entry) {
   font-family: "DM Sans", "Segoe UI", system-ui, sans-serif;
   --aid-green: var(--text);
   --aid-cream: var(--bg);
   --aid-muted: var(--muted);
-  --aid-rule: #d9ddd0;
-  --aid-surface: #fffcf5;
   background: var(--aid-cream);
   color: var(--aid-green);
 }
@@ -107,20 +86,6 @@
 
 .aid-surface { border-block-start: 1px solid var(--aid-rule); }
 
-.dark .aid-home,
-.dark main:has(.aid-opportunities, .aid-entry) {
-  --aid-rule: #3b5044;
-  --aid-surface: #1a2a21;
-}
-
-
-/* AidConnect tokens stay scoped so the remaining course templates keep their styles. */
-.aid-home, main:has(.aid-opportunities, .aid-entry) {
-  --aid-pop: #11201a;
-}
-.dark .aid-home, .dark main:has(.aid-opportunities, .aid-entry) {
-  --aid-pop: #c6f432;
-}
 .aid-sticker {
   border: 2px solid var(--aid-green);
   border-radius: 0.85rem;
@@ -136,8 +101,6 @@
 .aid-chip-mint { background: #bff0cf; }
 .aid-chip-peach { background: #ffd2bd; }
 .aid-chip-sky { background: #bfe3ff; }
-.aid-platform-logo { filter: brightness(0); }
-.dark .aid-platform-logo { filter: brightness(0) invert(1); }
 .aid-home :is(h1, h2, h3),
 .aid-opportunities :is(h1, h2, h3) {
   font-family: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
@@ -162,7 +125,6 @@
   width: 100%;
   height: auto;
 }
-.dark .aid-wordmark img { filter: brightness(1.8); }
 
 .aid-footer-theme {
   background: var(--bg);
@@ -273,11 +235,6 @@
   --fx-chip-mint: #bff0cf;
 }
 
-@theme inline {
-  --color-ink: var(--text);
-  --font-display: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
-}
-
 .aid-mobile-nav { min-height: 5rem; }
 .aid-mobile-nav .bubble-menu { z-index: 51; }
 .aid-mobile-nav .bubble-menu-items { z-index: 50; }
@@ -316,15 +273,36 @@
   margin: auto;
   padding: 1.5rem;
   border-radius: 0.75rem;
-  background: #11201a;
-  color: white;
+  background: var(--panel);
+  color: var(--text);
+}
+.aid-photo-pending-frame {
+  position: sticky;
+  top: 0;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  text-align: center;
+}
+.aid-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 1rem;
+  min-height: 3.25rem;
+}
+.aid-logo-placeholder span {
+  width: min(25%, 8rem);
+  height: 2rem;
+  border-radius: 0.5rem;
 }
 .aid-accent-button {
   display: inline-flex;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  background: var(--fx-accent);
-  color: var(--fx-on-accent);
+  background: var(--primary);
+  color: var(--bg);
   font-weight: 700;
 }
 .aid-mobile-nav .bubble-menu { top: 0.75rem; padding-inline: 1rem; }
@@ -332,8 +310,6 @@
 .aid-mobile-nav .bubble-menu-items { pointer-events: auto; padding-top: 5rem; }
 .aid-mobile-nav .bubble-menu-items .pill-list { row-gap: 0.5rem; padding-bottom: 1rem; }
 .aid-mobile-nav .bubble-menu-items .pill-link { min-height: 3rem; padding-block: 0.5rem; }
-.aid-platform-loop img { filter: brightness(0) saturate(100%) invert(30%) sepia(31%) saturate(1165%) hue-rotate(103deg) brightness(92%); }
-.dark .aid-platform-loop img { filter: brightness(0) invert(1); }
 
 @media (max-width: 767px) {
   .app-shell:has(.aid-home) .aid-hero-content { padding-top: 2rem; }

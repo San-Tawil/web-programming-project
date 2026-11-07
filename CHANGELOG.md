@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-07 — Tailwind theme colors
+
+Moved light and dark theme colors and logo filters to Tailwind utilities. The existing toggle still controls and remembers the selected theme.
+
+## 2026-11-07 — Consolidated source folders
+
+Moved the HTML entry, pages, shared components, and styles under `src/`. React Bits components now live in `src/components/fx/`. Updated Vite, Tailwind source paths, and imports, and removed unused effect copies.
+
+## 2026-11-07 — Faster startup on slow connections
+
+- Deferred the homepage carousel, expanding photo, and decorative effects until their sections approach the viewport. The photo and carousel reserve space while they load.
+- Lowered the fetch priority of secondary images, reduced secondary homepage photos from about 1,050 KB to 593 KB, and reduced the navigation logo from 192 KB to under 2 KB.
+
+- Replaced generic loading bars with navigation and card placeholders at startup, a hero placeholder for Home, and a card grid for All Opportunities.
+- Added a theme-aware skeleton directly to the HTML so it appears while JavaScript downloads. Lazy routes retain their own loading skeleton.
+- Split desktop navigation from startup code, made web fonts nonblocking, and added smaller responsive WebP hero images.
+
+## 2026-11-07 — Theme-aware opportunity panel
+
+The homepage photo panel and its Browse opportunities button now follow the site's light and dark themes.
+
 ## 2026-11-06 — Login button color
 
 Changed the desktop navigation’s account button to the site’s forest green.

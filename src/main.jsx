@@ -2,29 +2,44 @@ import React, { lazy, Suspense, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
-import Layout from '../components/Layout.jsx';
-import AdaptiveNavbar from '../components/AdaptiveNavbar.jsx';
+import Layout from './components/Layout.jsx';
+import AdaptiveNavbar from './components/AdaptiveNavbar.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
-import Footer from '../components/Footer.jsx';
-import './index.css';
+import Footer from './components/Footer.jsx';
+import './styles/index.css';
 
-const HomePage = lazy(() => import('../pages/HomePage.jsx'));
-const LoginPortalPage = lazy(() => import('../pages/JoinPages.jsx'));
-const AccountEntryPage = lazy(() => import('../pages/JoinPages.jsx').then(module => ({ default: module.AccountEntryPage })));
-const OpportunitiesPage = lazy(() => import('../pages/OpportunitiesPage.jsx'));
-const AboutPage = lazy(() => import('../pages/AboutPage.jsx'));
-const ContactPage = lazy(() => import('../pages/ContactPage.jsx'));
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage.jsx'));
+const HomePage = lazy(() => import('./pages/HomePage.jsx'));
+const LoginPortalPage = lazy(() => import('./pages/JoinPages.jsx'));
+const AccountEntryPage = lazy(() => import('./pages/JoinPages.jsx').then(module => ({ default: module.AccountEntryPage })));
+const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage.jsx'));
+const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
+const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
 
-function PageSkeleton() {
+function PageSkeleton({ pathname }) {
+  const home = pathname === '/';
   return (
     <div className="aid-page-skeleton" role="status">
       <span className="sr-only">Loading page…</span>
-      <div className="aid-skeleton" aria-hidden="true" />
-      <div className="aid-skeleton" aria-hidden="true" />
-      <div className="aid-skeleton" aria-hidden="true" />
+      <div className={home ? 'aid-skeleton-hero' : undefined} aria-hidden="true">
+        <div className="aid-skeleton aid-skeleton-title" />
+        <div className="aid-skeleton aid-skeleton-line" />
+        {home && <div className="aid-skeleton aid-skeleton-button" />}
+      </div>
+      {pathname === '/opportunities' && (
+        <div className="aid-skeleton-grid" aria-hidden="true">
+          <div className="aid-skeleton aid-skeleton-card" />
+          <div className="aid-skeleton aid-skeleton-card" />
+          <div className="aid-skeleton aid-skeleton-card" />
+        </div>
+      )}
     </div>
   );
+}
+
+function RouteLoadingBoundary({ children }) {
+  const { pathname } = useLocation();
+  return <Suspense key={pathname} fallback={<PageSkeleton pathname={pathname} />}>{children}</Suspense>;
 }
 
 function RouteFocus() {
@@ -51,7 +66,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <RouteFocus />
 
         <main id="main-content" tabIndex={-1}>
-          <Suspense fallback={<PageSkeleton />}>
+          <RouteLoadingBoundary>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
@@ -65,7 +80,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="/contact" element={<ContactPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-          </Suspense>
+          </RouteLoadingBoundary>
         </main>
 
         <Footer />
