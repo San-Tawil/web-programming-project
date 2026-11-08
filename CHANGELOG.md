@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-08 — Separate opportunities and shifts
+
+The organization dashboard greets the active demo organization and offers separate Add opportunity and Add shift actions. Shifts can stand alone or link to an opportunity. Demo account IDs identify listing owners and applicants.
+
+## 2026-11-07 — Create demo shifts
+
+Added a Create shift action with a date, start and end times, capacity, and signup type. The shift appears in the catalog and organization calendar, and volunteers see its time range once confirmed.
+
+## 2026-11-07 — Fixed desktop logo sizing
+
+Kept the centered navbar logo at 28 pixels so CardNav's image sizing cannot stretch or clip it.
+
+## 2026-11-07 — Shift calendars and hours chart
+
+Added a monthly calendar to each dashboard and replaced the volunteer progress bars with a labeled column chart. The volunteer calendar shows confirmed shifts, and the organization calendar shows posted opportunities.
+
+## 2026-11-07 — Volunteer and organization dashboard demos
+
+Added two lazy-loaded dashboards using shared Tailwind components and sample data. Volunteers can reserve spots or apply, organizations can review applications and post demo opportunities, and confirmed shifts appear on both sides. The volunteer dashboard includes a sample hours chart and completed shifts.
+
 ## 2026-11-07 — Consolidated app styling in Tailwind
 
 Moved the remaining homepage, navigation, photo-credit, and loading styles into Tailwind utilities. The startup HTML links the Tailwind stylesheet directly so the skeleton can appear before React. React Bits keeps its component styles for the effects.
