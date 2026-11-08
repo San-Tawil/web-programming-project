@@ -8,6 +8,7 @@ import Footer from './components/Footer.jsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const AccountPage = lazy(() => import('./pages/AccountPage.jsx'));
+const Login = lazy(() => import('./pages/Login.jsx'));
 const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
@@ -57,7 +58,7 @@ function App() {
             <Route path="/opportunities" element={<OpportunitiesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/login" element={<AccountPage />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<AccountPage signUp />} />
             <Route path="/volunteer/login" element={<AccountPage audience="a volunteer" />} />
             <Route path="/volunteer/register" element={<AccountPage audience="a volunteer" signUp />} />
