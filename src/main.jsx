@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 import AdaptiveNavbar from './components/AdaptiveNavbar.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { DashboardDemoProvider } from './context/DashboardDemoContext.jsx';
 import Footer from './components/Footer.jsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
@@ -12,6 +13,8 @@ const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
+const VolunteerDashboard = lazy(() => import('./pages/VolunteerDashboard.jsx'));
+const OrganizationDashboard = lazy(() => import('./pages/OrganizationDashboard.jsx'));
 
 function PageSkeleton({ pathname }) {
   const home = pathname === '/';
@@ -23,7 +26,7 @@ function PageSkeleton({ pathname }) {
         <div className="motion-safe:animate-skeleton h-4 w-[min(90%,34rem)] rounded-lg bg-(--placeholder)" />
         {home && <div className="motion-safe:animate-skeleton mt-6 h-11 w-40 rounded-lg bg-(--placeholder)" />}
       </div>
-      {pathname === '/opportunities' && (
+      {(pathname === '/opportunities' || pathname.endsWith('/dashboard')) && (
         <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-4" aria-hidden="true">
           <div className="motion-safe:animate-skeleton min-h-44 rounded-lg bg-(--placeholder)" />
           <div className="motion-safe:animate-skeleton min-h-44 rounded-lg bg-(--placeholder)" />
@@ -63,6 +66,8 @@ function App() {
             <Route path="/volunteer/register" element={<AccountPage audience="a volunteer" signUp />} />
             <Route path="/organizations/login" element={<AccountPage audience="an organization" />} />
             <Route path="/organizations/register" element={<AccountPage audience="an organization" signUp />} />
+            <Route path="/volunteer/dashboard" element={<VolunteerDashboard />} />
+            <Route path="/organizations/dashboard" element={<OrganizationDashboard />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
@@ -76,7 +81,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
       <BrowserRouter>
-        <App />
+        <DashboardDemoProvider>
+          <App />
+        </DashboardDemoProvider>
       </BrowserRouter>
     </ThemeProvider>
   </React.StrictMode>,

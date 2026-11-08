@@ -16,7 +16,13 @@ export default function AccountPage({ signUp = false, audience }) {
       <h1>{audience ? `${action} as ${audience}` : action}</h1>
       <p>This page is a placeholder.</p>
       {audience ? (
-        <Link className="underline" to={`/${path}`}>Back to account options</Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link className="rounded-md bg-aid-primary px-4 py-3 font-semibold text-white hover:underline"
+            to={audience === 'a volunteer' ? '/volunteer/dashboard' : '/organizations/dashboard'}>
+            Open demo dashboard
+          </Link>
+          <Link className="underline" to={`/${path}`}>Back to account options</Link>
+        </div>
       ) : (
         <div className="flex flex-wrap gap-4">
           {roles.map(role => (

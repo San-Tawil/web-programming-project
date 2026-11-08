@@ -152,8 +152,8 @@
   outline: none;
 }
 
-.card-nav__logo img,
-.card-nav__logo svg {
+.card-nav__logo > img,
+.card-nav__logo > svg {
   display: block;
   height: 100%;
   width: auto;
