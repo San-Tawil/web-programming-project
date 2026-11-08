@@ -24,7 +24,7 @@ export default function Navbar() {
       <Container className="flex min-h-20 items-center">
         <div className="min-w-0 flex-1">
           <CardNav key={pathname} items={items} ariaLabel="Main navigation"
-            logo={<span className="flex items-center gap-2 font-bold"><img src={aidConnectLogo} alt="" width="28" height="28" className="shrink-0 rounded-full object-contain [.card-nav__logo_&]:size-7" />AidConnect</span>}
+            logo={<span className="flex items-center gap-2 font-bold"><img src={aidConnectLogo} alt="" width="28" height="28" className="size-7 shrink-0 rounded-full object-contain" />AidConnect</span>}
             logoAlt="AidConnect home" logoHref="/" maxWidth={1120} intro={false}
             surface="solid" openOn="click" linkComponent={RouterLink}
             actions={<div className="flex items-center justify-end gap-2"><ThemeSwitch /><AuthActions /></div>}
