@@ -25,13 +25,15 @@ export function findAccount(email) {
   return mockAccounts.find((account) => account.email === target);
 }
 
-export function addAccount({ role, name, email, password }) {
+// Organizations also keep contactName, location and description.
+export function addAccount({ role, name, email, password, ...details }) {
   const account = {
     id: `${role}-${mockAccounts.length + 1}`,
     role,
     name: name.trim(),
     email: email.trim().toLowerCase(),
     password,
+    ...details,
   };
   mockAccounts.push(account);
   return account;
