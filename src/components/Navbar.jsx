@@ -13,7 +13,7 @@ function RouterLink({ href, ...props }) {
 const items = [
   { label: 'Home', className: "[&_.card-nav__link]:after:absolute [&_.card-nav__link]:after:inset-0 [&_.card-nav__link]:after:content-['']", description: 'Back to the AidConnect homepage.', links: [{ label: 'Go to Home', href: '/' }] },
   { label: 'Volunteer', description: 'Find a role close to home.', links: [{ label: 'Browse opportunities', href: '/opportunities' }] },
-  { label: 'Organizations', description: 'Share a role with local volunteers.', links: [{ label: 'Post an opportunity', href: '/organizations/register' }, { label: 'Organization login', href: '/organizations/login' }] },
+  { label: 'Organizations', description: 'Share a role with local volunteers.', links: [{ label: 'Organization tools', href: '/organizations/tools' }, { label: 'Organization login', href: '/organizations/login' }] },
   { label: 'AidConnect', description: 'Get to know the project.', links: [{ label: 'About', href: '/about' }, { label: 'Contact us', href: '/contact' }] },
 ];
 

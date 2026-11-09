@@ -5,9 +5,11 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import AdaptiveNavbar from './components/AdaptiveNavbar.jsx';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import Footer from './components/Footer.jsx';
+import { OpportunitiesProvider } from './context/OpportunitiesContext.jsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.jsx'));
 const AccountPage = lazy(() => import('./pages/AccountPage.jsx'));
+const OrganizationToolsPage = lazy(() => import('./pages/OrganizationToolsPage.jsx'));
 const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
@@ -35,16 +37,17 @@ function PageSkeleton({ pathname }) {
 }
 
 function App() {
-  const { key, pathname } = useLocation();
+  const { pathname } = useLocation();
   const main = useRef(null);
-  const previousKey = useRef(key);
+  const previousPath = useRef(pathname);
 
   useEffect(() => {
-    if (previousKey.current !== key) {
-      main.current?.focus();
-      previousKey.current = key;
+    if (previousPath.current !== pathname) {
+      main.current?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      previousPath.current = pathname;
     }
-  }, [key]);
+  }, [pathname]);
 
   return (
     <div className="group/app flex min-h-screen flex-col has-[.aid-home]:relative">
@@ -55,6 +58,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
+            <Route path="/organizations/tools" element={<OrganizationToolsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<AccountPage />} />
@@ -75,9 +79,11 @@ function App() {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <OpportunitiesProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </OpportunitiesProvider>
     </ThemeProvider>
   </React.StrictMode>,
 );

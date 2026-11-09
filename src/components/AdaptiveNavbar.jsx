@@ -12,6 +12,7 @@ const navigationFallback = <nav aria-label="Site pages"><Link to="/">Home</Link>
 const items = [
   { label: 'Home', to: '/' },
   { label: 'Find opportunities', to: '/opportunities' },
+  { label: 'Organization tools', to: '/organizations/tools' },
   { label: 'About', to: '/about' },
   { label: 'Contact us', to: '/contact' },
 ].map(item => ({

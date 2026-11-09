@@ -59,3 +59,37 @@ BubbleMenu's eight numbered modifications are marked in the full file. LogoLoop,
 - **Dashboard** — No decorative effects are needed.
 
 The existing photo hero is shared by both themes in this checkout. The Home update preserves that layout. The paused and reduced-motion platform strips use a wrapped list to keep all links reachable. Logo assets remain named by slug and load through the Vite glob.
+
+## Opportunity list and organization tools (Phase 1)
+
+- `/opportunities`: searchable published listings; combined cause/city filters; date, duration, and title sorting; result counts, reset and empty states; expandable volunteer guidance.
+- `/organizations/tools`: Together Lebanon's demo workspace; create and edit validated opportunities; draft/published/closed states; deletion with confirmation; live counts and status filtering.
+- Desktop, mobile and footer navigation link to the tools. The homepage's featured cards use the same shared data.
+
+### Run locally
+
+Use Node.js 22.12+ (or 20.19+), then run `npm ci` and `npm run dev` from the repository root. Open the URL Vite prints and visit the routes above. `npm run build` creates `dist/`; `npm run preview` serves that build. Production hosting must rewrite application routes to `index.html` for BrowserRouter deep links.
+
+### Data and course alignment
+
+`src/data/opportunities.js` contains fictional organizations and sample opportunities. `OpportunitiesProvider` owns the in-memory array using `useState`; both pages and the homepage consume it. Navigation preserves changes; refreshing restores the seed data. Organization identity is fixed for this Phase 1 demonstration, not authenticated access control. No real opportunities are published and no backend requests are sent.
+
+The list covers the brief's List View; organization tools covers the Add/Edit Form and mock CRUD. Shared components receive props, controlled forms validate text/date/numeric inputs, and `useEffect` updates page titles. Semantic sections/articles, heading order, labels, time elements, linked validation messages, live feedback, keyboard focus and native dialog behavior follow Chapters 3–4. Responsive Grid/Flexbox, theme variables, Tailwind utilities and breakpoints follow Chapters 5–8. Events, conditional display, array filtering/mapping and immutable object updates apply Chapters 9–10 through React.
+
+These two pages do not by themselves satisfy the whole team's submission: the brief separately requires two distinct detail routes, login/register, other assigned views, team names/contribution attribution, deployment and screenshots. Expandable listing details are not claimed as separate detail pages.
+
+### Manual acceptance walkthrough
+
+1. Filter opportunities by Education and Beirut; search for homework. Reset and try an unmatched search, then expand a card.
+2. Open Organization tools. Create an empty role to see labeled validation errors; enter valid fields and choose Published.
+3. Navigate to Find opportunities and search for the new title. Open its details.
+4. Return to tools, edit the title, then close the role. Confirm it disappears from the public list. Publish again to restore it.
+5. Delete it; cancel once to verify it remains, then confirm. Refresh to restore the sample data.
+6. Repeat at mobile/tablet/desktop widths, in light/dark mode, and using the keyboard.
+
+### Page previews and verification
+
+![Opportunity list](docs/screenshots/opportunities.png)
+![Organization tools](docs/screenshots/organization-tools.png)
+
+Verified with a production build and Chromium interaction checks: combined filters, empty results, detail disclosure, continuous search typing, required-field validation, create/edit, cross-route data sharing, publish/close, deletion cancellation/confirmation, and no horizontal overflow at 320, 390, 768 and 1366 pixels. Light and dark layouts were reviewed. Vite was aligned to version 7 to match the existing plugins' supported peer dependency range.
