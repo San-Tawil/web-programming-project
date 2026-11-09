@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FormField from "./FormField.jsx";
+import { useDashboardDemo } from "../context/DashboardDemoContext.jsx";
 import { findAccount, addAccount } from "../data/mockAccounts.js";
 
-// Phase 1: volunteer sign-up fields live here first. Organization sign-up
-// will reuse this form and add its own fields in a later pass, so the
-// `role` prop is already here even though only volunteer fields render.
+const emptyForm = { firstName: "", lastName: "", email: "", location: "", password: "", confirmPassword: "" };
+const uploadClasses = "min-w-0 cursor-pointer text-sm text-(--muted) file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-(--nav-panel) file:px-3 file:py-2 file:font-semibold file:text-(--primary) hover:file:bg-(--line)";
 
-const emptyForm = { name: "", email: "", password: "", confirmPassword: "" };
-
-function validate(form) {
+function validate(form, emailIsValid) {
   const errors = {};
-  if (!form.name.trim()) errors.name = "Enter your full name.";
-  if (!/^\S+@\S+\.\S+$/.test(form.email))
-    errors.email = "Enter a valid email address.";
+  if (!form.firstName.trim()) errors.firstName = "Enter your first name.";
+  if (!form.lastName.trim()) errors.lastName = "Enter your last name.";
+  if (!emailIsValid) errors.email = "Enter a valid email address.";
   else if (findAccount(form.email))
     errors.email = "An account with this email already exists.";
   if (form.password.length < 8) errors.password = "Use at least 8 characters.";
@@ -22,112 +20,152 @@ function validate(form) {
   return errors;
 }
 
-export default function RegisterForm({ role }) {
-  const isOrganization = role === "organizations";
+export default function RegisterForm({ role, children }) {
+  const navigate = useNavigate();
+  const { selectAccount } = useDashboardDemo();
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
-  const [created, setCreated] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, validity } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
+    setErrors((current) => ({
+      ...current,
+      [name]: name === "email" && value && !validity.valid
+        ? "Enter a valid email address."
+        : undefined,
+    }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const nextErrors = validate(form);
+    if (saving) return;
+    const emailField = event.currentTarget.elements.namedItem("email");
+    const nextErrors = validate(form, emailField.validity.valid);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
+    const firstError = Object.keys(nextErrors)[0];
+    if (firstError) {
+      event.currentTarget.elements.namedItem(firstError).focus();
+      return;
+    }
 
-    const account = addAccount({
-      role,
-      name: form.name,
-      email: form.email,
-      password: form.password,
-    });
-    setCreated(account);
+    const fields = event.currentTarget.elements;
+    setSaving(true);
+    try {
+      const account = await addAccount({
+        role,
+        name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+        email: form.email,
+        password: form.password,
+        location: role === "volunteer" ? form.location : "",
+        cv: fields.namedItem("cv")?.files[0],
+        photo: fields.namedItem("photo")?.files[0],
+      });
+      if (!account) {
+        setErrors({ email: "An account with this email already exists." });
+        return;
+      }
+      selectAccount(account);
+      navigate(`/${account.role}/dashboard`, { replace: true });
+    } catch {
+      setErrors({ form: "Your account could not be saved in this browser. Try again." });
+    } finally {
+      setSaving(false);
+    }
   };
-
-  if (created) {
-    return (
-      <div
-        role="status"
-        className="grid gap-3 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6"
-      >
-        <h2 className="mb-0 text-xl">Welcome, {created.name}!</h2>
-        <p className="mb-0 text-(--muted)">
-          Your demo account is ready. It only lasts until you refresh the page.
-        </p>
-        <Link
-          className="inline-flex w-full items-center justify-center rounded-full bg-[#c6f432] px-[1.3rem] py-[0.8rem] font-semibold text-[#08111f] sm:w-auto sm:justify-self-start"
-          to={
-            isOrganization ? "/organizations/dashboard" : "/volunteer/dashboard"
-          }
-        >
-          Go to your dashboard
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <form
       className="grid gap-4 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6"
-      aria-label={isOrganization ? "Organization sign up" : "Volunteer sign up"}
+      aria-label={role === "organizations" ? "Organization sign up" : "Volunteer sign up"}
       noValidate
       onSubmit={handleSubmit}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
+      {children}
+      <FormField
+        label="First name *"
+        name="firstName"
+        autoComplete="given-name"
+        required
+        value={form.firstName}
+        onChange={handleChange}
+        error={errors.firstName}
+      />
+      <FormField
+        label="Last name *"
+        name="lastName"
+        autoComplete="family-name"
+        required
+        value={form.lastName}
+        onChange={handleChange}
+        error={errors.lastName}
+      />
+      <FormField
+        label="Email *"
+        name="email"
+        type="email"
+        autoComplete="email"
+        pattern=".+@.+\..+"
+        required
+        className="aria-invalid:border-red-600 dark:aria-invalid:border-red-300"
+        placeholder="you@example.com"
+        value={form.email}
+        onChange={handleChange}
+        error={errors.email}
+      />
+      {role === "volunteer" && (
         <FormField
-          label="Full name"
-          name="name"
-          type="text"
-          autoComplete="name"
-          placeholder="Your name"
-          value={form.name}
+          label="City or area (optional)"
+          name="location"
+          autoComplete="address-level2"
+          placeholder="e.g. Beirut"
+          value={form.location}
           onChange={handleChange}
-          error={errors.name}
         />
-        <FormField
-          label="Email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={form.email}
-          onChange={handleChange}
-          error={errors.email}
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          placeholder="At least 8 characters"
-          value={form.password}
-          onChange={handleChange}
-          error={errors.password}
-        />
-        <FormField
-          label="Confirm password"
-          name="confirmPassword"
-          type="password"
-          autoComplete="new-password"
-          placeholder="Re-enter your password"
-          value={form.confirmPassword}
-          onChange={handleChange}
-          error={errors.confirmPassword}
-        />
-      </div>
-
+      )}
+      <FormField
+        label="Password *"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        required
+        minLength={8}
+        placeholder="At least 8 characters"
+        value={form.password}
+        onChange={handleChange}
+        error={errors.password}
+      />
+      <FormField
+        label="Confirm password *"
+        name="confirmPassword"
+        type="password"
+        autoComplete="new-password"
+        required
+        placeholder="Re-enter your password"
+        value={form.confirmPassword}
+        onChange={handleChange}
+        error={errors.confirmPassword}
+      />
+      {role === "volunteer" && (
+        <>
+          <div className="grid min-w-0 gap-1">
+            <FormField label="CV (optional)" name="cv" type="file" accept=".pdf,.doc,.docx" className={uploadClasses} aria-describedby="cv-formats" />
+            <p id="cv-formats" className="m-0 text-xs text-(--muted)">PDF, DOC, or DOCX</p>
+          </div>
+          <div className="grid min-w-0 gap-1">
+            <FormField label="Profile photo (optional)" name="photo" type="file" accept="image/jpeg,image/png,image/webp" className={uploadClasses} aria-describedby="photo-formats" />
+            <p id="photo-formats" className="m-0 text-xs text-(--muted)">JPG, PNG, or WebP</p>
+          </div>
+        </>
+      )}
+      {errors.form && <p role="alert" className="m-0 text-sm text-red-700 dark:text-red-300">{errors.form}</p>}
       <button
         type="submit"
-        className="inline-flex w-full items-center justify-center rounded-full border border-transparent bg-[#c6f432] px-[1.3rem] py-[0.8rem] font-semibold text-[#08111f] transition sm:w-auto sm:justify-self-start"
+        disabled={saving}
+        className="w-full cursor-pointer rounded-xl border-0 bg-(--primary) px-5 py-3 font-semibold text-white hover:bg-(--primary-strong) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) disabled:opacity-60 dark:text-(--bg) sm:w-auto sm:justify-self-start"
       >
-        Create account
+        {saving ? "Creating account…" : "Create account"}
       </button>
     </form>
   );

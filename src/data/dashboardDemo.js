@@ -54,9 +54,9 @@ export const initialDemo = {
 };
 
 export const completedShifts = [
-  { title: 'Neighborhood garden day', date: '2026-08-22', month: 'Aug', hours: 2 },
-  { title: 'Community food packing', date: '2026-09-12', month: 'Sep', hours: 3 },
-  { title: 'Coastal cleanup', date: '2026-10-24', month: 'Oct', hours: 3 },
+  { title: 'Neighborhood garden day', cause: 'Community support', date: '2026-08-22', month: 'Aug', hours: 2 },
+  { title: 'Community food packing', cause: 'Food support', date: '2026-09-12', month: 'Sep', hours: 3 },
+  { title: 'Coastal cleanup', cause: 'Environment', date: '2026-10-24', month: 'Oct', hours: 3 },
 ];
 
 export function shiftDate(date) {
@@ -76,6 +76,10 @@ export function spotsFilled(signups, opportunityId) {
 }
 
 export function demoReducer(state, action) {
+  if (action.type === 'selectVolunteer') {
+    return { ...state, volunteer: action.volunteer };
+  }
+
   if (action.type === 'post') {
     const { parentId } = action.opportunity;
     if (parentId && !state.opportunities.some(item =>
@@ -104,6 +108,15 @@ export function demoReducer(state, action) {
     return {
       ...state,
       signups: [...state.signups, { opportunityId: opportunity.id, volunteerId: state.volunteer.id, volunteer: state.volunteer.name, status }],
+    };
+  }
+
+  if (action.type === 'leave' && opportunity.kind === 'shift') {
+    return {
+      ...state,
+      signups: state.signups.filter(item =>
+        item.opportunityId !== opportunity.id || item.volunteerId !== state.volunteer.id || item.status === 'Declined'
+      ),
     };
   }
 

@@ -1,8 +1,6 @@
-// Phase 1 mock account store shared by the register and login pages.
-// It lives in memory only, so a full page refresh resets it to the demo
-// accounts below. Passwords are plain text because this is demo data;
-// Phase 2 moves accounts to the backend, which will hash them.
-// `role` matches the route paths: 'volunteer' or 'organizations'.
+// Browser-local demo accounts. Built-in accounts use a public demo password.
+const storageKey = 'aidconnect-demo-accounts';
+const attachments = new Map();
 export const mockAccounts = [
   {
     id: "volunteer-demo",
@@ -22,17 +20,47 @@ export const mockAccounts = [
 
 export function findAccount(email) {
   const target = email.trim().toLowerCase();
-  return mockAccounts.find((account) => account.email === target);
+  const account = [...mockAccounts, ...readAccounts()].find(item => item.email === target);
+  return account && { ...account, ...attachments.get(account.id) };
 }
 
-export function addAccount({ role, name, email, password }) {
+function readAccounts() {
+  try {
+    const accounts = JSON.parse(localStorage.getItem(storageKey) ?? '[]');
+    return Array.isArray(accounts) ? accounts : [];
+  } catch {
+    return [];
+  }
+}
+
+async function passwordHash(password, salt) {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({
+    name: 'PBKDF2', hash: 'SHA-256', salt: encoder.encode(salt), iterations: 600000,
+  }, key, 256);
+  return Array.from(new Uint8Array(bits)).join(',');
+}
+
+export async function matchesPassword(account, password) {
+  return account.salt
+    ? account.hash === await passwordHash(password, account.salt)
+    : account.password === password;
+}
+
+export async function addAccount({ role, name, email, password, location = "", cv, photo }) {
+  const salt = crypto.randomUUID();
   const account = {
-    id: `${role}-${mockAccounts.length + 1}`,
+    id: crypto.randomUUID(),
     role,
     name: name.trim(),
     email: email.trim().toLowerCase(),
-    password,
+    salt,
+    hash: await passwordHash(password, salt),
+    location: location.trim(),
   };
-  mockAccounts.push(account);
-  return account;
+  if (findAccount(account.email)) return null;
+  localStorage.setItem(storageKey, JSON.stringify([...readAccounts(), account]));
+  if (cv || photo) attachments.set(account.id, { cv, photo });
+  return { ...account, cv, photo };
 }

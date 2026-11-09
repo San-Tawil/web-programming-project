@@ -2,60 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout, { DashboardSection } from '../components/DashboardLayout.jsx';
 import ShiftCalendar from '../components/ShiftCalendar.jsx';
+import VolunteerProfile from '../components/VolunteerProfile.jsx';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
-import { completedShifts, isConfirmed, shiftDate, shiftTime } from '../data/dashboardDemo.js';
-
-function VolunteerHours() {
-  const total = completedShifts.reduce((hours, shift) => hours + shift.hours, 0);
-  const max = Math.max(1, ...completedShifts.map(shift => shift.hours));
-  const axis = Array.from({ length: max + 1 }, (_, hours) => hours);
-
-  return (
-    <DashboardSection title="Volunteer hours">
-      <p className="mb-1 text-2xl font-bold">{total} confirmed hours</p>
-      <p className="mb-4 text-sm text-(--muted)">Sample data · Hours by month</p>
-      <svg viewBox="0 0 320 168" role="img"
-        aria-label={`Monthly volunteer hours. ${completedShifts.map(shift => `${shift.month}: ${shift.hours} hours`).join(', ')}.`}
-        className="block w-full max-w-sm">
-        <text x="4" y="14" className="fill-(--muted) text-xs">Hours</text>
-        {axis.map(hours => {
-          const y = 138 - hours / max * 106;
-          return (
-            <g key={hours}>
-              <line x1="36" x2="308" y1={y} y2={y} className="stroke-(--line)" />
-              <text x="25" y={y} textAnchor="end" dominantBaseline="middle" className="fill-(--muted) text-xs">{hours}</text>
-            </g>
-          );
-        })}
-        <line x1="36" x2="36" y1="32" y2="138" className="stroke-(--line)" />
-        {completedShifts.map(({ month, hours }, index) => {
-          const slot = 272 / completedShifts.length;
-          const x = 36 + slot * (index + 0.5);
-          const height = hours / max * 106;
-          return (
-            <g key={month}>
-              <rect x={x - 17} y={138 - height} width="34" height={height} rx="3" className="fill-(--primary)" />
-              <text x={x} y={131 - height} textAnchor="middle" className="fill-(--text) text-xs font-semibold">{hours} h</text>
-              <text x={x} y="158" textAnchor="middle" className="fill-(--muted) text-xs">{month}</text>
-            </g>
-          );
-        })}
-      </svg>
-      <h3 className="mt-6 text-base font-semibold">Completed shifts</h3>
-      <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
-        {completedShifts.map(({ date, title, hours }) => (
-          <li key={date} className="flex flex-wrap justify-between gap-2 py-2">
-            <span>{title}<span className="block text-(--muted)">{shiftDate(date)}</span></span>
-            <span>{hours} h</span>
-          </li>
-        ))}
-      </ul>
-    </DashboardSection>
-  );
-}
+import { completedShifts, initialDemo, isConfirmed, shiftDate, shiftTime } from '../data/dashboardDemo.js';
 
 export default function VolunteerDashboard() {
-  const { opportunities, signups, volunteer } = useDashboardDemo();
+  const { opportunities, signups, volunteer, dispatch } = useDashboardDemo();
+  const history = volunteer.id === initialDemo.volunteer.id ? completedShifts : [];
+  const shifts = opportunities.filter(item => item.kind === 'shift');
   const mine = signups.filter(signup => signup.volunteerId === volunteer.id);
   const confirmed = opportunities.filter(item => mine.some(signup => signup.opportunityId === item.id && isConfirmed(signup)));
   const upcoming = confirmed.filter(item => item.kind === 'shift')
@@ -66,6 +20,7 @@ export default function VolunteerDashboard() {
   return (
     <DashboardLayout title="Volunteer dashboard" otherRole="Organization"
       action={<Link className="rounded-md bg-aid-primary px-4 py-3 font-semibold text-white hover:underline" to="/opportunities">Browse opportunities</Link>}>
+      <VolunteerProfile key={volunteer.id} volunteer={volunteer} shifts={shifts} completedShifts={history} signups={signups} mine={mine} dispatch={dispatch} />
       <div className="grid gap-6">
         <DashboardSection title="Upcoming shifts">
           {upcoming.length === 0 ? (
@@ -109,7 +64,17 @@ export default function VolunteerDashboard() {
       </div>
       <div className="grid gap-6">
         <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? opportunities.find(item => item.kind === 'shift')?.date} />
-        <VolunteerHours />
+        <DashboardSection title="Completed shifts">
+          {history.length === 0 && <p className="mb-0 text-sm text-(--muted)">No completed shifts yet.</p>}
+          <ul className="m-0 list-none divide-y divide-(--line) p-0 text-sm">
+            {history.map(shift => (
+              <li key={shift.date} className="flex justify-between gap-3 py-2">
+                <span>{shift.title}<span className="block text-(--muted)">{shiftDate(shift.date)}</span></span>
+                <span className="shrink-0">{shift.hours} h</span>
+              </li>
+            ))}
+          </ul>
+        </DashboardSection>
       </div>
     </DashboardLayout>
   );
