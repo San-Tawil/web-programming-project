@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-
+import { Link } from "react-router-dom";
 // Phase 1 mock listings. The IDs can carry over to the team's shared opportunity data.
-const opportunities = [
+export const opportunities = [
   { id: 'coastal-cleanup', cause: 'Environment', title: 'Coastal cleanup', location: 'Ramlet el Baida, Beirut', time: '2 hours · One shift', description: 'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.' },
   { id: 'food-packing', cause: 'Food support', title: 'Community food packing', location: 'Beirut', time: '3 hours · One shift', description: 'Sort pantry staples and assemble grocery boxes for families in the community.' },
   { id: 'homework-club', cause: 'Education', title: 'After-school homework club', location: 'Hamra, Beirut', time: '1 hour · Weekly', description: 'Help students work through homework and build confidence by reading together.' },
@@ -12,7 +12,7 @@ const opportunities = [
 ];
 
 // All listings use the same card so visitors can compare the details in the same order.
-const causeColors = {
+export const causeColors = {
   Environment: 'bg-[#bff0cf]',
   'Food support': 'bg-[#ffd2bd]',
   Education: 'bg-[#bfe3ff]',
@@ -62,8 +62,22 @@ export default function OpportunityGrid({ featured = false, cause }) {
   return (
     <ul ref={gridRef} data-animate={!featured || entered} className="mt-6 motion-safe:data-[animate=true]:[&>li]:animate-opportunity-enter grid list-none gap-4 p-0 md:grid-cols-3">
       {listings.map((opportunity, index) => (
-        <li className="group/listing" key={opportunity.id} style={{ animationDelay: `${index * 65}ms` }}><OpportunityCard opportunity={opportunity} heading={featured ? "h3" : "h2"} /></li>
-      ))}
+  <li
+    className="group/listing"
+    key={opportunity.id}
+    style={{ animationDelay: `${index * 65}ms` }}
+  >
+    <Link
+      to={`/opportunities/${opportunity.id}`}
+      className="block h-full rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
+    >
+      <OpportunityCard
+        opportunity={opportunity}
+        heading={featured ? "h3" : "h2"}
+      />
+    </Link>
+  </li>
+))}
     </ul>
   );
 }

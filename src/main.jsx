@@ -12,6 +12,7 @@ const OpportunitiesPage = lazy(() => import('./pages/OpportunitiesPage.jsx'));
 const AboutPage = lazy(() => import('./pages/AboutPage.jsx'));
 const ContactPage = lazy(() => import('./pages/ContactPage.jsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage.jsx'));
+const OpportunityDetailsPage = lazy(() => import("./pages/OpportunityDetailsPage.jsx"));
 
 function PageSkeleton({ pathname }) {
   const home = pathname === '/';
@@ -63,6 +64,7 @@ function App() {
             <Route path="/volunteer/register" element={<AccountPage audience="a volunteer" signUp />} />
             <Route path="/organizations/login" element={<AccountPage audience="an organization" />} />
             <Route path="/organizations/register" element={<AccountPage audience="an organization" signUp />} />
+            <Route path="/opportunities/:id"element={<OpportunityDetailsPage />}/>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
