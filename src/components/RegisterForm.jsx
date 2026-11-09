@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import FormField from './FormField.jsx';
 
 // Phase 1: volunteer sign-up fields live here first. Organization sign-up
 // will reuse this form and add its own fields in a later pass, so the
 // `role` prop is already here even though only volunteer fields render.
+
+// Phase 1 mock accounts. New sign-ups are added here for the current
+// session only, so a refresh clears them. Phase 2 replaces this with the backend.
+const mockAccounts = [];
 
 const emptyForm = { name: '', email: '', password: '', confirmPassword: '' };
 
@@ -11,6 +16,7 @@ function validate(form) {
   const errors = {};
   if (!form.name.trim()) errors.name = 'Enter your full name.';
   if (!/^\S+@\S+\.\S+$/.test(form.email)) errors.email = 'Enter a valid email address.';
+  else if (mockAccounts.some(account => account.email === form.email.trim().toLowerCase())) errors.email = 'An account with this email already exists.';
   if (form.password.length < 8) errors.password = 'Use at least 8 characters.';
   if (form.confirmPassword !== form.password) errors.confirmPassword = 'Passwords do not match.';
   return errors;
@@ -20,6 +26,7 @@ export default function RegisterForm({ role }) {
   const isOrganization = role === 'organizations';
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
+  const [created, setCreated] = useState(null);
 
   const handleChange = event => {
     const { name, value } = event.target;
@@ -28,8 +35,29 @@ export default function RegisterForm({ role }) {
 
   const handleSubmit = event => {
     event.preventDefault();
-    setErrors(validate(form));
+    const nextErrors = validate(form);
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return;
+
+    const account = { id: `${role}-${mockAccounts.length + 1}`, role, name: form.name.trim(), email: form.email.trim().toLowerCase() };
+    mockAccounts.push(account);
+    setCreated(account);
   };
+
+  if (created) {
+    return (
+      <div role="status" className="grid gap-3 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6">
+        <h2 className="mb-0 text-xl">Welcome, {created.name}!</h2>
+        <p className="mb-0 text-(--muted)">Your demo account is ready. It only lasts until you refresh the page.</p>
+        <Link
+          className="inline-flex w-full items-center justify-center rounded-full bg-[#c6f432] px-[1.3rem] py-[0.8rem] font-semibold text-[#08111f] sm:w-auto sm:justify-self-start"
+          to={isOrganization ? '/organizations/dashboard' : '/volunteer/dashboard'}
+        >
+          Go to your dashboard
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <form
