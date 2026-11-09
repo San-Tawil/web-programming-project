@@ -1,25 +1,35 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Container from "../components/Container.jsx";
 import RegisterForm from "../components/RegisterForm.jsx";
+import RoleToggle from "../components/RoleToggle.jsx";
 
 const roles = [
   {
     path: "volunteer",
     label: "a volunteer",
+    toggleLabel: "Volunteer",
     blurb: "Find shifts near you and track your hours.",
   },
   {
     path: "organizations",
     label: "an organization",
+    toggleLabel: "Organization",
     blurb: "Post opportunities and manage your volunteers.",
   },
 ];
 
-export default function RegisterPage({ audience }) {
-  const role = roles.find((item) => item.label === audience);
+const toggleOptions = roles.map((item) => ({
+  value: item.path,
+  label: item.toggleLabel,
+}));
 
-  // Mobile: intro stacks above the form. Desktop: intro and form sit side by side.
+export default function RegisterPage({ audience }) {
+  const navigate = useNavigate();
+  // /register has no audience in the route, so it opens on the volunteer form.
+  const role = roles.find((item) => item.label === audience) ?? roles[0];
+
+  // Mobile: intro stacks above the toggle and form. Desktop: intro sits beside them.
   return (
     <Container className="py-12">
       <div className="grid items-start gap-8 lg:grid-cols-[0.8fr_1.2fr]">
@@ -28,14 +38,28 @@ export default function RegisterPage({ audience }) {
             Sign up
           </p>
           <h1 className="text-[clamp(2rem,4vw,3.2rem)]">
-            Sign up as {audience}
+            Sign up as {role.label}
           </h1>
-          <p className="text-(--muted)">{role?.blurb}</p>
-          <Link className="underline" to="/register">
-            Back to account options
-          </Link>
+          <p className="text-(--muted)">{role.blurb}</p>
+          <p className="text-sm text-(--muted)">
+            Already have an account?{" "}
+            <Link className="underline" to="/login">
+              Log in
+            </Link>
+          </p>
         </div>
-        <RegisterForm role={role?.path} />
+        <div className="grid gap-4">
+          <RoleToggle
+            label="Sign up as"
+            options={toggleOptions}
+            value={role.path}
+            onChange={(path) =>
+              navigate(`/${path}/register`, { replace: true })
+            }
+          />
+          {/* key resets the form when the toggle switches between sign-up types */}
+          <RegisterForm key={role.path} role={role.path} />
+        </div>
       </div>
     </Container>
   );
