@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Container from "../components/Container.jsx";
 import RegisterForm from "../components/RegisterForm.jsx";
+import RoleToggle from "../components/RoleToggle.jsx";
 import gardenPhoto from "../assets/photos/community-gardening.webp";
 import cleanupPhoto from "../assets/photos/coastal-cleanup.webp";
 import foodPhoto from "../assets/photos/volunteer-food-distribution.webp";
@@ -26,10 +28,12 @@ const roles = [
   },
 ];
 
+const toggleOptions = roles.map(({ path, name }) => ({ value: path, label: name }));
+
 export default function RegisterPage({ audience }) {
-  const [selectedRole, setSelectedRole] = useState(null);
+  const navigate = useNavigate();
   const [preview, setPreview] = useState(previews[0]);
-  const role = selectedRole ?? roles.find((item) => item.label === audience) ?? roles[0];
+  const role = roles.find((item) => item.label === audience) ?? roles[0];
 
   // Mobile: intro stacks above the form. Desktop: intro and form sit side by side.
   return (
@@ -40,26 +44,18 @@ export default function RegisterPage({ audience }) {
             Sign up as {role.label}
           </h1>
           <p className="text-(--muted)">{role.blurb}</p>
-
+          <p className="text-sm text-(--muted)">
+            Already have an account? <Link className="underline" to="/login">Log in</Link>
+          </p>
         </div>
         <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <RegisterForm role={role.path}>
-            <fieldset className="m-0 min-w-0 border-0 p-0">
-              <legend className="mb-2 p-0 font-medium">Account type</legend>
-              <div className="inline-flex max-w-full flex-wrap gap-1 rounded-xl border border-(--line) bg-(--panel) p-1">
-                {roles.map((option) => (
-                  <button
-                    key={option.path}
-                    type="button"
-                    aria-pressed={role.path === option.path}
-                    onClick={() => setSelectedRole(option)}
-                    className="min-h-11 cursor-pointer rounded-lg border-0 bg-transparent px-3 text-sm font-semibold text-(--text) hover:bg-(--nav-panel) focus-visible:outline-2 focus-visible:outline-(--primary) aria-pressed:bg-(--primary) aria-pressed:text-white dark:aria-pressed:text-(--bg)"
-                  >
-                    {option.name}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+          <RegisterForm key={role.path} role={role.path}>
+            <RoleToggle
+              label="Account type"
+              options={toggleOptions}
+              value={role.path}
+              onChange={(path) => navigate(`/${path}/register`, { replace: true })}
+            />
           </RegisterForm>
         </div>
         <section aria-labelledby="signup-preview" className="lg:col-start-1 lg:row-start-2">
