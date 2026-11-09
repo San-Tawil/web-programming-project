@@ -1,6 +1,6 @@
 // Phase 1 mock listings. The IDs can carry over to the team's shared opportunity data.
 const listings = [
-  { id: 'coastal-cleanup', cause: 'Environment', title: 'Coastal cleanup', location: 'Ramlet el Baida, Beirut', time: '2 hours · One shift', description: 'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.' },
+  { id: 'coastal-cleanup', cause: 'Environment', title: 'Coastal cleanup', location: 'Ramlet el Baida, Beirut', time: '2 hours · One shift', description: 'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.', bring: 'Water, sun protection, and closed-toe shoes.' },
   { id: 'food-packing', cause: 'Food support', title: 'Community food packing', location: 'Beirut', time: '3 hours · One shift', description: 'Sort pantry staples and assemble grocery boxes for families in the community.' },
   { id: 'homework-club', cause: 'Education', title: 'After-school homework club', location: 'Hamra, Beirut', time: '1 hour · Weekly', description: 'Help students work through homework and build confidence by reading together.' },
   { id: 'shelter-care', cause: 'Animal welfare', title: 'Shelter care shift', location: 'Tripoli, North Lebanon', time: '2 hours · One shift', description: 'Help shelter staff refresh bedding and prepare food for rescued animals.' },
@@ -21,11 +21,12 @@ const volunteer = { id: 'maya-haddad', name: 'Maya Haddad' };
 export const initialDemo = {
   organization,
   volunteer,
+  plannedByVolunteer: {},
   opportunities: [
     ...listings.map((listing, index) => ({
       ...listing,
       kind: 'shift',
-      date: `2026-11-${14 + index}`,
+      date: demoDate(5 + index),
       startTime: '09:00',
       endTime: '11:00',
       ...times[listing.id],
@@ -67,6 +68,27 @@ export function shiftTime({ startTime, endTime }) {
   return `${startTime}–${endTime}`;
 }
 
+function demoDate(daysFromToday) {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromToday);
+  return date.toLocaleDateString('sv-SE');
+}
+
+export function isClosed(listing) {
+  return Boolean(listing.cancelled) || (listing.kind === 'shift' && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
+}
+
+export function listingStatus(listing, signups) {
+  if (listing.cancelled) return 'Cancelled';
+  if (isClosed(listing)) return 'Closed';
+  return spotsFilled(signups, listing.id) >= listing.capacity ? 'Full' : 'Open';
+}
+
+export function signupLabel(listing) {
+  if (listing.signup === 'approval') return 'Apply for approval';
+  return listing.kind === 'shift' ? 'Reserve a spot' : 'Join opportunity';
+}
+
 export function isConfirmed({ status }) {
   return status === 'Reserved' || status === 'Accepted';
 }
@@ -82,6 +104,7 @@ export function demoReducer(state, action) {
 
   if (action.type === 'post') {
     const { parentId } = action.opportunity;
+    if (isClosed(action.opportunity)) return state;
     if (parentId && !state.opportunities.some(item =>
       item.id === parentId && item.kind === 'opportunity' && item.organizationId === state.organization.id
     )) return state;
@@ -96,13 +119,36 @@ export function demoReducer(state, action) {
 
   const opportunity = state.opportunities.find(item => item.id === action.opportunityId);
   if (!opportunity) return state;
-  const full = spotsFilled(state.signups, opportunity.id) >= opportunity.capacity;
+  const filled = spotsFilled(state.signups, opportunity.id);
+  const full = filled >= opportunity.capacity;
+  const closed = isClosed(opportunity);
+
+  if (action.type === 'togglePlan') {
+    if (opportunity.kind !== 'shift' || closed) return state;
+    const planned = state.plannedByVolunteer[state.volunteer.id] ?? [];
+    const updated = planned.includes(opportunity.id)
+      ? planned.filter(id => id !== opportunity.id)
+      : [...planned, opportunity.id];
+    return { ...state, plannedByVolunteer: { ...state.plannedByVolunteer, [state.volunteer.id]: updated } };
+  }
+
+  if (action.type === 'editShift' || action.type === 'cancelShift') {
+    if (closed || opportunity.kind !== 'shift' || opportunity.organizationId !== state.organization.id) return state;
+    const updated = action.type === 'cancelShift' ? { ...opportunity, cancelled: true } : { ...opportunity, ...action.changes };
+    if (action.type === 'editShift' && (
+      isClosed(updated) || updated.capacity < filled || updated.startTime >= updated.endTime ||
+      (updated.parentId && !state.opportunities.some(item =>
+        item.id === updated.parentId && item.kind === 'opportunity' && item.organizationId === state.organization.id
+      ))
+    )) return state;
+    return { ...state, opportunities: state.opportunities.map(item => item.id === opportunity.id ? updated : item) };
+  }
 
   if (action.type === 'join') {
     const alreadyJoined = state.signups.some(item =>
       item.opportunityId === opportunity.id && item.volunteerId === state.volunteer.id
     );
-    if (full || alreadyJoined) return state;
+    if (closed || full || alreadyJoined) return state;
 
     const status = opportunity.signup === 'approval' ? 'Pending' : 'Reserved';
     return {
@@ -111,16 +157,17 @@ export function demoReducer(state, action) {
     };
   }
 
-  if (action.type === 'leave' && opportunity.kind === 'shift') {
+  if (action.type === 'leave' && !closed) {
     return {
       ...state,
       signups: state.signups.filter(item =>
-        item.opportunityId !== opportunity.id || item.volunteerId !== state.volunteer.id || item.status === 'Declined'
+        item.opportunityId !== opportunity.id || item.volunteerId !== state.volunteer.id ||
+        !(item.status === 'Pending' || (opportunity.kind === 'shift' && isConfirmed(item)))
       ),
     };
   }
 
-  if (action.type === 'review' && opportunity.organizationId === state.organization.id
+  if (action.type === 'review' && !closed && opportunity.organizationId === state.organization.id
     && (action.status === 'Declined' || (action.status === 'Accepted' && !full))) {
     return {
       ...state,

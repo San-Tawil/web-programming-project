@@ -25,10 +25,10 @@ export default function DashboardLayout({ title, otherRole, action, children }) 
   );
 }
 
-export function DashboardSection({ title, children }) {
+export function DashboardSection({ title, id, children }) {
   const heading = useId();
   return (
-    <section aria-labelledby={heading} className="min-w-0 rounded-xl border border-(--aid-rule) bg-(--aid-surface) p-4 sm:p-5">
+    <section id={id} aria-labelledby={heading} tabIndex={-1} className="min-w-0 scroll-mt-24 rounded-xl border border-(--aid-rule) bg-(--aid-surface) p-4 sm:p-5">
       <h2 id={heading} className="mb-4 font-display text-xl font-bold">{title}</h2>
       {children}
     </section>

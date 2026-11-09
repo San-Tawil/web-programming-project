@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
-import { shiftDate, shiftTime, spotsFilled } from '../data/dashboardDemo.js';
+import { isClosed, listingStatus, shiftDate, shiftTime, signupLabel } from '../data/dashboardDemo.js';
 
 // All listings use the same card so visitors can compare the details in the same order.
 const causeColors = {
@@ -16,18 +16,17 @@ const causeColors = {
 function OpportunitySignup({ opportunity }) {
   const { signups, volunteer, dispatch } = useDashboardDemo();
   const signup = signups.find(item => item.opportunityId === opportunity.id && item.volunteerId === volunteer.id);
-  const available = opportunity.capacity - spotsFilled(signups, opportunity.id);
-  const approval = opportunity.signup === 'approval';
+  const status = listingStatus(opportunity, signups);
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      <button type="button" disabled={Boolean(signup) || available <= 0}
+      <button type="button" disabled={Boolean(signup) || status !== 'Open'}
         className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60"
         onClick={() => dispatch({ type: 'join', opportunityId: opportunity.id })}>
-        {approval ? 'Apply' : opportunity.kind === 'shift' ? 'Reserve a spot' : 'Join opportunity'}
+        {signupLabel(opportunity)}
       </button>
       <span role="status" className="text-sm text-(--muted)">
-        {signup?.status ?? (available <= 0 ? 'Full' : approval ? 'Approval required' : 'Open signup')}
+        {isClosed(opportunity) ? status : signup?.status ?? (status === 'Full' ? status : opportunity.signup === 'approval' ? 'Approval required' : 'Open signup')}
       </span>
     </div>
   );
