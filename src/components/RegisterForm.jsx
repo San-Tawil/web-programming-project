@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import FormField from "./FormField.jsx";
+import CheckboxField from "./CheckboxField.jsx";
 import { findAccount, addAccount } from "../data/mockAccounts.js";
 
 // One form for both sign-up types. Volunteers fill in the basics;
@@ -14,6 +15,7 @@ const emptyForm = {
   description: "",
   password: "",
   confirmPassword: "",
+  agreed: false,
 };
 
 function validate(form, isOrganization) {
@@ -36,6 +38,8 @@ function validate(form, isOrganization) {
   if (form.password.length < 8) errors.password = "Use at least 8 characters.";
   if (form.confirmPassword !== form.password)
     errors.confirmPassword = "Passwords do not match.";
+  if (!form.agreed)
+    errors.agreed = "You need to agree before creating an account.";
   return errors;
 }
 
@@ -45,9 +49,13 @@ export default function RegisterForm({ role }) {
   const [errors, setErrors] = useState({});
   const [created, setCreated] = useState(null);
 
+  // Text inputs store their value; checkboxes store checked true/false.
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = (event) => {
@@ -94,11 +102,13 @@ export default function RegisterForm({ role }) {
 
   const emailField = (
     <FormField
-      label="Email"
+      label={isOrganization ? "Organization email" : "Email"}
       name="email"
       type="email"
       autoComplete="email"
-      placeholder="you@example.com"
+      placeholder={
+        isOrganization ? "hello@yourorganization.org" : "you@example.com"
+      }
       value={form.email}
       onChange={handleChange}
       error={errors.email}
@@ -189,6 +199,27 @@ export default function RegisterForm({ role }) {
           error={errors.confirmPassword}
         />
       </div>
+
+      {/* The # links are placeholders until the Terms and Privacy pages exist;
+          swap them for <Link to="/terms"> and <Link to="/privacy"> then. */}
+      <CheckboxField
+        name="agreed"
+        checked={form.agreed}
+        onChange={handleChange}
+        error={errors.agreed}
+      >
+        {isOrganization
+          ? "I agree to the "
+          : "I'm 18 or older and I agree to the "}
+        <a className="underline" href="#">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a className="underline" href="#">
+          Privacy Policy
+        </a>
+        .
+      </CheckboxField>
 
       <button
         type="submit"
