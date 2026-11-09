@@ -3,19 +3,36 @@ import { Link } from "react-router-dom";
 import FormField from "./FormField.jsx";
 import { findAccount, addAccount } from "../data/mockAccounts.js";
 
-// Phase 1: volunteer sign-up fields live here first. Organization sign-up
-// will reuse this form and add its own fields in a later pass, so the
-// `role` prop is already here even though only volunteer fields render.
+// One form for both sign-up types. Volunteers fill in the basics;
+// organizations (role === 'organizations') get a few extra fields.
 
-const emptyForm = { name: "", email: "", password: "", confirmPassword: "" };
+const emptyForm = {
+  name: "",
+  contactName: "",
+  email: "",
+  location: "",
+  description: "",
+  password: "",
+  confirmPassword: "",
+};
 
-function validate(form) {
+function validate(form, isOrganization) {
   const errors = {};
-  if (!form.name.trim()) errors.name = "Enter your full name.";
+  if (!form.name.trim())
+    errors.name = isOrganization
+      ? "Enter your organization name."
+      : "Enter your full name.";
+  if (isOrganization && !form.contactName.trim())
+    errors.contactName = "Enter a contact person.";
   if (!/^\S+@\S+\.\S+$/.test(form.email))
     errors.email = "Enter a valid email address.";
   else if (findAccount(form.email))
     errors.email = "An account with this email already exists.";
+  if (isOrganization && !form.location.trim())
+    errors.location = "Enter where you are based.";
+  if (isOrganization && form.description.trim().length < 20)
+    errors.description =
+      "Describe your organization in at least 20 characters.";
   if (form.password.length < 8) errors.password = "Use at least 8 characters.";
   if (form.confirmPassword !== form.password)
     errors.confirmPassword = "Passwords do not match.";
@@ -35,7 +52,7 @@ export default function RegisterForm({ role }) {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const nextErrors = validate(form);
+    const nextErrors = validate(form, isOrganization);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
@@ -44,6 +61,11 @@ export default function RegisterForm({ role }) {
       name: form.name,
       email: form.email,
       password: form.password,
+      ...(isOrganization && {
+        contactName: form.contactName.trim(),
+        location: form.location.trim(),
+        description: form.description.trim(),
+      }),
     });
     setCreated(account);
   };
@@ -70,6 +92,19 @@ export default function RegisterForm({ role }) {
     );
   }
 
+  const emailField = (
+    <FormField
+      label="Email"
+      name="email"
+      type="email"
+      autoComplete="email"
+      placeholder="you@example.com"
+      value={form.email}
+      onChange={handleChange}
+      error={errors.email}
+    />
+  );
+
   return (
     <form
       className="grid gap-4 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6"
@@ -77,28 +112,60 @@ export default function RegisterForm({ role }) {
       noValidate
       onSubmit={handleSubmit}
     >
+      {/* Mobile: one column. Tablet and up: related fields share a row. */}
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
-          label="Full name"
+          label={isOrganization ? "Organization name" : "Full name"}
           name="name"
           type="text"
-          autoComplete="name"
-          placeholder="Your name"
+          autoComplete={isOrganization ? "organization" : "name"}
+          placeholder={isOrganization ? "Your organization" : "Your name"}
           value={form.name}
           onChange={handleChange}
           error={errors.name}
         />
-        <FormField
-          label="Email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          value={form.email}
-          onChange={handleChange}
-          error={errors.email}
-        />
+        {isOrganization ? (
+          <FormField
+            label="Contact person"
+            name="contactName"
+            type="text"
+            autoComplete="name"
+            placeholder="Who volunteers will hear from"
+            value={form.contactName}
+            onChange={handleChange}
+            error={errors.contactName}
+          />
+        ) : (
+          emailField
+        )}
       </div>
+
+      {isOrganization && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {emailField}
+            <FormField
+              label="Location"
+              name="location"
+              type="text"
+              placeholder="City or area"
+              value={form.location}
+              onChange={handleChange}
+              error={errors.location}
+            />
+          </div>
+          <FormField
+            label="About your organization"
+            name="description"
+            as="textarea"
+            rows="4"
+            placeholder="What does your organization do?"
+            value={form.description}
+            onChange={handleChange}
+            error={errors.description}
+          />
+        </>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField
@@ -127,7 +194,7 @@ export default function RegisterForm({ role }) {
         type="submit"
         className="inline-flex w-full items-center justify-center rounded-full border border-transparent bg-[#c6f432] px-[1.3rem] py-[0.8rem] font-semibold text-[#08111f] transition sm:w-auto sm:justify-self-start"
       >
-        Create account
+        {isOrganization ? "Create organization account" : "Create account"}
       </button>
     </form>
   );
