@@ -50,8 +50,8 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
   }
 
   return (
-    <form className="grid gap-4 text-sm [&_label]:grid [&_label]:gap-1" onSubmit={addListing}>
-      <label>Title <input className={field} name="title" defaultValue={listing?.title} required maxLength={80} /></label>
+    <form className="grid gap-4 text-sm sm:grid-cols-2 [&_label]:grid [&_label]:gap-1" onSubmit={addListing}>
+      <label className="sm:col-span-2">Title <input className={field} name="title" defaultValue={listing?.title} required maxLength={80} /></label>
       {isShift && (
         <label>Program (optional)
           <select className={field} value={parentId} onChange={event => setParentId(event.target.value)}>
@@ -68,15 +68,14 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
               {causes.map(cause => <option key={cause}>{cause}</option>)}
             </select>
           </label>
-          <label>Location <input className={field} name="location" defaultValue={listing?.location} required maxLength={100} /></label>
-          <label>Description <textarea className={field} name="description" defaultValue={listing?.description} required rows={3} maxLength={300} /></label>
         </>
       )}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
         <label>Date <input className={field} type="date" name="date" min={parent?.date > today ? parent.date : today} defaultValue={listing?.date} required /></label>
         <label>Start time <input className={field} type="time" name="startTime" defaultValue={listing?.startTime} required /></label>
         <label>End time <input className={field} type="time" name="endTime" defaultValue={listing?.endTime} required /></label>
       </div>
+      {!parent && <label>Location <input className={field} name="location" defaultValue={listing?.location} required maxLength={100} /></label>}
       <label>Capacity <input className={field} type="number" name="capacity" min={minCapacity} max={100} defaultValue={listing?.capacity} required /></label>
       <label>Signup type
         <select className={field} name="signup" defaultValue={listing?.signup ?? 'open'}>
@@ -84,11 +83,12 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
           <option value="approval">Approval required</option>
         </select>
       </label>
-      <div className="flex flex-wrap gap-3">
-        <button type="submit" className="min-h-11 cursor-pointer rounded-md border-0 bg-(--primary) px-4 font-semibold text-(--bg)">{listing ? 'Save changes' : `Add ${kind}`}</button>
+      {!parent && <label className="sm:col-span-2">Description <textarea className={field} name="description" defaultValue={listing?.description} required rows={3} maxLength={300} /></label>}
+      <p role="status" className={notice ? 'm-0 text-(--muted) sm:col-span-2' : 'sr-only'}>{notice}</p>
+      <div className="flex flex-wrap justify-end gap-3 sm:col-span-2">
         <button type="button" className="min-h-11 cursor-pointer rounded-md border border-(--line) bg-(--bg) px-4 font-semibold text-(--text)" onClick={onCancel}>Cancel</button>
+        <button type="submit" className="min-h-11 cursor-pointer rounded-md border-0 bg-(--primary) px-4 font-semibold text-(--bg)">{listing ? 'Save changes' : `Add ${kind}`}</button>
       </div>
-      <p role="status" className={notice ? 'm-0 text-(--muted)' : 'sr-only'}>{notice}</p>
     </form>
   );
 }

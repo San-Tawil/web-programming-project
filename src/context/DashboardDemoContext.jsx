@@ -16,9 +16,13 @@ export function DashboardDemoProvider({ children }) {
     } : initialDemo.volunteer;
     setAccountRole(account?.role ?? null);
     dispatch({ type: 'selectVolunteer', volunteer });
-    if (account?.role === 'organizations') {
-      dispatch({ type: 'updateProfile', role: 'organization', changes: { name: account.name, location: account.location, photo: account.photo } });
-    }
+    const organization = account?.role === 'organizations' ? {
+      id: account.id === 'organizations-demo' ? initialDemo.organization.id : account.id,
+      name: account.name,
+      location: account.location,
+      photo: account.photo,
+    } : initialDemo.organization;
+    dispatch({ type: 'selectOrganization', organization });
   }
   return (
     <DashboardDemoContext.Provider value={{ ...demo, dispatch, accountRole, selectAccount }}>

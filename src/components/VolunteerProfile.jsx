@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Badge, EmptyState } from './DashboardUI.jsx';
 import { listingStatus, shiftDate, shiftTime, signupAction, spotsFilled } from '../data/dashboardDemo.js';
 
 const row = 'flex flex-wrap items-center justify-between gap-3 py-3';
@@ -80,7 +82,7 @@ export default function VolunteerProfile({ shifts, history, entries, plannedIds,
         </div>
         <div>
           <h3 className="mb-1 text-base">Plan future shifts</h3>
-          <p className="mb-2 text-sm text-(--muted)">Planning estimates hours. To sign up, use <a href="#find-shifts" className="underline">Find shifts</a>.</p>
+          <p className="mb-2 text-sm text-(--muted)">Planning estimates hours. To sign up, use <Link to="/volunteer/dashboard?section=find-shifts" className="underline">Find shifts</Link>.</p>
           <ul className="m-0 list-none divide-y divide-(--line) p-0">
             {shifts.map(shift => (
               <li key={shift.id}>
@@ -103,9 +105,13 @@ export default function VolunteerProfile({ shifts, history, entries, plannedIds,
 
 export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
   const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
   const causes = [...new Set(shifts.map(shift => shift.cause))];
   const currentFilter = causes.includes(filter) ? filter : 'All';
-  const visible = shifts.filter(shift => currentFilter === 'All' || shift.cause === currentFilter);
+  const visible = shifts.filter(shift => (currentFilter === 'All' || shift.cause === currentFilter) &&
+    shift.title.toLowerCase().includes(search.trim().toLowerCase()) &&
+    (statusFilter === 'All' || listingStatus(shift, signups) === statusFilter));
 
   return (
     <section id="find-shifts" aria-labelledby="shift-board-title" tabIndex={-1} className="min-w-0 scroll-mt-32 rounded-xl border border-(--line) bg-(--panel) p-4 sm:p-5 lg:scroll-mt-20">
@@ -114,14 +120,24 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
           <h2 id="shift-board-title" className="mb-1 font-display text-xl font-bold">Find shifts</h2>
           <p className="m-0 text-sm text-(--muted)">Reserve to confirm your place now. Apply when an organizer needs to approve your signup.</p>
         </div>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <label className="grid gap-1 text-sm font-semibold">Search shifts
+          <input className={field} type="search" value={search} onChange={event => setSearch(event.target.value)} />
+        </label>
         <label className="grid gap-1 text-sm font-semibold">Cause
           <select value={currentFilter} className={field} onChange={event => setFilter(event.target.value)}>
             <option value="All">All causes</option>
             {causes.map(cause => <option key={cause}>{cause}</option>)}
           </select>
         </label>
+        <label className="grid gap-1 text-sm font-semibold">Availability
+          <select value={statusFilter} className={field} onChange={event => setStatusFilter(event.target.value)}>
+            {['All', 'Open', 'Full'].map(status => <option key={status}>{status}</option>)}
+          </select>
+        </label>
       </div>
-      {visible.length === 0 && <p className="mt-4 mb-0 text-sm text-(--muted)">No upcoming shifts are listed yet.</p>}
+      {visible.length === 0 && <div className="mt-4"><EmptyState action={<button type="button" className={button + ' mt-2'} onClick={() => { setSearch(''); setFilter('All'); setStatusFilter('All'); }}>Clear filters</button>}>No shifts match these filters.</EmptyState></div>}
       <ul className="mt-3 mb-0 list-none divide-y divide-(--line) p-0">
         {visible.map(shift => {
           const status = mine.find(signup => signup.opportunityId === shift.id)?.status;
@@ -133,7 +149,8 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
               <div className="min-w-0 flex-1 break-words">
                 <strong className="block">{shift.title}</strong>
                 <span className="block text-sm text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)} · {shift.location}</span>
-                <span className="block text-sm text-(--muted)">{status ?? (availability === 'Full' ? 'Full' : remaining + (remaining === 1 ? ' spot left' : ' spots left'))}</span>
+                <div className="mt-2 flex flex-wrap items-center gap-2"><Badge label={status ?? (availability === 'Open' && shift.signup === 'approval' ? 'Approval required' : availability)} />
+                  <span className="text-sm text-(--muted)">{remaining} {remaining === 1 ? 'spot left' : 'spots left'}</span></div>
               </div>
               <button type="button" className={button} disabled={action.disabled}
                 aria-label={action.label + ': ' + shift.title} onClick={() => onChange(shift, action.type, status)}>

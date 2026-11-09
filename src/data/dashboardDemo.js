@@ -20,6 +20,7 @@ const volunteer = { id: 'maya-haddad', name: 'Maya Haddad' };
 
 export const initialDemo = {
   organization,
+  organizationProfiles: {},
   volunteer,
   plannedByVolunteer: {},
   hoursByVolunteer: {},
@@ -125,6 +126,11 @@ export function spotsFilled(signups, opportunityId) {
 }
 
 export function demoReducer(state, action) {
+  if (action.type === 'selectOrganization') {
+    const profile = state.organizationProfiles[action.organization.id] ?? action.organization;
+    return { ...state, organization: profile };
+  }
+
   if (action.type === 'logHours' || action.type === 'removeHours') {
     const id = state.volunteer.id;
     const entries = state.hoursByVolunteer[id] ?? [];
@@ -138,11 +144,13 @@ export function demoReducer(state, action) {
   if (action.type === 'updateProfile') {
     const { role, changes } = action;
     if (role === 'organization') {
+      const profile = { ...state.organization, ...changes, id: state.organization.id };
       return {
         ...state,
-        organization: { ...state.organization, ...changes },
+        organization: profile,
+        organizationProfiles: { ...state.organizationProfiles, [profile.id]: profile },
         opportunities: state.opportunities.map(item =>
-          item.organizationId === state.organization.id ? { ...item, organizer: changes.name } : item
+          item.organizationId === profile.id ? { ...item, organizer: profile.name } : item
         ),
       };
     }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import DashboardLayout, { DashboardSection } from '../components/DashboardLayout.jsx';
+import DashboardLayout, { DashboardSection, useDashboardView } from '../components/DashboardLayout.jsx';
+import { Badge, EmptyState } from '../components/DashboardUI.jsx';
 import ListingDetails from '../components/ListingDetails.jsx';
 import ShiftCalendar from '../components/ShiftCalendar.jsx';
 import VolunteerProfile, { VolunteerShiftBoard } from '../components/VolunteerProfile.jsx';
@@ -8,7 +9,7 @@ import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
 import { completedShifts, initialDemo, isClosed, isConfirmed, shiftDate, shiftTime } from '../data/dashboardDemo.js';
 
 const textAction = 'min-h-11 cursor-pointer rounded-md border border-(--line) bg-(--panel) px-3 text-sm font-semibold text-(--text) hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-(--primary)';
-const sections = [['overview', 'Overview'], ['find-shifts', 'Find shifts'], ['my-applications', 'Applications'], ['my-shifts', 'My shifts'], ['hours', 'Hours & planning']];
+const sections = [['overview', 'Overview'], ['my-applications', 'Applications'], ['my-shifts', 'My shifts'], ['find-shifts', 'Find shifts'], ['hours', 'Hours & planning']];
 const applicationCopy = {
   Pending: 'Waiting for the organizer to review your application.',
   Accepted: 'Your place is confirmed.',
@@ -19,7 +20,10 @@ const applicationCopy = {
 
 export default function VolunteerDashboard() {
   const { opportunities, signups, volunteer, plannedByVolunteer, hoursByVolunteer, dispatch } = useDashboardDemo();
+  const view = useDashboardView(sections);
   const [notice, setNotice] = useState('');
+  const [appSearch, setAppSearch] = useState('');
+  const [appStatus, setAppStatus] = useState('All');
   const history = volunteer.id === initialDemo.volunteer.id ? completedShifts : [];
   const entries = hoursByVolunteer[volunteer.id] ?? [];
   const shifts = opportunities.filter(item => item.kind === 'shift' && !isClosed(item));
@@ -33,11 +37,19 @@ export default function VolunteerDashboard() {
   const pendingApplications = applications.filter(signup =>
     signup.status === 'Pending' && opportunities.some(item => item.id === signup.opportunityId && !isClosed(item))
   );
+  const visibleApplications = applications.flatMap(({ opportunityId, status }) => {
+    const listing = opportunities.find(item => item.id === opportunityId);
+    if (!listing) return [];
+    const label = listing.cancelled ? 'Cancelled' : status === 'Pending' && isClosed(listing) ? 'Closed' : status;
+    if (view === 'my-applications' && ((appStatus !== 'All' && label !== appStatus) ||
+      !listing.title.toLowerCase().includes(appSearch.trim().toLowerCase()))) return [];
+    return [{ listing, label }];
+  });
   const plannedIds = plannedByVolunteer[volunteer.id] ?? [];
   const next = upcoming[0];
   const metrics = [
-    { label: 'Confirmed shifts', value: upcoming.length, href: '#next-shift', detail: 'Next shift' },
-    { label: 'Pending applications', value: pendingApplications.length, href: '#my-applications', detail: 'My applications' },
+    { label: 'Confirmed shifts', value: upcoming.length, href: '#next-shift', detail: 'Next shift', badge: upcoming.length ? 'Confirmed' : undefined },
+    { label: 'Pending applications', value: pendingApplications.length, href: '#my-applications', detail: 'My applications', badge: pendingApplications.length ? 'Pending' : undefined },
     { label: 'Hours logged', value: Number([...history, ...entries].reduce((total, shift) => total + shift.hours, 0).toFixed(2)), href: '#hours', detail: 'Hours & planning' },
     { label: 'Planned shifts', value: shifts.filter(shift => plannedIds.includes(shift.id)).length, href: '#hours', detail: 'Edit plan' },
   ];
@@ -59,24 +71,24 @@ export default function VolunteerDashboard() {
     changeSignup(listing, 'leave', status);
   }
 
-  return (
-    <DashboardLayout title="Volunteer dashboard" profile={volunteer} otherRole="Organization" sections={sections} metrics={metrics}
-      action={<Link className="rounded-lg bg-(--primary) px-4 py-3 font-semibold text-(--bg) hover:underline" to="/volunteer/dashboard#find-shifts">Find a shift</Link>}>
-      <div className="grid gap-5">
-      <p role="status" className={notice ? 'm-0 text-sm text-(--primary)' : 'sr-only'}>{notice}</p>
-      <VolunteerShiftBoard shifts={shifts} signups={signups} mine={mine} onChange={changeSignup} />
-      <DashboardSection id="my-applications" title="My applications">
-        {applications.length === 0 ? <p className="mb-0 text-(--muted)">Applications for approval-only opportunities will appear here.</p> : (
+  const applicationsCard = (
+    <DashboardSection id="my-applications" title="My applications">
+        {view === 'my-applications' && <div className="mb-3 flex flex-wrap gap-3">
+          <label className="grid gap-1 text-sm">Search applications<input className={textAction} type="search" value={appSearch} onChange={event => setAppSearch(event.target.value)} /></label>
+          <label className="grid gap-1 text-sm">Status<select className={textAction} value={appStatus} onChange={event => setAppStatus(event.target.value)}>
+            {['All', 'Pending', 'Accepted', 'Declined', 'Cancelled', 'Closed'].map(status => <option key={status}>{status}</option>)}
+          </select></label>
+        </div>}
+        {visibleApplications.length === 0 ? <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>
+          {applications.length ? 'No applications match these filters.' : 'Applications appear here after you apply for a shift.'}
+        </EmptyState> : (
           <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
-            {applications.map(({ opportunityId, status }) => {
-              const listing = opportunities.find(item => item.id === opportunityId);
-              if (!listing) return null;
-              const label = listing.cancelled ? 'Cancelled' : status === 'Pending' && isClosed(listing) ? 'Closed' : status;
+            {visibleApplications.map(({ listing, label }) => {
               return (
-                <li key={opportunityId} className="py-3 first:pt-0 last:pb-0">
+                <li key={listing.id} className="py-3 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <strong className="min-w-0 break-words">{listing.title}</strong>
-                    <span className="rounded-full border border-(--line) px-2.5 py-0.5 text-sm font-semibold">{label}</span>
+                    <Badge label={label} />
                   </div>
                   <p className="mt-1 mb-0 text-sm text-(--muted)">{applicationCopy[label]}</p>
                   {label === 'Pending' && (
@@ -88,8 +100,9 @@ export default function VolunteerDashboard() {
           </ul>
         )}
       </DashboardSection>
-      <div id="my-shifts" tabIndex={-1} className="grid min-w-0 scroll-mt-32 gap-5 lg:scroll-mt-20">
-      <DashboardSection id="next-shift" title="Next confirmed shift">
+  );
+  const nextCard = (
+    <DashboardSection id="next-shift" title="Next confirmed shift">
         {next ? (
           <>
             <h3 className="mb-1 text-base font-bold break-words">{next.title}</h3>
@@ -99,16 +112,14 @@ export default function VolunteerDashboard() {
             <button type="button" className={`${textAction} mt-2`} onClick={event => leave(event, next)}>Cancel reservation</button>
           </>
         ) : (
-          <>
-            <p className="mb-2 text-(--muted)">Your next booking will appear here.</p>
-            <Link to="/volunteer/dashboard#find-shifts" className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline">Find a shift</Link>
-          </>
+          <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>You have no upcoming confirmed shifts.</EmptyState>
         )}
       </DashboardSection>
-      <div className="grid min-w-0 gap-5 xl:grid-cols-[1.35fr_minmax(0,1fr)]">
-        <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? shifts[0]?.date} />
-        <div className="grid min-w-0 gap-5">
-        {(programs.length > 0 || cancelled.length > 0) && (
+  );
+  const scheduleCards = (
+    <>
+      <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? shifts[0]?.date} />
+      {(programs.length > 0 || cancelled.length > 0) && (
           <DashboardSection title="Other bookings">
             <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
               {[...programs, ...cancelled].map(item => (
@@ -121,22 +132,33 @@ export default function VolunteerDashboard() {
           </DashboardSection>
         )}
         <DashboardSection title="Completed shifts">
-          {history.length === 0 && <p className="mb-0 text-sm text-(--muted)">Completed shifts and logged hours will appear here.</p>}
+          {history.length === 0 && <EmptyState action={<Link to="/volunteer/dashboard?section=hours" className="mt-2 inline-block font-semibold text-(--primary) underline">Log volunteer time</Link>}>Completed shifts will appear here.</EmptyState>}
           <ul className="m-0 list-none divide-y divide-(--line) p-0 text-sm">
             {history.map(shift => (
               <li key={shift.date} className="flex justify-between gap-3 py-2">
                 <span>{shift.title}<span className="block text-(--muted)">{shiftDate(shift.date)}</span></span>
-                <span className="shrink-0">{shift.hours} h</span>
+                <Badge label={shift.hours + ' h'} />
               </li>
             ))}
           </ul>
         </DashboardSection>
+    </>
+  );
+
+  return (
+    <DashboardLayout title="Volunteer dashboard" profile={volunteer} otherRole="Organization" sections={sections} metrics={metrics}
+      action={<Link className="rounded-lg bg-(--primary) px-4 py-3 text-sm font-semibold text-(--bg) hover:underline" to="/volunteer/dashboard?section=find-shifts">Find a shift</Link>}>
+      <p role="status" className={notice ? 'mb-4 text-sm text-(--primary)' : 'sr-only'}>{notice}</p>
+      {view === 'overview' && (
+        <div className="grid grid-cols-12 items-start gap-6">
+          <div className="col-span-full grid min-w-0 gap-6 lg:col-span-8">{nextCard}{applicationsCard}</div>
+          <div className="col-span-full grid min-w-0 gap-6 lg:col-span-4">{scheduleCards}</div>
         </div>
-      </div>
-      </div>
-      <VolunteerProfile key={volunteer.id} shifts={shifts} history={history} entries={entries}
-        plannedIds={plannedIds} dispatch={dispatch} />
-      </div>
+      )}
+      {view === 'my-applications' && applicationsCard}
+      {view === 'my-shifts' && <div className="grid gap-6">{nextCard}{scheduleCards}</div>}
+      {view === 'find-shifts' && <VolunteerShiftBoard shifts={shifts} signups={signups} mine={mine} onChange={changeSignup} />}
+      {view === 'hours' && <VolunteerProfile key={volunteer.id} shifts={shifts} history={history} entries={entries} plannedIds={plannedIds} dispatch={dispatch} />}
     </DashboardLayout>
   );
 }

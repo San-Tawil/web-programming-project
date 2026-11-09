@@ -57,6 +57,7 @@ function App() {
   const { key, pathname, hash } = useLocation();
   const dashboard = /^\/(volunteer|organizations)\/dashboard(?:\/profile)?\/?$/.test(pathname);
   const dashboardProfile = dashboard && /\/profile\/?$/.test(pathname);
+  const Content = dashboard ? 'div' : 'main';
   const main = useRef(null);
   const previousKey = useRef(key);
 
@@ -76,7 +77,7 @@ function App() {
         Skip to main content
       </a>
       {!dashboard && <AdaptiveNavbar />}
-      <main
+      <Content
         ref={main}
         id="main-content"
         tabIndex={-1}
@@ -122,7 +123,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
-      </main>
+      </Content>
       {!dashboard && <Footer />}
     </div>
   );

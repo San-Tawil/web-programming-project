@@ -6,8 +6,6 @@ import DeferredContent from './DeferredContent.jsx';
 import PhotoCredit from './PhotoCredit.jsx';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import useMediaQuery from '../hooks/useMediaQuery.js';
-import useCssVar from '../hooks/useCssVar.js';
-const PixelTrail = lazy(() => import('./fx/PixelTrail/PixelTrail.jsx'));
 const LogoLoop = lazy(() => import('./fx/LogoLoop/LogoLoop.jsx'));
 const ScrollExpand = lazy(() => import('./fx/ScrollExpand/ScrollExpand.jsx'));
 
@@ -126,24 +124,10 @@ export function VolunteerPhotoBand({ src }) {
 }
 
 export function OrganizationTrail({ photo }) {
-  const reduced = useReducedMotion();
-  const fine = useMediaQuery('(min-width: 768px) and (pointer: fine)');
-  const color = useCssVar('--fx-on-accent');
-  const trailColor = useCssVar('--primary');
-
   return (
     <figure className="group/photo relative m-0">
       <div className="relative block h-52 overflow-hidden rounded-xl md:bg-(--primary)">
         <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" className="absolute inset-0 size-full object-cover" />
-        {!reduced && fine && color && trailColor && (
-          <div aria-hidden="true" className="absolute inset-0">
-            <DeferredContent className="h-full">
-              <PixelTrail gridSize={44} trailSize={0.08} maxAge={450} interpolate={5}
-                gooeyFilter={{ strength: 2 }} gap={0.1} shine={0.3} glow={0.2}
-                color={color} trailColor={trailColor} />
-            </DeferredContent>
-          </div>
-        )}
       </div>
       <PhotoCredit photographer="Julia M Cameron" source="https://www.pexels.com/photo/people-sorting-donations-6994963/" />
     </figure>
