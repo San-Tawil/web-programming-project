@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
-import { isClosed, spotsFilled } from '../data/dashboardDemo.js';
+import { isClosed, listingScheduleError, spotsFilled } from '../data/dashboardDemo.js';
 
 const field = 'w-full rounded-md border border-(--line) bg-(--bg) px-3 py-2 text-(--text)';
 const causes = [
@@ -8,7 +8,7 @@ const causes = [
   'Community support', 'Senior support', 'Arts and culture', 'Youth sports', 'Accessibility',
 ];
 
-export default function OpportunityForm({ kind, listing, onSave }) {
+export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
   const { dispatch, opportunities, organization, signups } = useDashboardDemo();
   const [parentId, setParentId] = useState(listing?.parentId ?? '');
   const [notice, setNotice] = useState('');
@@ -30,20 +30,17 @@ export default function OpportunityForm({ kind, listing, onSave }) {
       setNotice('Enter a title, location, and description.');
       return;
     }
-    if (isShift && endTime <= startTime) {
-      setNotice('End time must be after the start time on the same day.');
-      return;
-    }
-
     const opportunity = {
       kind, title, location, description,
       cause: parent?.cause ?? data.get('cause'),
       capacity: Number(data.get('capacity')),
       signup: data.get('signup'),
-      ...(isShift && { parentId, date: data.get('date'), startTime, endTime }),
+      date: data.get('date'), startTime, endTime,
+      ...(isShift && { parentId }),
     };
-    if (isClosed(opportunity) || (listing && isClosed(listing))) {
-      setNotice('Choose a future start time. Shifts that have already started cannot be edited.');
+    const error = listingScheduleError(opportunity, parent);
+    if (error || (listing && isClosed(listing))) {
+      setNotice(error || 'Listings that have already started cannot be edited.');
       return;
     }
     dispatch(listing
@@ -75,13 +72,11 @@ export default function OpportunityForm({ kind, listing, onSave }) {
           <label>Description <textarea className={field} name="description" defaultValue={listing?.description} required rows={3} maxLength={300} /></label>
         </>
       )}
-      {isShift && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          <label>Date <input className={field} type="date" name="date" min={today} defaultValue={listing?.date} required /></label>
-          <label>Start time <input className={field} type="time" name="startTime" defaultValue={listing?.startTime} required /></label>
-          <label>End time <input className={field} type="time" name="endTime" defaultValue={listing?.endTime} required /></label>
-        </div>
-      )}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <label>Date <input className={field} type="date" name="date" min={parent?.date > today ? parent.date : today} defaultValue={listing?.date} required /></label>
+        <label>Start time <input className={field} type="time" name="startTime" defaultValue={listing?.startTime} required /></label>
+        <label>End time <input className={field} type="time" name="endTime" defaultValue={listing?.endTime} required /></label>
+      </div>
       <label>Capacity <input className={field} type="number" name="capacity" min={minCapacity} max={100} defaultValue={listing?.capacity} required /></label>
       <label>Signup type
         <select className={field} name="signup" defaultValue={listing?.signup ?? 'open'}>
@@ -89,7 +84,10 @@ export default function OpportunityForm({ kind, listing, onSave }) {
           <option value="approval">Approval required</option>
         </select>
       </label>
-      <button type="submit" className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-4 font-semibold text-white">{listing ? 'Save changes' : `Add ${kind}`}</button>
+      <div className="flex flex-wrap gap-3">
+        <button type="submit" className="min-h-11 cursor-pointer rounded-md border-0 bg-(--primary) px-4 font-semibold text-(--bg)">{listing ? 'Save changes' : `Add ${kind}`}</button>
+        <button type="button" className="min-h-11 cursor-pointer rounded-md border border-(--line) bg-(--bg) px-4 font-semibold text-(--text)" onClick={onCancel}>Cancel</button>
+      </div>
       <p role="status" className={notice ? 'm-0 text-(--muted)' : 'sr-only'}>{notice}</p>
     </form>
   );

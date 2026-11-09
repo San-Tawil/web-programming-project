@@ -54,26 +54,28 @@ function PageSkeleton({ pathname }) {
 }
 
 function App() {
-  const { key, pathname } = useLocation();
+  const { key, pathname, hash } = useLocation();
+  const dashboard = /^\/(volunteer|organizations)\/dashboard(?:\/profile)?\/?$/.test(pathname);
+  const dashboardProfile = dashboard && /\/profile\/?$/.test(pathname);
   const main = useRef(null);
   const previousKey = useRef(key);
 
   useEffect(() => {
     if (previousKey.current !== key) {
-      main.current?.focus();
+      if (!dashboard || !hash) main.current?.focus({ preventScroll: dashboard });
       previousKey.current = key;
     }
-  }, [key]);
+  }, [key, dashboard, hash]);
 
   return (
     <div className="group/app flex min-h-screen flex-col has-[.aid-home]:relative">
       <a
         className="fixed top-3 left-3 z-[100] -translate-y-[200%] bg-(--panel) px-4 py-3 text-(--text) focus:translate-y-0"
-        href="#main-content"
+        href={dashboardProfile ? '#profile-settings' : dashboard ? '#overview' : '#main-content'}
       >
         Skip to main content
       </a>
-      <AdaptiveNavbar />
+      {!dashboard && <AdaptiveNavbar />}
       <main
         ref={main}
         id="main-content"
@@ -115,11 +117,13 @@ function App() {
               path="/organizations/dashboard"
               element={<OrganizationDashboard />}
             />
+            <Route path="/volunteer/dashboard/profile" element={<VolunteerDashboard />} />
+            <Route path="/organizations/dashboard/profile" element={<OrganizationDashboard />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!dashboard && <Footer />}
     </div>
   );
 }

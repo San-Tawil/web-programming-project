@@ -14,7 +14,7 @@ export default function ListingDetails({ listing, signups, parent }) {
       <dl className="m-0 grid gap-1.5 [&_dd]:m-0 [&_dt]:font-semibold">
         <div className="flex flex-wrap gap-x-2"><dt>Organizer</dt><dd>{listing.organizer}</dd></div>
         <div className="flex flex-wrap gap-x-2"><dt>Meeting location</dt><dd className="min-w-0 break-words">{listing.location}</dd></div>
-        {listing.kind === 'shift' && (
+        {listing.date && (
           <div className="flex flex-wrap gap-x-2"><dt>When</dt><dd>{shiftDate(listing.date)} · {shiftTime(listing)}</dd></div>
         )}
         {parent && <div className="flex flex-wrap gap-x-2"><dt>Program</dt><dd>{parent.title}</dd></div>}

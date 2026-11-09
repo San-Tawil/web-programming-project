@@ -12,6 +12,31 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant hover-capable (@media (hover: hover));
 
+.dashboard-shell {
+  --bg: #f3f5f2;
+  --panel: #fbfcfa;
+  --aid-surface: var(--panel);
+  --nav-panel: #e6eee8;
+  --line: #d0d9d1;
+  --aid-rule: var(--line);
+  --text: #17251e;
+  --muted: #4c6155;
+  --primary: #256448;
+  --primary-strong: #184632;
+}
+
+.dark .dashboard-shell {
+  color-scheme: dark;
+  --bg: #090e0c;
+  --panel: #101814;
+  --nav-panel: #16231c;
+  --line: #29382f;
+  --text: #ecf1ed;
+  --muted: #aebeb4;
+  --primary: #9cd3ad;
+  --primary-strong: #c4e8cf;
+}
+
 @theme {
   --color-aid-primary: #1f6b4a;
   --color-aid-footer: #193b30;

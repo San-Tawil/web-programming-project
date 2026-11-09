@@ -16,6 +16,9 @@ export function DashboardDemoProvider({ children }) {
     } : initialDemo.volunteer;
     setAccountRole(account?.role ?? null);
     dispatch({ type: 'selectVolunteer', volunteer });
+    if (account?.role === 'organizations') {
+      dispatch({ type: 'updateProfile', role: 'organization', changes: { name: account.name, location: account.location, photo: account.photo } });
+    }
   }
   return (
     <DashboardDemoContext.Provider value={{ ...demo, dispatch, accountRole, selectAccount }}>

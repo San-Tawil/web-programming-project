@@ -22,6 +22,7 @@ export const initialDemo = {
   organization,
   volunteer,
   plannedByVolunteer: {},
+  hoursByVolunteer: {},
   opportunities: [
     ...listings.map((listing, index) => ({
       ...listing,
@@ -75,7 +76,16 @@ function demoDate(daysFromToday) {
 }
 
 export function isClosed(listing) {
-  return Boolean(listing.cancelled) || (listing.kind === 'shift' && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
+  return Boolean(listing.cancelled) || Boolean(listing.date && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
+}
+
+export function listingScheduleError(listing, parent) {
+  const start = new Date(`${listing.date}T${listing.startTime}`);
+  const end = new Date(`${listing.date}T${listing.endTime}`);
+  if (!Number.isFinite(+start) || start <= new Date()) return 'Choose a date and start time in the future.';
+  if (!Number.isFinite(+end) || end <= start) return 'End time must be after the start time.';
+  if (parent?.date && start < new Date(`${parent.date}T${parent.startTime}`)) return 'A shift cannot start before its program.';
+  return '';
 }
 
 export function listingStatus(listing, signups) {
@@ -115,16 +125,46 @@ export function spotsFilled(signups, opportunityId) {
 }
 
 export function demoReducer(state, action) {
+  if (action.type === 'logHours' || action.type === 'removeHours') {
+    const id = state.volunteer.id;
+    const entries = state.hoursByVolunteer[id] ?? [];
+    const { entry } = action;
+    if (action.type === 'logHours' && (!entry.title || !Number.isFinite(entry.hours) || entry.hours <= 0 || entry.hours > 24 ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(entry.date) || entry.date > demoDate(0))) return state;
+    const updated = action.type === 'logHours' ? [...entries, entry] : entries.filter(item => item.id !== action.id);
+    return { ...state, hoursByVolunteer: { ...state.hoursByVolunteer, [id]: updated } };
+  }
+
+  if (action.type === 'updateProfile') {
+    const { role, changes } = action;
+    if (role === 'organization') {
+      return {
+        ...state,
+        organization: { ...state.organization, ...changes },
+        opportunities: state.opportunities.map(item =>
+          item.organizationId === state.organization.id ? { ...item, organizer: changes.name } : item
+        ),
+      };
+    }
+    return {
+      ...state,
+      volunteer: { ...state.volunteer, ...changes },
+      signups: state.signups.map(signup =>
+        signup.volunteerId === state.volunteer.id ? { ...signup, volunteer: changes.name } : signup
+      ),
+    };
+  }
+
   if (action.type === 'selectVolunteer') {
     return { ...state, volunteer: action.volunteer };
   }
 
   if (action.type === 'post') {
     const { parentId } = action.opportunity;
-    if (isClosed(action.opportunity)) return state;
-    if (parentId && !state.opportunities.some(item =>
+    const parent = state.opportunities.find(item =>
       item.id === parentId && item.kind === 'opportunity' && item.organizationId === state.organization.id
-    )) return state;
+    );
+    if ((parentId && !parent) || listingScheduleError(action.opportunity, parent)) return state;
     const opportunity = {
       ...action.opportunity,
       id: `demo-${state.opportunities.length}`,
@@ -152,12 +192,11 @@ export function demoReducer(state, action) {
   if (action.type === 'editShift' || action.type === 'cancelShift') {
     if (closed || opportunity.kind !== 'shift' || opportunity.organizationId !== state.organization.id) return state;
     const updated = action.type === 'cancelShift' ? { ...opportunity, cancelled: true } : { ...opportunity, ...action.changes };
-    if (action.type === 'editShift' && (
-      isClosed(updated) || updated.capacity < filled || updated.startTime >= updated.endTime ||
-      (updated.parentId && !state.opportunities.some(item =>
-        item.id === updated.parentId && item.kind === 'opportunity' && item.organizationId === state.organization.id
-      ))
-    )) return state;
+    const parent = state.opportunities.find(item =>
+      item.id === updated.parentId && item.kind === 'opportunity' && item.organizationId === state.organization.id
+    );
+    if (action.type === 'editShift' && (updated.capacity < filled || (updated.parentId && !parent) ||
+      listingScheduleError(updated, parent))) return state;
     return { ...state, opportunities: state.opportunities.map(item => item.id === opportunity.id ? updated : item) };
   }
 

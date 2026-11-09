@@ -8,7 +8,7 @@ import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
 import { completedShifts, initialDemo, isClosed, isConfirmed, shiftDate, shiftTime } from '../data/dashboardDemo.js';
 
 const textAction = 'min-h-11 cursor-pointer rounded-md border border-(--line) bg-(--panel) px-3 text-sm font-semibold text-(--text) hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-(--primary)';
-const sections = [['next-shift', 'Overview'], ['my-shifts', 'My shifts'], ['my-applications', 'Applications'], ['hours', 'Hours & planning']];
+const sections = [['overview', 'Overview'], ['find-shifts', 'Find shifts'], ['my-applications', 'Applications'], ['my-shifts', 'My shifts'], ['hours', 'Hours & planning']];
 const applicationCopy = {
   Pending: 'Waiting for the organizer to review your application.',
   Accepted: 'Your place is confirmed.',
@@ -18,9 +18,10 @@ const applicationCopy = {
 };
 
 export default function VolunteerDashboard() {
-  const { opportunities, signups, volunteer, plannedByVolunteer, dispatch } = useDashboardDemo();
+  const { opportunities, signups, volunteer, plannedByVolunteer, hoursByVolunteer, dispatch } = useDashboardDemo();
   const [notice, setNotice] = useState('');
   const history = volunteer.id === initialDemo.volunteer.id ? completedShifts : [];
+  const entries = hoursByVolunteer[volunteer.id] ?? [];
   const shifts = opportunities.filter(item => item.kind === 'shift' && !isClosed(item));
   const mine = signups.filter(signup => signup.volunteerId === volunteer.id);
   const confirmed = opportunities.filter(item => mine.some(signup => signup.opportunityId === item.id && isConfirmed(signup)));
@@ -29,7 +30,17 @@ export default function VolunteerDashboard() {
   const cancelled = confirmed.filter(item => item.cancelled);
   const programs = confirmed.filter(item => item.kind === 'opportunity');
   const applications = mine.filter(signup => signup.status !== 'Reserved');
+  const pendingApplications = applications.filter(signup =>
+    signup.status === 'Pending' && opportunities.some(item => item.id === signup.opportunityId && !isClosed(item))
+  );
+  const plannedIds = plannedByVolunteer[volunteer.id] ?? [];
   const next = upcoming[0];
+  const metrics = [
+    { label: 'Confirmed shifts', value: upcoming.length, href: '#next-shift', detail: 'Next shift' },
+    { label: 'Pending applications', value: pendingApplications.length, href: '#my-applications', detail: 'My applications' },
+    { label: 'Hours logged', value: Number([...history, ...entries].reduce((total, shift) => total + shift.hours, 0).toFixed(2)), href: '#hours', detail: 'Hours & planning' },
+    { label: 'Planned shifts', value: shifts.filter(shift => plannedIds.includes(shift.id)).length, href: '#hours', detail: 'Edit plan' },
+  ];
 
   function changeSignup(listing, type, status) {
     if (isClosed(listing)) {
@@ -49,28 +60,11 @@ export default function VolunteerDashboard() {
   }
 
   return (
-    <DashboardLayout title="Volunteer dashboard" otherRole="Organization"
-      action={<Link className="rounded-md bg-aid-primary px-4 py-3 font-semibold text-white hover:underline" to="/opportunities">Browse opportunities</Link>}>
-      <nav aria-label="Volunteer dashboard sections" className="flex flex-wrap gap-x-4 border-b border-(--line) pb-2 lg:col-span-2">
-        {sections.map(([id, label]) => <a className="inline-flex min-h-11 items-center text-sm font-semibold text-(--primary) hover:underline" key={id} href={`#${id}`}>{label}</a>)}
-      </nav>
-      <p role="status" className={notice ? 'm-0 text-sm text-(--primary) lg:col-span-2' : 'sr-only'}>{notice}</p>
-      <DashboardSection id="next-shift" title="Next confirmed shift">
-        {next ? (
-          <>
-            <h3 className="mb-1 text-base font-bold break-words">{next.title}</h3>
-            <p className="mb-1 text-sm text-(--muted)">{shiftDate(next.date)} · {shiftTime(next)}</p>
-            <p className="mb-2 text-sm break-words">{next.location} · {next.organizer}</p>
-            <ListingDetails key={next.id} listing={next} signups={signups} parent={opportunities.find(item => item.id === next.parentId)} />
-            <button type="button" className={`${textAction} mt-2`} onClick={event => leave(event, next)}>Cancel reservation</button>
-          </>
-        ) : (
-          <>
-            <p className="mb-2 text-(--muted)">Your next booking will appear here.</p>
-            <Link to="/opportunities" className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline">Find a shift</Link>
-          </>
-        )}
-      </DashboardSection>
+    <DashboardLayout title="Volunteer dashboard" profile={volunteer} otherRole="Organization" sections={sections} metrics={metrics}
+      action={<Link className="rounded-lg bg-(--primary) px-4 py-3 font-semibold text-(--bg) hover:underline" to="/volunteer/dashboard#find-shifts">Find a shift</Link>}>
+      <div className="grid gap-5">
+      <p role="status" className={notice ? 'm-0 text-sm text-(--primary)' : 'sr-only'}>{notice}</p>
+      <VolunteerShiftBoard shifts={shifts} signups={signups} mine={mine} onChange={changeSignup} />
       <DashboardSection id="my-applications" title="My applications">
         {applications.length === 0 ? <p className="mb-0 text-(--muted)">Applications for approval-only opportunities will appear here.</p> : (
           <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
@@ -94,8 +88,26 @@ export default function VolunteerDashboard() {
           </ul>
         )}
       </DashboardSection>
-      <div id="my-shifts" className="grid min-w-0 scroll-mt-24 gap-6">
+      <div id="my-shifts" tabIndex={-1} className="grid min-w-0 scroll-mt-32 gap-5 lg:scroll-mt-20">
+      <DashboardSection id="next-shift" title="Next confirmed shift">
+        {next ? (
+          <>
+            <h3 className="mb-1 text-base font-bold break-words">{next.title}</h3>
+            <p className="mb-1 text-sm text-(--muted)">{shiftDate(next.date)} · {shiftTime(next)}</p>
+            <p className="mb-2 text-sm break-words">{next.location} · {next.organizer}</p>
+            <ListingDetails key={next.id} listing={next} signups={signups} parent={opportunities.find(item => item.id === next.parentId)} />
+            <button type="button" className={`${textAction} mt-2`} onClick={event => leave(event, next)}>Cancel reservation</button>
+          </>
+        ) : (
+          <>
+            <p className="mb-2 text-(--muted)">Your next booking will appear here.</p>
+            <Link to="/volunteer/dashboard#find-shifts" className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline">Find a shift</Link>
+          </>
+        )}
+      </DashboardSection>
+      <div className="grid min-w-0 gap-5 xl:grid-cols-[1.35fr_minmax(0,1fr)]">
         <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? shifts[0]?.date} />
+        <div className="grid min-w-0 gap-5">
         {(programs.length > 0 || cancelled.length > 0) && (
           <DashboardSection title="Other bookings">
             <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
@@ -119,10 +131,12 @@ export default function VolunteerDashboard() {
             ))}
           </ul>
         </DashboardSection>
+        </div>
       </div>
-      <VolunteerShiftBoard shifts={shifts} signups={signups} mine={mine} onChange={changeSignup} />
-      <VolunteerProfile key={volunteer.id} volunteer={volunteer} shifts={shifts} completedShifts={history}
-        plannedIds={plannedByVolunteer[volunteer.id] ?? []} dispatch={dispatch} />
+      </div>
+      <VolunteerProfile key={volunteer.id} shifts={shifts} history={history} entries={entries}
+        plannedIds={plannedIds} dispatch={dispatch} />
+      </div>
     </DashboardLayout>
   );
 }

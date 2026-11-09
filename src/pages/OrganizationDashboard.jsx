@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { DashboardSection } from '../components/DashboardLayout.jsx';
+import DashboardLayout, { DashboardSection } from '../components/DashboardLayout.jsx';
 import ListingDetails from '../components/ListingDetails.jsx';
 import OpportunityForm from '../components/OpportunityForm.jsx';
 import ShiftCalendar from '../components/ShiftCalendar.jsx';
@@ -10,7 +10,7 @@ import { completedShifts, initialDemo, isClosed, isConfirmed, listingStatus, shi
 const button = 'min-h-11 cursor-pointer rounded-md border border-(--line) bg-(--bg) px-3 text-sm font-semibold text-(--text) hover:border-(--primary) focus-visible:outline-2 focus-visible:outline-(--primary) disabled:cursor-default disabled:opacity-60';
 const primaryButton = 'min-h-11 cursor-pointer rounded-md border-0 bg-(--primary) px-4 text-sm font-semibold text-white hover:bg-(--primary-strong) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) dark:text-(--bg)';
 const listingTabs = ['My shifts', 'My opportunities', 'Completed'];
-const sections = [['overview', 'Overview'], ['applications', 'Applications'], ['listings', 'Listings'], ['schedule', 'Schedule']];
+const sections = [['overview', 'Overview'], ['listings', 'Listings'], ['applications', 'Applications'], ['schedule', 'Schedule']];
 
 function ListingList({ items, signups, programs, onAction }) {
   if (!items.length) return <p className="mb-0 text-(--muted)">Nothing added yet.</p>;
@@ -26,7 +26,7 @@ function ListingList({ items, signups, programs, onAction }) {
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 break-words">
                 <h3 className="mb-1 text-base font-semibold">{item.title}</h3>
-                {item.kind === 'shift' && <p className="mb-0 text-sm text-(--muted)">{shiftDate(item.date)} · {shiftTime(item)}</p>}
+                {item.date && <p className="mb-0 text-sm text-(--muted)">{shiftDate(item.date)} · {shiftTime(item)}</p>}
                 {parent && <p className="mb-0 text-sm text-(--muted)">Part of {parent.title}</p>}
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -64,9 +64,22 @@ export default function OrganizationDashboard() {
   const [listingNotice, setListingNotice] = useState('');
   const [reviewNotice, setReviewNotice] = useState('');
   const dialog = useRef(null);
+  const editor = useRef(null);
+  const returnFocus = useRef(null);
   useEffect(() => {
-    if (action && !dialog.current.open) dialog.current.showModal();
+    if (action?.mode === 'cancel' && !dialog.current.open) dialog.current.showModal();
+    else if (action) editor.current?.focus();
   }, [action]);
+
+  function openAction(next) {
+    returnFocus.current = document.activeElement;
+    setAction(next);
+  }
+
+  function closeEditor() {
+    setAction(null);
+    returnFocus.current?.focus();
+  }
 
   const owned = opportunities.filter(item => item.organizationId === organization.id);
   const shifts = owned.filter(item => item.kind === 'shift')
@@ -79,6 +92,12 @@ export default function OrganizationDashboard() {
   const pending = applications.filter(signup => signup.status === 'Pending' && !isClosed(owned.find(item => item.id === signup.opportunityId)));
   const reviewed = applications.filter(signup => signup.status === 'Accepted' || signup.status === 'Declined');
   const recordedHours = completedShifts.reduce((total, shift) => total + shift.hours, 0);
+  const metrics = [
+    { label: 'Applications to review', value: pending.length, href: '#applications', detail: `${pending.length} ${pending.length === 1 ? 'application' : 'applications'} to review` },
+    { label: 'Scheduled shifts', value: upcoming.length, href: '#schedule', detail: 'View schedule' },
+    { label: 'Volunteer hours logged', value: recordedHours, href: '#listings', detail: 'Manage listings' },
+    { label: 'Open listings', value: owned.filter(item => listingStatus(item, signups) === 'Open').length, href: '#listings', detail: 'View listings' },
+  ];
   const dialogTitle = { shift: 'Add a shift', opportunity: 'Add an opportunity', edit: 'Edit shift', cancel: 'Cancel shift' }[action?.mode];
 
   function review(event, signup, status) {
@@ -97,7 +116,8 @@ export default function OrganizationDashboard() {
     else setListingTab('My shifts');
     setShowAll(true);
     setListingNotice(message);
-    dialog.current.close();
+    if (dialog.current.open) dialog.current.close();
+    setAction(null);
     document.getElementById('listings')?.focus();
   }
 
@@ -111,29 +131,52 @@ export default function OrganizationDashboard() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 font-body sm:px-6">
-      <header id="overview" className="flex scroll-mt-24 flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="mb-2 font-display text-3xl font-bold sm:text-4xl">Organization dashboard</h1>
-          <p className="mb-1 text-sm text-(--muted)">{organization.name} · Course demo</p>
-          <p className="m-0 text-sm text-(--muted)">{upcoming.length} scheduled {upcoming.length === 1 ? 'shift' : 'shifts'} · {recordedHours} demo volunteer hours</p>
-        </div>
+    <DashboardLayout title="Organization dashboard" profile={organization} otherRole="Volunteer" sections={sections} metrics={metrics}
+      action={
         <div className="flex flex-wrap gap-2">
-          <button type="button" className={primaryButton} aria-haspopup="dialog" onClick={() => setAction({ mode: 'shift' })}>Add shift</button>
-          <button type="button" className={button} aria-haspopup="dialog" onClick={() => setAction({ mode: 'opportunity' })}>Add opportunity</button>
+          <button type="button" className={primaryButton} onClick={() => openAction({ mode: 'shift' })}>Add shift</button>
+          <button type="button" className={button} onClick={() => openAction({ mode: 'opportunity' })}>Add opportunity</button>
         </div>
-      </header>
+      }>
 
-      <nav aria-label="Organization dashboard sections" className="flex flex-wrap items-center gap-x-4 border-b border-(--line) pb-2">
-        {sections.map(([id, label]) => <a className="inline-flex min-h-11 items-center text-sm font-semibold text-(--primary) hover:underline" key={id} href={`#${id}`}>{label}</a>)}
-        <Link className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4 sm:ml-auto" to="/volunteer/dashboard">View volunteer demo</Link>
-      </nav>
-
-      <a href="#applications" className="w-fit rounded-md bg-(--nav-panel) px-3 py-2 text-sm font-semibold text-(--primary) underline underline-offset-4">
-        {pending.length} {pending.length === 1 ? 'application' : 'applications'} to review
-      </a>
-
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(17rem,1fr)_minmax(0,1.45fr)]">
+      {action && action.mode !== 'cancel' && (
+        <section ref={editor} tabIndex={-1} aria-labelledby="listing-editor-title" className="mb-5 scroll-mt-32 rounded-xl border border-(--line) bg-(--panel) p-4 sm:p-5 lg:scroll-mt-20">
+          <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 id="listing-editor-title" className="mb-0 font-display text-xl">{dialogTitle}</h2>
+            <button type="button" className={button} onClick={closeEditor}>Close form</button>
+          </header>
+          <OpportunityForm key={action.item?.id ?? action.mode} kind={action.item?.kind ?? action.mode} listing={action.item}
+            onCancel={closeEditor}
+            onSave={title => finishListing(action.mode === 'edit' ? `${title} was updated.` : `${title} is now in the demo catalog.`)} />
+        </section>
+      )}
+      <div className="grid gap-5">
+        <div className="min-w-0">
+          <DashboardSection id="listings" title="Manage listings">
+            <p role="status" className={listingNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{listingNotice}</p>
+            <div role="group" aria-label="Choose a listing view" className="mb-3 flex flex-wrap gap-2">
+              {listingTabs.map(tab => (
+                <button key={tab} type="button" aria-pressed={listingTab === tab}
+                  className={button + ' aria-pressed:border-(--primary) aria-pressed:bg-(--nav-panel) aria-pressed:text-(--primary)'}
+                  onClick={() => { setListingTab(tab); setShowAll(false); }}>{tab}</button>
+              ))}
+            </div>
+            {listingTab === 'Completed' ? (
+              <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
+                {visible.map(shift => (
+                  <li key={shift.date} className="flex flex-wrap justify-between gap-2 py-4">
+                    <div><strong>{shift.title}</strong><p className="mb-0 text-(--muted)">{shiftDate(shift.date)} · {initialDemo.volunteer.name} attended</p></div>
+                    <span className="shrink-0 tabular-nums">{shift.hours} h</span>
+                  </li>
+                ))}
+              </ul>
+            ) : <ListingList key={listingTab} items={visible} signups={signups} programs={programs} onAction={openAction} />}
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+              {listed.length > 5 && <button type="button" className={button} aria-expanded={showAll} onClick={() => setShowAll(current => !current)}>{showAll ? 'Show fewer' : `View all (${listed.length})`}</button>}
+              <Link className="text-(--primary) underline underline-offset-4" to="/opportunities">View demo catalog</Link>
+            </div>
+          </DashboardSection>
+        </div>
         <DashboardSection id="applications" title="Applications to review">
           <p role="status" className={reviewNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{reviewNotice}</p>
           {pending.length === 0 && <p className="mb-0 text-sm text-(--muted)">You’re caught up. New applications will appear here.</p>}
@@ -175,55 +218,25 @@ export default function OrganizationDashboard() {
           )}
         </DashboardSection>
 
-        <div className="min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <DashboardSection id="listings" title="Manage listings">
-            <p role="status" className={listingNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{listingNotice}</p>
-            <div role="group" aria-label="Choose a listing view" className="mb-3 flex flex-wrap gap-2">
-              {listingTabs.map(tab => (
-                <button key={tab} type="button" aria-pressed={listingTab === tab}
-                  className={button + ' aria-pressed:border-(--primary) aria-pressed:bg-(--nav-panel) aria-pressed:text-(--primary)'}
-                  onClick={() => { setListingTab(tab); setShowAll(false); }}>{tab}</button>
-              ))}
-            </div>
-            {listingTab === 'Completed' ? (
-              <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
-                {visible.map(shift => (
-                  <li key={shift.date} className="flex flex-wrap justify-between gap-2 py-4">
-                    <div><strong>{shift.title}</strong><p className="mb-0 text-(--muted)">{shiftDate(shift.date)} · {initialDemo.volunteer.name} attended</p></div>
-                    <span className="shrink-0 tabular-nums">{shift.hours} h</span>
-                  </li>
-                ))}
-              </ul>
-            ) : <ListingList key={listingTab} items={visible} signups={signups} programs={programs} onAction={setAction} />}
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
-              {listed.length > 5 && <button type="button" className={button} aria-expanded={showAll} onClick={() => setShowAll(current => !current)}>{showAll ? 'Show fewer' : `View all (${listed.length})`}</button>}
-              <Link className="text-(--primary) underline underline-offset-4" to="/opportunities">View demo catalog</Link>
-            </div>
-          </DashboardSection>
-        </div>
-        <div id="schedule" className="min-w-0 scroll-mt-24 lg:col-start-1">
+        <div id="schedule" tabIndex={-1} className="min-w-0 scroll-mt-32 lg:scroll-mt-20">
           <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date} />
         </div>
       </div>
-      <p className="mb-0 text-sm text-(--muted)">Demo changes reset on refresh.</p>
 
       <dialog ref={dialog} aria-labelledby="listing-dialog-title"
         className="fixed inset-0 m-auto max-h-[85dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-xl border border-(--line) bg-(--panel) p-5 text-(--text) backdrop:bg-black/60 sm:p-6"
-        onClose={() => setAction(null)}>
+        onClose={() => setAction(current => current?.mode === 'cancel' ? null : current)}>
         <header className="mb-4 flex items-center justify-between gap-4">
-          <h2 id="listing-dialog-title" className="mb-0 font-display text-xl">{dialogTitle}</h2>
-          <button type="button" className={button} onClick={() => dialog.current.close()}>{action?.mode === 'cancel' ? 'Keep shift' : 'Close'}</button>
+          <h2 id="listing-dialog-title" className="mb-0 font-display text-xl">Cancel shift</h2>
+          <button type="button" className={button} onClick={() => dialog.current.close()}>Keep shift</button>
         </header>
-        {action?.mode === 'cancel' ? (
+        {action?.mode === 'cancel' && (
           <>
             <p className="mb-4 break-words">Cancel <strong>{action.item.title}</strong>? This closes signup and removes the shift from volunteers’ upcoming schedules.</p>
             <button type="button" className={primaryButton} onClick={cancelShift}>Confirm cancellation</button>
           </>
-        ) : action && (
-          <OpportunityForm key={action.item?.id ?? action.mode} kind={action.item?.kind ?? action.mode} listing={action.item}
-            onSave={title => finishListing(action.mode === 'edit' ? `${title} was updated.` : `${title} is now in the demo catalog.`)} />
         )}
       </dialog>
-    </div>
+    </DashboardLayout>
   );
 }

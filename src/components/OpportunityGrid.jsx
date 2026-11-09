@@ -49,8 +49,8 @@ function OpportunityCard({ opportunity, featured, shifts }) {
       <p className="mb-3 text-sm leading-relaxed text-(--muted) sm:text-base">{description}</p>
       <dl className="mt-auto mb-0 grid gap-1.5 border-t border-(--aid-rule) pt-3 text-sm [&>div]:grid [&>div]:grid-cols-[4rem_1fr] [&>div]:gap-2 [&_dt]:text-(--muted) [&_dd]:m-0 [&_dd]:font-semibold">
         <div><dt>Location</dt><dd>{location}</dd></div>
-        {isShift && <div><dt>Date</dt><dd>{shiftDate(opportunity.date)}</dd></div>}
-        {isShift && <div><dt>Time</dt><dd>{shiftTime(opportunity)}</dd></div>}
+        {opportunity.date && <div><dt>Date</dt><dd>{shiftDate(opportunity.date)}</dd></div>}
+        {opportunity.date && <div><dt>Time</dt><dd>{shiftTime(opportunity)}</dd></div>}
         {featured && <div><dt>Signup</dt><dd>{opportunity.signup === 'approval' ? 'Application required' : 'Instant reservation'}</dd></div>}
       </dl>
       {featured ? (
