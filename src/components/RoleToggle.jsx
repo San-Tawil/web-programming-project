@@ -17,7 +17,7 @@ export default function RoleToggle({ label, options, value, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className="min-h-11 flex-1 cursor-pointer rounded-lg px-3 text-sm font-semibold text-(--text) hover:bg-(--text)/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) aria-pressed:bg-(--primary) aria-pressed:text-white dark:aria-pressed:text-(--bg)"
+            className="min-h-11 flex-1 cursor-pointer rounded-lg border-0 bg-transparent px-3 text-sm font-semibold text-(--text) hover:bg-(--text)/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) aria-pressed:bg-(--primary) aria-pressed:text-white dark:aria-pressed:text-(--bg)"
           >
             {option.label}
           </button>

@@ -91,7 +91,7 @@ export default function RegisterForm({ role, children }) {
 
   return (
     <form
-      className="grid gap-4 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6"
+      className="grid min-w-0 gap-5"
       aria-label={isOrganization ? "Organization sign up" : "Volunteer sign up"}
       noValidate
       onSubmit={handleSubmit}
@@ -147,7 +147,7 @@ export default function RegisterForm({ role, children }) {
         autoComplete="email"
         pattern=".+@.+\..+"
         required
-        className="aria-invalid:border-red-600 dark:aria-invalid:border-red-300"
+        className="aria-invalid:border-rose-800/60 dark:aria-invalid:border-rose-300/60"
         placeholder="you@example.com"
         value={form.email}
         onChange={handleChange}
@@ -211,7 +211,7 @@ export default function RegisterForm({ role, children }) {
           </div>
         </>
       )}
-      {errors.form && <p role="alert" className="m-0 text-sm text-red-700 dark:text-red-300">{errors.form}</p>}
+      {errors.form && <p role="alert" className="m-0 text-sm text-rose-800 dark:text-rose-300">{errors.form}</p>}
       <button
         type="submit"
         disabled={saving}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { listingStatus, shiftDate, shiftTime, signupLabel, spotsFilled } from '../data/dashboardDemo.js';
+import { listingStatus, shiftDate, shiftTime, signupAction, spotsFilled } from '../data/dashboardDemo.js';
 
 const goal = 40;
 const row = 'flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6';
@@ -82,7 +82,7 @@ export default function VolunteerProfile({ volunteer, shifts, completedShifts, p
         <div className={row + ' border-y border-(--line)'}>
           <div>
             <h3 className="mb-1 text-base">Plan your shifts</h3>
-            <p className="m-0 text-sm text-(--muted)">Planning adds estimated hours. Book from the shift board.</p>
+            <p className="m-0 text-sm text-(--muted)">Checking a shift adds estimated hours to your plan. Reserve or apply from the shift board.</p>
           </div>
           <span className="text-sm text-(--muted)" role="status">{plannedShifts.length} of {shifts.length} selected</span>
         </div>
@@ -146,8 +146,7 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
                 const status = mine.find(signup => signup.opportunityId === shift.id)?.status;
                 const filled = spotsFilled(signups, shift.id);
                 const availability = listingStatus(shift, signups);
-                const canLeave = status && status !== 'Declined';
-                const actionLabel = status === 'Pending' ? 'Withdraw application' : canLeave ? 'Cancel reservation' : signupLabel(shift);
+                const action = signupAction(shift, status, availability);
                 return (
                   <li key={shift.id} className={row}>
                     <div className="min-w-0 flex-1 break-words">
@@ -158,10 +157,10 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
                         <span>{filled} of {shift.capacity} spots · {status ?? (availability === 'Open' && shift.signup === 'approval' ? 'Approval required' : availability)}</span>
                       </div>
                     </div>
-                    <button type="button" className={button} disabled={status === 'Declined' || (!status && availability !== 'Open')}
-                      aria-label={`${actionLabel}: ${shift.title}`}
-                      onClick={() => onChange(shift, canLeave ? 'leave' : 'join', status)}>
-                      {actionLabel}
+                    <button type="button" className={button} disabled={action.disabled}
+                      aria-label={`${action.label}: ${shift.title}`}
+                      onClick={() => onChange(shift, action.type, status)}>
+                      {action.label}
                     </button>
                   </li>
                 );

@@ -41,6 +41,7 @@ const platformLogos = platforms.map(({ slug, title, href }) => {
 });
 
 export function RegionalPlatforms() {
+  const desktop = useMediaQuery('(min-width: 768px)');
   const reducedMotion = useReducedMotion();
   const [playback, setPlayback] = useState(null);
   const playing = playback ?? !reducedMotion;
@@ -49,13 +50,13 @@ export function RegionalPlatforms() {
       <Container className="py-12 md:py-16">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="region-title">Volunteering across Lebanon and the region</h2>
-          <button type="button" className="inline-grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full border border-current"
+          {desktop && <button type="button" className="inline-grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full border border-current"
             aria-controls="regional-logo-carousel" aria-label={playing ? 'Pause organization carousel' : 'Play organization carousel'}
             onClick={() => setPlayback(!playing)}>
             <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
-          </button>
+          </button>}
         </div>
-        <div id="regional-logo-carousel">
+        {desktop ? <div id="regional-logo-carousel">
           <DeferredContent fallback={
             <div className="flex min-h-[3.25rem] items-center justify-around gap-4 [&>span]:h-8 [&>span]:w-[min(25%,8rem)] [&>span]:rounded-lg" aria-hidden="true">
               <span className="bg-(--line) motion-safe:animate-skeleton" />
@@ -68,13 +69,20 @@ export function RegionalPlatforms() {
               respectReducedMotion={false}
               intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="pt-2 pb-3 [&_.logoloop__node]:block [&_img]:[filter:brightness(0)_saturate(100%)_invert(30%)_sepia(31%)_saturate(1165%)_hue-rotate(103deg)_brightness(92%)] dark:[&_img]:[filter:brightness(0)_invert(1)]" />
           </DeferredContent>
-        </div>
+        </div> : (
+          <ul className="m-0 grid list-none grid-cols-2 gap-x-4 p-0">
+            {platforms.slice(0, 6).map(({ slug, title, href }) => (
+              <li key={slug}><a href={href} className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">{title}</a></li>
+            ))}
+          </ul>
+        )}
       </Container>
     </section>
   );
 }
 
 export function VolunteerPhotoBand({ src }) {
+  const desktop = useMediaQuery('(min-width: 768px)');
   const reduced = useReducedMotion();
   const scrollDistance = reduced ? 0 : 0.8;
   const holdDistance = reduced ? 0 : 0.15;
@@ -85,6 +93,17 @@ export function VolunteerPhotoBand({ src }) {
       <Link to="/opportunities" className="inline-flex rounded-lg bg-(--primary) px-4 py-3 font-bold text-(--bg)">Browse opportunities</Link>
     </div>
   );
+  if (!desktop) {
+    return (
+      <section aria-labelledby="volunteer-photo-title" className="bg-(--panel)">
+        <figure className="group/photo relative m-0">
+          <LoadingImage src={src} alt="Volunteers carrying boxes of food for distribution" loading="lazy" className="aspect-video max-h-72 w-full object-cover" />
+          <PhotoCredit photographer="Lagos Food Bank Initiative" source="https://www.pexels.com/photo/happy-volunteers-carrying-boxes-8061641/" />
+        </figure>
+        {message}
+      </section>
+    );
+  }
   return (
     <section aria-labelledby="volunteer-photo-title">
       <DeferredContent rootMargin="1200px 0px" fallback={

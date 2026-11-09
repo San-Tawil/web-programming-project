@@ -84,9 +84,26 @@ export function listingStatus(listing, signups) {
   return spotsFilled(signups, listing.id) >= listing.capacity ? 'Full' : 'Open';
 }
 
-export function signupLabel(listing) {
+function signupLabel(listing) {
   if (listing.signup === 'approval') return 'Apply for approval';
   return listing.kind === 'shift' ? 'Reserve a spot' : 'Join opportunity';
+}
+
+export function signupAction(listing, status, availability) {
+  const pending = status === 'Pending';
+  const reserved = listing.kind === 'shift' && isConfirmed({ status });
+  if (pending || reserved) {
+    return {
+      type: 'leave',
+      label: pending ? 'Withdraw application' : 'Cancel reservation',
+      disabled: availability === 'Closed' || availability === 'Cancelled',
+    };
+  }
+  return {
+    type: 'join',
+    label: signupLabel(listing),
+    disabled: Boolean(status) || availability !== 'Open',
+  };
 }
 
 export function isConfirmed({ status }) {

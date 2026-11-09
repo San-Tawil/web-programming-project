@@ -59,7 +59,7 @@ export default function ShiftCalendar({ shifts, initialDate }) {
             {option}
           </button>
         ))}
-        <button type="button" className={button} onClick={() => { setCursor(today); setSelected(null); }}>Today</button>
+        <button type="button" className={button} onClick={() => { setCursor(today); setSelected(todayKey); }}>Today</button>
         {selected && <button type="button" className={button} onClick={() => setSelected(null)}>Show all dates</button>}
       </div>
       <div className="mb-3 flex items-center justify-between gap-2">

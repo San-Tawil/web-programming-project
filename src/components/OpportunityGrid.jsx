@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
-import { isClosed, listingStatus, shiftDate, shiftTime, signupLabel } from '../data/dashboardDemo.js';
+import { isClosed, listingStatus, shiftDate, shiftTime, signupAction } from '../data/dashboardDemo.js';
 
 // All listings use the same card so visitors can compare the details in the same order.
 const causeColors = {
@@ -17,13 +18,14 @@ function OpportunitySignup({ opportunity }) {
   const { signups, volunteer, dispatch } = useDashboardDemo();
   const signup = signups.find(item => item.opportunityId === opportunity.id && item.volunteerId === volunteer.id);
   const status = listingStatus(opportunity, signups);
+  const action = signupAction(opportunity, signup?.status, status);
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      <button type="button" disabled={Boolean(signup) || status !== 'Open'}
+      <button type="button" disabled={action.disabled}
         className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60"
-        onClick={() => dispatch({ type: 'join', opportunityId: opportunity.id })}>
-        {signupLabel(opportunity)}
+        onClick={() => dispatch({ type: action.type, opportunityId: opportunity.id })}>
+        {action.label}
       </button>
       <span role="status" className="text-sm text-(--muted)">
         {isClosed(opportunity) ? status : signup?.status ?? (status === 'Full' ? status : opportunity.signup === 'approval' ? 'Approval required' : 'Open signup')}
@@ -33,7 +35,7 @@ function OpportunitySignup({ opportunity }) {
 }
 
 function OpportunityCard({ opportunity, featured, shifts }) {
-  const { cause, title, location, time, description } = opportunity;
+  const { cause, title, location, description } = opportunity;
   const Heading = featured ? 'h3' : 'h2';
   const isShift = opportunity.kind === 'shift';
 
@@ -47,10 +49,16 @@ function OpportunityCard({ opportunity, featured, shifts }) {
       <p className="mb-3 text-sm leading-relaxed text-(--muted) sm:text-base">{description}</p>
       <dl className="mt-auto mb-0 grid gap-1.5 border-t border-(--aid-rule) pt-3 text-sm [&>div]:grid [&>div]:grid-cols-[4rem_1fr] [&>div]:gap-2 [&_dt]:text-(--muted) [&_dd]:m-0 [&_dd]:font-semibold">
         <div><dt>Location</dt><dd>{location}</dd></div>
-        {isShift && <div><dt>Time</dt><dd>{featured && time ? time : shiftTime(opportunity)}</dd></div>}
-        {!featured && isShift && <div><dt>Date</dt><dd>{shiftDate(opportunity.date)}</dd></div>}
+        {isShift && <div><dt>Date</dt><dd>{shiftDate(opportunity.date)}</dd></div>}
+        {isShift && <div><dt>Time</dt><dd>{shiftTime(opportunity)}</dd></div>}
+        {featured && <div><dt>Signup</dt><dd>{opportunity.signup === 'approval' ? 'Application required' : 'Instant reservation'}</dd></div>}
       </dl>
-      {!featured && <OpportunitySignup opportunity={opportunity} />}
+      {featured ? (
+        <Link to={`/opportunities?shift=${encodeURIComponent(opportunity.id)}`}
+          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4">
+          View shift<span className="sr-only">: {title}</span>
+        </Link>
+      ) : <OpportunitySignup opportunity={opportunity} />}
       {!featured && shifts.length > 0 && (
         <details className="mt-4 border-t border-(--aid-rule) pt-3">
           <summary className="cursor-pointer font-semibold">Scheduled shifts ({shifts.length})</summary>
@@ -69,10 +77,12 @@ function OpportunityCard({ opportunity, featured, shifts }) {
   );
 }
 
-export default function OpportunityGrid({ featured = false, cause }) {
+export default function OpportunityGrid({ featured = false, cause, shiftId }) {
   const { opportunities } = useDashboardDemo();
   const matching = opportunities.filter(item => !item.parentId && (!cause || item.cause === cause));
-  const listings = featured ? matching.slice(0, 3) : matching;
+  const listings = featured
+    ? opportunities.filter(item => item.kind === 'shift' && !isClosed(item)).slice(0, 3)
+    : shiftId ? opportunities.filter(item => item.kind === 'shift' && item.id === shiftId) : matching;
   const gridRef = useRef(null);
   const [entered, setEntered] = useState(false);
 
@@ -89,7 +99,7 @@ export default function OpportunityGrid({ featured = false, cause }) {
     return () => observer.disconnect();
   }, [featured]);
 
-  if (!listings.length) return <p className="text-(--muted) mt-6">No sample opportunities are listed for this cause yet.</p>;
+  if (!listings.length) return <p className="text-(--muted) mt-6">{shiftId ? 'This shift could not be found.' : 'No sample opportunities are listed here yet.'}</p>;
 
   return (
     <ul ref={gridRef} data-animate={!featured || entered} className="mt-6 motion-safe:data-[animate=true]:[&>li]:animate-opportunity-enter grid list-none gap-4 p-0 md:grid-cols-3">
