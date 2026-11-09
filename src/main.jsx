@@ -17,6 +17,7 @@ const VolunteerDashboard = lazy(() => import("./pages/VolunteerDashboard.jsx"));
 const OrganizationDashboard = lazy(
   () => import("./pages/OrganizationDashboard.jsx"),
 );
+const Login = lazy(() => import("./pages/Login.jsx"));
 const RegisterPage = lazy(() => import("./pages/RegisterPage.jsx"));
 
 function PageSkeleton({ pathname }) {
@@ -88,7 +89,7 @@ function App() {
             <Route path="/opportunities" element={<OpportunitiesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
-            <Route path="/login" element={<AccountPage />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/register" element={<AccountPage signUp />} />
             <Route
               path="/volunteer/login"
