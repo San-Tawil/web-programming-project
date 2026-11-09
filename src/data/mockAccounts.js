@@ -48,7 +48,9 @@ export async function matchesPassword(account, password) {
     : account.password === password;
 }
 
-export async function addAccount({ role, name, email, password, location = "", cv, photo }) {
+export async function addAccount({
+  role, name, email, password, location = "", contactName = "", description = "", cv, photo,
+}) {
   const salt = crypto.randomUUID();
   const account = {
     id: crypto.randomUUID(),
@@ -58,6 +60,10 @@ export async function addAccount({ role, name, email, password, location = "", c
     salt,
     hash: await passwordHash(password, salt),
     location: location.trim(),
+    ...(role === "organizations" && {
+      contactName: contactName.trim(),
+      description: description.trim(),
+    }),
   };
   if (findAccount(account.email)) return null;
   localStorage.setItem(storageKey, JSON.stringify([...readAccounts(), account]));
