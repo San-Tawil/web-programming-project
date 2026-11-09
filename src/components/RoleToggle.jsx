@@ -17,10 +17,10 @@ export default function RoleToggle({ label, options, value, onChange }) {
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option.value)}
-            className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) ${
+            className={`flex-1 appearance-none rounded-full border border-transparent px-4 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary) ${
               active
                 ? "bg-[#c6f432] text-[#08111f]"
-                : "text-(--text) hover:bg-(--text)/10"
+                : "bg-transparent text-(--text) hover:bg-(--text)/10"
             }`}
           >
             {option.label}
