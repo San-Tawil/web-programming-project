@@ -19,6 +19,12 @@ Run `npm run dev`, `npm run build`, or `npm run preview` from the project folder
 - `ThemeSwitch.jsx` flips a single dark-mode setting. Tailwind's `dark:` classes change the colors, and the browser remembers the choice.
 - `DeferredContent.jsx` waits until a homepage effect is close to view before loading it.
 
+### Dashboard demo
+
+Open `/volunteer/dashboard` or `/organizations/dashboard` from the account placeholders. Reserve the coastal cleanup for instant signup, or apply to the homework club and accept the application from the organization dashboard. Both pages use the same in-memory demo data. Refreshing resets the demo. The hours chart uses sample data.
+
+Organizations can add an undated opportunity or a scheduled shift. Shifts can stand alone or be attached to an opportunity. The dashboard reads the greeting and listing ownership from the demo account, so login can supply the same account fields in Phase 2.
+
 ## React Bits handoff
 
 The app already had GSAP. ScrollReveal uses its bundled ScrollTrigger plugin, and BubbleMenu uses GSAP for its opening transition. This integration adds no dependencies.
@@ -63,7 +69,7 @@ The existing photo hero is shared by both themes in this checkout. The Home upda
 ## Opportunity list and organization tools (Phase 1)
 
 - `/opportunities`: searchable published listings; combined cause/city filters; date, duration, and title sorting; result counts, reset and empty states; expandable volunteer guidance.
-- `/organizations/tools`: Together Lebanon's demo workspace; create and edit validated opportunities; draft/published/closed states; deletion with confirmation; live counts and status filtering.
+- `/organizations/tools`: AidConnect Community's demo workspace; create and edit validated opportunities; draft/published/closed states; deletion with confirmation; live counts and status filtering.
 - Desktop, mobile and footer navigation link to the tools. The homepage's featured cards use the same shared data.
 
 ### Run locally
@@ -72,7 +78,7 @@ Use Node.js 22.12+ (or 20.19+), then run `npm ci` and `npm run dev` from the rep
 
 ### Data and course alignment
 
-`src/data/opportunities.js` contains fictional organizations and sample opportunities. `OpportunitiesProvider` owns the in-memory array using `useState`; both pages and the homepage consume it. Navigation preserves changes; refreshing restores the seed data. Organization identity is fixed for this Phase 1 demonstration, not authenticated access control. No real opportunities are published and no backend requests are sent.
+`DashboardDemoProvider` owns one in-memory reducer store for opportunities, shifts, and signups. `OpportunitiesProvider` adapts organization tools to that same store; the list, homepage, and both dashboards share changes. `src/data/opportunities.js` supplies preparation details and city metadata for the seed records. Navigation preserves changes; refreshing restores the seed data. Organization identity is fixed for this Phase 1 demonstration, not authenticated access control. No real opportunities are published and no backend requests are sent.
 
 The list covers the brief's List View; organization tools covers the Add/Edit Form and mock CRUD. Shared components receive props, controlled forms validate text/date/numeric inputs, and `useEffect` updates page titles. Semantic sections/articles, heading order, labels, time elements, linked validation messages, live feedback, keyboard focus and native dialog behavior follow Chapters 3–4. Responsive Grid/Flexbox, theme variables, Tailwind utilities and breakpoints follow Chapters 5–8. Events, conditional display, array filtering/mapping and immutable object updates apply Chapters 9–10 through React.
 
@@ -93,3 +99,12 @@ These two pages do not by themselves satisfy the whole team's submission: the br
 ![Organization tools](docs/screenshots/organization-tools.png)
 
 Verified with a production build and Chromium interaction checks: combined filters, empty results, detail disclosure, continuous search typing, required-field validation, create/edit, cross-route data sharing, publish/close, deletion cancellation/confirmation, and no horizontal overflow at 320, 390, 768 and 1366 pixels. Light and dark layouts were reviewed. Vite was aligned to version 7 to match the existing plugins' supported peer dependency range.
+
+
+### Main integration
+
+Merged main's registration, login, role toggle, volunteer dashboard and organization dashboard. Both creation forms remain available: the dashboard creates programs and scheduled shifts; tools edit visibility and listing details. Published records can be joined/applied to from the searchable list. Closing a parent hides its shifts from public discovery; deleting it removes its shifts and associated signups. Capacity edits cannot undercut confirmed reservations. Ongoing programs may omit date and hours. New records use unique IDs even after deletions.
+
+About, Contact and Not Found now explicitly import React, fixing route crashes under the existing Vite JSX configuration. Contact remains the team's existing frontend placeholder; it does not send messages.
+
+Integration verification: `node --test tests/opportunities.test.js` covers capacity limits, unique IDs after deletion, schedule updates, parent visibility and cascading deletion. Production-browser checks cover signup/approval, both registration/login roles, cross-page creation and editing, responsive routes and errors. Role-specific login links now open the working login form.

@@ -1,3 +1,5 @@
+import React from 'react';
+
 const values = [
   {
     title: 'Our mission',

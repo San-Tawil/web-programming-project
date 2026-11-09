@@ -1,3 +1,5 @@
+import React from 'react';
+
 const NotFoundPage = () => {
   return (
     <section className="pt-[4.5rem] pb-16 text-center">

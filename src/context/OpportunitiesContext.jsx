@@ -1,19 +1,18 @@
-import React, { createContext, useContext, useState } from 'react';
-import { initialOpportunities } from '../data/opportunities.js';
+import React, { createContext, useContext } from 'react';
+import { useDashboardDemo } from './DashboardDemoContext.jsx';
 
 const OpportunitiesContext = createContext(null);
 
-// Phase 1: shared in-memory data survives route changes and resets on refresh.
+// Adapt the tools to the same reducer used by signups and both dashboards.
 export function OpportunitiesProvider({ children }) {
-  const [opportunities, setOpportunities] = useState(initialOpportunities);
+  const { opportunities, organization, dispatch } = useDashboardDemo();
   function saveOpportunity(values, id) {
-    if (id) setOpportunities(items => items.map(item => item.id === id ? { ...item, ...values } : item));
-    else setOpportunities(items => [...items, { ...values, id: crypto.randomUUID(), organization: 'Together Lebanon', organizationId: 'together' }]);
+    dispatch(id
+      ? { type: 'updateOpportunity', opportunityId: id, values }
+      : { type: 'post', opportunity: { ...values, kind: 'opportunity', signup: 'open' } });
   }
-  function removeOpportunity(id) {
-    setOpportunities(items => items.filter(item => item.id !== id));
-  }
-  return <OpportunitiesContext.Provider value={{ opportunities, saveOpportunity, removeOpportunity }}>{children}</OpportunitiesContext.Provider>;
+  function removeOpportunity(id) { dispatch({ type: 'deleteOpportunity', opportunityId: id }); }
+  return <OpportunitiesContext.Provider value={{ opportunities, organization, saveOpportunity, removeOpportunity }}>{children}</OpportunitiesContext.Provider>;
 }
 
 export function useOpportunities() { return useContext(OpportunitiesContext); }

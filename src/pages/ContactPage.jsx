@@ -1,3 +1,5 @@
+import React from 'react';
+
 const labelClasses = 'grid gap-[0.45rem] font-medium text-(--muted)';
 const fieldClasses = 'w-full rounded-xl border border-(--line) bg-white/2 px-[0.9rem] py-[0.8rem] text-(--text) focus:outline-2 focus:outline-offset-2 focus:outline-(--primary)';
 

@@ -8,7 +8,7 @@ export const primaryClass = `${buttonClass} border-transparent! bg-[#c6f432]! te
 export function WorkspacePage({ children }) {
   return <div className="mx-auto w-[calc(100%-2rem)] max-w-[1120px] py-7 font-body sm:w-[calc(100%-3rem)] md:py-12 [&_:is(h1,h2,h3)]:font-display [&_h2]:text-2xl [&_h3]:text-xl">
     <nav aria-label="Opportunity workspace" className="mb-8 flex flex-wrap gap-2">
-      {[['/opportunities', 'Find opportunities'], ['/organizations/tools', 'Organization tools']].map(([to, text]) => <NavLink key={to} to={to} className={({ isActive }) => `${buttonClass} ${isActive ? 'bg-(--text)! text-(--bg)!' : ''}`}>{text}</NavLink>)}
+      {[['/opportunities', 'Find opportunities'], ['/organizations/tools', 'Organization tools'], ['/organizations/dashboard', 'Organization dashboard']].map(([to, text]) => <NavLink key={to} to={to} className={({ isActive }) => `${buttonClass} ${isActive ? 'bg-(--text)! text-(--bg)!' : ''}`}>{text}</NavLink>)}
     </nav>
     {children}
   </div>;

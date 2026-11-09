@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useOpportunities } from '../context/OpportunitiesContext.jsx';
+import { isPublished } from '../data/dashboardDemo.js';
+import { OpportunitySignup } from '../components/OpportunityGrid.jsx';
 import { causes, formatDate } from '../data/opportunities.js';
 import { WorkspacePage, buttonClass, fieldClass } from '../components/OpportunityUI.jsx';
 
@@ -13,11 +15,12 @@ function ListingCard({ item }) {
     <p className="leading-relaxed text-(--muted)">{item.description}</p>
     <dl className="mt-auto grid gap-3 border-t border-(--line) py-4 text-sm [&_dd]:m-0 [&_dd]:font-semibold [&_dt]:text-(--muted) [&>div]:flex [&>div]:justify-between [&>div]:gap-3">
       <div><dt>Where</dt><dd>{item.city}</dd></div>
-      <div><dt>When</dt><dd><time dateTime={item.date}>{formatDate(item.date)}</time></dd></div>
-      <div><dt>Commitment</dt><dd>{item.hours} {Number(item.hours) === 1 ? 'hour' : 'hours'}</dd></div>
+      <div><dt>When</dt><dd><time dateTime={item.date}>{item.date ? formatDate(item.date) : 'Flexible schedule'}</time></dd></div>
+      <div><dt>Commitment</dt><dd>{item.hours ? `${item.hours} ${Number(item.hours) === 1 ? 'hour' : 'hours'}` : item.startTime ? `${item.startTime} - ${item.endTime}` : 'Arrange with organizer'}</dd></div>
       <div><dt>Team size</dt><dd>{item.capacity} volunteers</dd></div>
     </dl>
-    <button type="button" className={buttonClass} aria-expanded={expanded} aria-controls={`details-${item.id}`} onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide details' : 'View details'}<span className="sr-only"> for {item.title}</span></button>
+    <OpportunitySignup opportunity={item} />
+    <button type="button" className={`${buttonClass} mt-3`} aria-expanded={expanded} aria-controls={`details-${item.id}`} onClick={() => setExpanded(value => !value)}>{expanded ? 'Hide details' : 'View details'}<span className="sr-only"> for {item.title}</span></button>
     <div id={`details-${item.id}`} hidden={!expanded} className="mt-4 border-t border-(--line) pt-4 text-sm leading-relaxed"><h3>Before you join</h3><p>{item.requirements}</p><p className="mb-0"><strong>Meeting point:</strong> {item.location}</p></div>
   </article>;
 }
@@ -35,12 +38,13 @@ export default function OpportunitiesPage() {
     if (value) next.set(key, value); else next.delete(key);
     setParams(next, { replace: true });
   }
-  const published = opportunities.filter(item => item.status === 'Published');
+  const published = opportunities.filter(item => isPublished(item, opportunities));
   const cities = [...new Set(published.map(item => item.city))].sort();
   const listings = published.filter(item => (!cause || item.cause === cause) && (!city || item.city === city) && `${item.title} ${item.description} ${item.organization} ${item.location} ${item.city}`.toLowerCase().includes(query.trim().toLowerCase()))
-    .sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title) : sort === 'hours' ? a.hours - b.hours : a.date.localeCompare(b.date));
+    .sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title) : sort === 'hours' ? (a.hours || 24) - (b.hours || 24) : (a.date || '9999').localeCompare(b.date || '9999'));
   return <WorkspacePage>
     <header className="mb-8 max-w-3xl"><p className="text-sm font-bold uppercase tracking-widest text-(--primary)">Small actions. Shared impact.</p><h1>Find your next<br />way to give back.</h1><p className="text-lg leading-relaxed text-(--muted)">Discover volunteer opportunities across Lebanon. Find a cause you care about and a role that fits your time.</p><p className="text-sm text-(--muted)">Demo listings for the course project.</p></header>
+    <p><Link to="/volunteer/dashboard" className="font-semibold underline">My volunteer dashboard</Link></p>
     <section aria-label="Search and filter opportunities" className="rounded-2xl border border-(--line) bg-(--panel) p-5">
       <form role="search" onSubmit={event => event.preventDefault()} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
         <label className="text-sm font-bold">Search opportunities<input type="search" className={fieldClass} value={query} placeholder="Search roles, places, or organizations" onChange={event => setQuery(event.target.value)} /></label>
