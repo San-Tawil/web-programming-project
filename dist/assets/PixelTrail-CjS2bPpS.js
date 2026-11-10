@@ -1,4 +1,4 @@
-import{r as R,R as oe}from"./index-SsCB3gfi.js";const _=512,M=256,Ae={square:0,circle:1,diamond:2},Se={fade:0,shrink:1,dither:2},ne=c=>c,Me=`#version 300 es
+import{r as R,R as oe}from"./index-BRioqbVU.js";const _=512,M=256,Ae={square:0,circle:1,diamond:2},Se={fade:0,shrink:1,dither:2},ne=c=>c,Me=`#version 300 es
 in vec2 a_position;
 void main() {
   gl_Position = vec4(a_position, 0.0, 1.0);

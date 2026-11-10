@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { authDestination } from '../data/authDestination.js';
 import Container from '../components/Container.jsx';
 import { findAccount, matchesPassword } from '../data/mockAccounts.js';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
@@ -10,6 +11,7 @@ import logo from '../assets/brand/aidconnect-logo.webp';
 
 export default function Login() {
     const navigate = useNavigate();
+    const { state } = useLocation();
     const { selectAccount } = useDashboardDemo();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -34,7 +36,7 @@ export default function Login() {
                 return;
             }
             selectAccount(account);
-            navigate(`/${account.role}/dashboard`, { replace: true });
+            navigate(authDestination(account.role, state?.returnTo), { replace: true });
         } catch {
             setLoginError('unavailable');
         } finally {
@@ -161,7 +163,7 @@ export default function Login() {
                                     {loginError === 'missing-account' ? (
                                         <>
                                             No demo account uses this email.{' '}
-                                            <Link to="/register" className="font-semibold text-(--primary) underline underline-offset-4">
+                                            <Link to="/register" state={state} className="font-semibold text-(--primary) underline underline-offset-4">
                                                 Create an account
                                             </Link>
                                         </>
@@ -185,7 +187,7 @@ export default function Login() {
                         <p className="mt-6 mb-0 text-center text-sm text-(--muted)">
                             Don't have an account?{' '}
                             <Link
-                                to="/register"
+                                to="/register" state={state}
                                 className="font-semibold text-(--primary) underline decoration-transparent underline-offset-4 hover:decoration-current focus-visible:decoration-current"
                             >
                                 Register

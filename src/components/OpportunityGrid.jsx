@@ -1,28 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import CauseBadge from './CauseBadge.jsx';
+import { buttonClass } from './OpportunityUI.jsx';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
 import { shiftDate, shiftTime, spotsFilled, isPublished } from '../data/dashboardDemo.js';
 
-// All listings use the same card so visitors can compare the details in the same order.
-const causeColors = {
-  Environment: 'bg-[#bff0cf]',
-  'Food support': 'bg-[#ffd2bd]',
-  Education: 'bg-[#bfe3ff]',
-  'Animal welfare': 'bg-[#f5dd9f]',
-  'Community support': 'bg-[#c9df9c]',
-  Health: 'bg-[#ffd0da]',
-  'Arts and culture': 'bg-[#efbaf1]',
-};
-
 export function OpportunitySignup({ opportunity }) {
-  const { signups, volunteer, dispatch } = useDashboardDemo();
+  const { signups, volunteer, dispatch, accountRole } = useDashboardDemo();
   const signup = signups.find(item => item.opportunityId === opportunity.id && item.volunteerId === volunteer.id);
   const available = opportunity.capacity - spotsFilled(signups, opportunity.id);
   const approval = opportunity.signup === 'approval';
 
+  const returnTo = `/opportunities/${opportunity.id}`;
+  if (!accountRole) return <div className="mt-4 flex flex-wrap items-center gap-3" aria-label={`Sign in to join ${opportunity.title}`}>
+    <Link to="/volunteer/register" state={{ returnTo }} className={buttonClass}>Sign up<span className="sr-only"> to join {opportunity.title}</span></Link>
+    <Link to="/login" state={{ returnTo }} className={`${buttonClass} underline`}>Log in<span className="sr-only"> to join {opportunity.title}</span></Link>
+  </div>;
+  if (accountRole !== 'volunteer') return <p className="mt-4 mb-0 text-sm text-(--muted)">Use a volunteer account to join this opportunity.</p>;
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <button type="button" disabled={Boolean(signup) || available <= 0}
-        className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60"
+        className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
         onClick={() => dispatch({ type: 'join', opportunityId: opportunity.id })}>
         {approval ? 'Apply' : opportunity.kind === 'shift' ? 'Reserve a spot' : 'Join opportunity'}
       </button>
@@ -41,10 +39,10 @@ function OpportunityCard({ opportunity, featured, shifts }) {
   return (
     <article className="flex group-hover/listing:border-(--primary) motion-safe:group-hover/listing:-translate-x-1 h-full flex-col rounded-xl border border-(--aid-rule) bg-(--aid-surface) p-4 sm:p-5 motion-safe:transition-transform">
       <div className="flex flex-wrap items-center gap-2">
-        <p className={`mb-0 rounded-full px-2.5 py-0.5 text-xs font-semibold text-[#11201a] ${causeColors[cause] ?? "bg-[#f6ef9a]"}`}>{cause}</p>
+        <CauseBadge cause={cause} />
         {!featured && <span className="text-xs font-medium text-(--muted)">{isShift ? 'Shift' : 'Opportunity'}</span>}
       </div>
-      <Heading className="mt-3 mb-2 text-lg font-bold">{title}</Heading>
+      <Heading className="mt-3 mb-2 text-lg font-bold"><Link className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-(--primary)" to={`/opportunities/${opportunity.id}`}>{title}</Link></Heading>
       <p className="mb-3 text-sm leading-relaxed text-(--muted) sm:text-base">{description}</p>
       <dl className="mt-auto mb-0 grid gap-1.5 border-t border-(--aid-rule) pt-3 text-sm [&>div]:grid [&>div]:grid-cols-[4rem_1fr] [&>div]:gap-2 [&_dt]:text-(--muted) [&_dd]:m-0 [&_dd]:font-semibold">
         <div><dt>Location</dt><dd>{location}</dd></div>

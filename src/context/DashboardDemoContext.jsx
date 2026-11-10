@@ -4,8 +4,13 @@ import { demoReducer, initialDemo } from '../data/dashboardDemo.js';
 const DashboardDemoContext = createContext(null);
 
 export function DashboardDemoProvider({ children }) {
-  const [demo, dispatch] = useReducer(demoReducer, initialDemo);
+  const [demo, reducerDispatch] = useReducer(demoReducer, initialDemo);
   const [accountRole, setAccountRole] = useState(null);
+
+  function dispatch(action) {
+    if (action.type === 'join' && accountRole !== 'volunteer') return;
+    reducerDispatch(action);
+  }
 
   function selectAccount(account) {
     const volunteer = account?.role === 'volunteer' ? {

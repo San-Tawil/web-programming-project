@@ -10,6 +10,7 @@ import Footer from "./components/Footer.jsx";
 
 const OrganizationToolsPage = lazy(() => import("./pages/OrganizationToolsPage.jsx"));
 const HomePage = lazy(() => import("./pages/HomePage.jsx"));
+const OpportunityDetailPage = lazy(() => import("./pages/OpportunityDetailPage.jsx"));
 const OpportunitiesPage = lazy(() => import("./pages/OpportunitiesPage.jsx"));
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
 const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
@@ -89,6 +90,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
+            <Route path="/opportunities/:opportunityId" element={<OpportunityDetailPage />} />
             <Route path="/organizations/tools" element={<OrganizationToolsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />

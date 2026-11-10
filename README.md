@@ -68,7 +68,7 @@ The existing photo hero is shared by both themes in this checkout. The Home upda
 
 ## Opportunity list and organization tools (Phase 1)
 
-- `/opportunities`: searchable published listings; combined cause/city filters; date, duration, and title sorting; result counts, reset and empty states; expandable volunteer guidance.
+- `/opportunities`: searchable published listings; combined cause/city filters; date, duration, and title sorting; result counts, reset and empty states; cause-colored cards linking to full opportunity details.
 - `/organizations/tools`: AidConnect Community's demo workspace; create and edit validated opportunities; draft/published/closed states; deletion with confirmation; live counts and status filtering.
 - Desktop, mobile and footer navigation link to the tools. The homepage's featured cards use the same shared data.
 
@@ -86,7 +86,7 @@ These two pages do not by themselves satisfy the whole team's submission: the br
 
 ### Manual acceptance walkthrough
 
-1. Filter opportunities by Education and Beirut; search for homework. Reset and try an unmatched search, then expand a card.
+1. Filter opportunities by Education and Beirut; search for homework. Reset and try an unmatched search, then open a card by clicking its body or focusing its title and pressing Enter.
 2. Open Organization tools. Create an empty role to see labeled validation errors; enter valid fields and choose Published.
 3. Navigate to Find opportunities and search for the new title. Open its details.
 4. Return to tools, edit the title, then close the role. Confirm it disappears from the public list. Publish again to restore it.
@@ -108,3 +108,16 @@ Merged main's registration, login, role toggle, volunteer dashboard and organiza
 About, Contact and Not Found now explicitly import React, fixing route crashes under the existing Vite JSX configuration. Contact remains the team's existing frontend placeholder; it does not send messages.
 
 Integration verification: `node --test tests/opportunities.test.js` covers capacity limits, unique IDs after deletion, schedule updates, parent visibility and cascading deletion. Production-browser checks cover signup/approval, both registration/login roles, cross-page creation and editing, responsive routes and errors. Role-specific login links now open the working login form.
+
+
+### Opportunity discovery and details
+
+Cards use shared cause colors with visible text labels, so color is not the only cue. Hover and keyboard focus highlight cards; a real React Router link opens `/opportunities/:opportunityId`. Separate signup/login controls remain independently keyboard accessible. The detail page includes preparation guidance, timing, availability, related shifts, and a labeled organization profile with demo data. Missing, closed or draft IDs show an unavailable state.
+
+Guests see Sign up and Log in instead of reservation/application buttons. Logged-in volunteers can reserve/apply; organization accounts receive an explanation. The shared context also rejects guest join actions. Login and registration return volunteers to the selected opportunity through a restricted internal return path. This remains Phase 1 mock authentication, with session identity reset on page refresh.
+
+Both pages use existing React hooks, React Router, and Tailwind theme utilities. Headings, landmarks, breadcrumbs, visible labels, focus indicators, reduced-motion support and live availability feedback provide accessible navigation. Run `node --test tests/*.test.js` for the reducer and return-path checks.
+
+![Opportunity detail and organization profile](docs/screenshots/opportunity-detail.png)
+
+Verified: production build; six Node tests; guest/volunteer/organization action visibility; card click and keyboard navigation; login/signup return paths; unavailable IDs; and 320/390/768/1366-pixel layouts. Automated axe checks of the list and both scheduled/flexible detail variants reported no WCAG 2 A/AA or 2.1 AA violations in the page main content in either theme. Automated checks complement the keyboard and visual review; they do not establish complete accessibility conformance.
