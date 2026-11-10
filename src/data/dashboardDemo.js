@@ -57,9 +57,39 @@ export const initialDemo = {
 };
 
 export const completedShifts = [
-  { title: 'Neighborhood garden day', cause: 'Community support', date: '2026-08-22', month: 'Aug', hours: 2 },
-  { title: 'Community food packing', cause: 'Food support', date: '2026-09-12', month: 'Sep', hours: 3 },
-  { title: 'Coastal cleanup', cause: 'Environment', date: '2026-10-24', month: 'Oct', hours: 3 },
+  {
+    id: 'completed-garden-day',
+    title: 'Neighborhood garden day',
+    cause: 'Community support',
+    date: '2026-08-22',
+    month: 'Aug',
+    hours: 2,
+    location: 'Sidon, South Lebanon',
+    description:
+      'Prepare planting beds and water seedlings with neighborhood volunteers.',
+  },
+  {
+    id: 'completed-food-packing',
+    title: 'Community food packing',
+    cause: 'Food support',
+    date: '2026-09-12',
+    month: 'Sep',
+    hours: 3,
+    location: 'Beirut',
+    description:
+      'Sort pantry staples and assemble grocery boxes for families in the community.',
+  },
+  {
+    id: 'completed-coastal-cleanup',
+    title: 'Coastal cleanup',
+    cause: 'Environment',
+    date: '2026-10-24',
+    month: 'Oct',
+    hours: 3,
+    location: 'Ramlet el Baida, Beirut',
+    description:
+      'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.',
+  },
 ];
 
 export function shiftDate(date) {

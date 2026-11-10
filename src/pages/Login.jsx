@@ -15,6 +15,7 @@ export default function Login() {
     const location = useLocation();
     const from = location.state?.from;
     const { selectAccount } = useDashboardDemo();
+
     const [email, setEmail] = useState(
         () => localStorage.getItem(rememberedEmailKey) || ''
     );
@@ -29,28 +30,33 @@ export default function Login() {
     async function handleSubmit(e) {
         e.preventDefault();
         if (checking) return;
+
         const account = findAccount(email);
 
         if (!account) {
             setLoginError('missing-account');
             return;
         }
+
         setChecking(true);
+
         try {
             if (!await matchesPassword(account, password)) {
                 setLoginError('wrong-password');
                 return;
             }
+
             if (rememberMe) {
                 localStorage.setItem(rememberedEmailKey, account.email);
             } else {
                 localStorage.removeItem(rememberedEmailKey);
             }
+
             selectAccount(account, rememberMe);
 
             const destination =
                 account.role === 'volunteer' &&
-                    from === '/volunteer/dashboard?section=find-shifts'
+                from === '/volunteer/dashboard?section=find-shifts'
                     ? from
                     : `/${account.role}/dashboard`;
 
@@ -66,25 +72,28 @@ export default function Login() {
         <section className="py-12 md:py-16">
             <Container>
                 <div className="grid overflow-hidden rounded-3xl border border-(--line) bg-(--panel) md:grid-cols-2">
-                    {/*Left side*/}
+                    {/* Left side */}
                     <div className="flex flex-col gap-5 bg-(--nav-panel) p-6 sm:p-8 md:p-10">
                         <div className="flex items-center gap-2 font-bold">
                             <img
                                 src={logo}
-                                alt=""
+                                alt="AidConnect logo"
                                 width="28"
                                 height="28"
                                 className="size-7 shrink-0 rounded-full object-contain"
                             />
                             AidConnect
                         </div>
+
                         <h1 className="mb-0 font-display text-3xl font-bold">
                             Make a difference, together.
                         </h1>
+
                         <p className="mb-2 text-(--muted)">
                             Connect with meaningful volunteering opportunities
                             and be part of something bigger.
                         </p>
+
                         <img
                             src={volunteerPhoto}
                             alt="Neighbors working together on a community garden"
@@ -97,9 +106,11 @@ export default function Login() {
                         <h2 className="mb-0 font-display text-2xl font-bold">
                             Welcome back
                         </h2>
+
                         <p className="mt-2 mb-0 text-sm text-(--muted)">
                             Log in to your AidConnect account.
                         </p>
+
                         <form onSubmit={handleSubmit} className="mt-7 space-y-5">
                             {/* Email */}
                             <div>
@@ -109,6 +120,7 @@ export default function Login() {
                                 >
                                     Email address
                                 </label>
+
                                 <input
                                     id="email"
                                     type="email"
@@ -120,9 +132,36 @@ export default function Login() {
                                     }}
                                     placeholder="you@example.com"
                                     autoComplete="email"
-                                    className="w-full rounded-xl border border-(--line) bg-(--bg) px-4 py-3 text-(--text) placeholder:text-(--muted) focus:outline-2 focus:outline-(--primary)"
+                                    aria-invalid={loginError === 'missing-account'}
+                                    aria-describedby={
+                                        loginError === 'missing-account'
+                                            ? 'email-error'
+                                            : undefined
+                                    }
+                                    className={`w-full rounded-xl border bg-(--bg) px-4 py-3 text-(--text) placeholder:text-(--muted) focus:outline-2 focus:outline-(--primary) ${
+                                        loginError === 'missing-account'
+                                            ? 'border-rose-800/60 dark:border-rose-300/60'
+                                            : 'border-(--line)'
+                                    }`}
                                 />
+
+                                {loginError === 'missing-account' && (
+                                    <p
+                                        id="email-error"
+                                        role="alert"
+                                        className="mt-1 mb-0 text-sm text-rose-800 dark:text-rose-300"
+                                    >
+                                        No account uses this email. Please check your email or{' '}
+                                        <Link
+                                            to="/register"
+                                            className="font-semibold text-(--primary) underline decoration-transparent underline-offset-4 hover:decoration-current focus-visible:decoration-current"
+                                        >
+                                            register
+                                        </Link>
+                                    </p>
+                                )}
                             </div>
+
                             {/* Password */}
                             <div>
                                 <label
@@ -131,6 +170,7 @@ export default function Login() {
                                 >
                                     Password
                                 </label>
+
                                 <div className="relative">
                                     <input
                                         id="password"
@@ -143,8 +183,19 @@ export default function Login() {
                                         }}
                                         placeholder="Enter your password"
                                         autoComplete="current-password"
-                                        className="w-full rounded-xl border border-(--line) bg-(--bg) px-4 py-3 pr-14 text-(--text) placeholder:text-(--muted) focus:outline-2 focus:outline-(--primary)"
+                                        aria-invalid={loginError === 'wrong-password'}
+                                        aria-describedby={
+                                            loginError === 'wrong-password'
+                                                ? 'password-error'
+                                                : undefined
+                                        }
+                                        className={`w-full rounded-xl border bg-(--bg) px-4 py-3 pr-14 text-(--text) placeholder:text-(--muted) focus:outline-2 focus:outline-(--primary) ${
+                                            loginError === 'wrong-password'
+                                                ? 'border-rose-800/60 dark:border-rose-300/60'
+                                                : 'border-(--line)'
+                                        }`}
                                     />
+
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
@@ -157,8 +208,19 @@ export default function Login() {
                                         }
                                     </button>
                                 </div>
+
+                                {loginError === 'wrong-password' && (
+                                    <p
+                                        id="password-error"
+                                        role="alert"
+                                        className="mt-1 mb-0 text-sm text-rose-800 dark:text-rose-300"
+                                    >
+                                        That password is incorrect. Please try again.
+                                    </p>
+                                )}
                             </div>
 
+                            {/* Remember me and Forgot password */}
                             <div className="flex flex-wrap items-center justify-between gap-3">
                                 <label className="flex cursor-pointer items-center gap-2 text-sm text-(--muted)">
                                     <input
@@ -169,6 +231,7 @@ export default function Login() {
                                     />
                                     Remember me
                                 </label>
+
                                 <Link
                                     to="/forgot-password"
                                     className="text-sm text-(--primary) underline decoration-transparent underline-offset-4 hover:decoration-current focus-visible:decoration-current"
@@ -176,22 +239,17 @@ export default function Login() {
                                     Forgot password?
                                 </Link>
                             </div>
-                            {loginError && (
-                                <p role="alert" className="mb-0 text-sm">
-                                    {loginError === 'missing-account' ? (
-                                        <>
-                                            No demo account uses this email.{' '}
-                                            <Link to="/register" className="font-semibold text-(--primary) underline underline-offset-4">
-                                                Create an account
-                                            </Link>
-                                        </>
-                                    ) : (
-                                        loginError === 'wrong-password'
-                                            ? 'That password is incorrect. Please try again.'
-                                            : 'Your account could not be checked in this browser. Please try again.'
-                                    )}
+
+                            {loginError === 'unavailable' && (
+                                <p
+                                    role="alert"
+                                    className="m-0 text-sm text-rose-800 dark:text-rose-300"
+                                >
+                                    Your account could not be checked in this browser. Please try again.
                                 </p>
                             )}
+
+                            {/* Login button */}
                             <button
                                 type="submit"
                                 disabled={checking}

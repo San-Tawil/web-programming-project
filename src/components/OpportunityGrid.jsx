@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
 import {
   isClosed,
-  listingStatus,
   shiftDate,
   shiftTime,
-  signupAction,
 } from '../data/dashboardDemo.js';
 // All listings use the same card so visitors can compare the details in the same order.
 export const causeColors = {
@@ -19,25 +17,7 @@ export const causeColors = {
   'Arts and culture': 'bg-[#efbaf1]',
 };
 
-function OpportunitySignup({ opportunity }) {
-  const { signups, volunteer, dispatch } = useDashboardDemo();
-  const signup = signups.find(item => item.opportunityId === opportunity.id && item.volunteerId === volunteer.id);
-  const status = listingStatus(opportunity, signups);
-  const action = signupAction(opportunity, signup?.status, status);
 
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-3">
-      <button type="button" disabled={action.disabled}
-        className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60"
-        onClick={() => dispatch({ type: action.type, opportunityId: opportunity.id })}>
-        {action.label}
-      </button>
-      <span role="status" className="text-sm text-(--muted)">
-        {isClosed(opportunity) ? status : signup?.status ?? (status === 'Full' ? status : opportunity.signup === 'approval' ? 'Approval required' : 'Open signup')}
-      </span>
-    </div>
-  );
-}
 
 function OpportunityCard({ opportunity, featured, shifts }) {
   const { cause, title, location, description } = opportunity;
@@ -58,25 +38,12 @@ function OpportunityCard({ opportunity, featured, shifts }) {
         {opportunity.date && <div><dt>Time</dt><dd>{shiftTime(opportunity)}</dd></div>}
         {featured && <div><dt>Signup</dt><dd>{opportunity.signup === 'approval' ? 'Application required' : 'Instant reservation'}</dd></div>}
       </dl>
-      {featured ? (
-        <Link
-          to={`/opportunities/${opportunity.id}`}
-          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4"
-        >
-          View details<span className="sr-only">: {title}</span>
-        </Link>
-      ) : (
-        <OpportunitySignup opportunity={opportunity} />
-      )}
-
-      {!featured && (
-        <Link
-          to={`/opportunities/${opportunity.id}`}
-          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4"
-        >
-          View details<span className="sr-only">: {title}</span>
-        </Link>
-      )}
+      <Link
+  to={`/opportunities/${opportunity.id}`}
+  className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4"
+>
+  View details<span className="sr-only">: {title}</span>
+</Link>
 
       {!featured && shifts.length > 0 && (
         <details className="mt-4 border-t border-(--aid-rule) pt-3">
@@ -86,7 +53,6 @@ function OpportunityCard({ opportunity, featured, shifts }) {
               <li key={shift.id} className="py-3">
                 <strong>{shift.title}</strong>
                 <p className="mb-0 text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)}</p>
-                <OpportunitySignup opportunity={shift} />
               </li>
             ))}
           </ul>

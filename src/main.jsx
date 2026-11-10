@@ -82,21 +82,24 @@ function App() {
   const { accountRole } = useDashboardDemo();
 
   useEffect(() => {
-  if (previousKey.current !== key) {
-    if (dashboard) {
-      window.scrollTo(0, 0);
-    }
+    if (previousKey.current !== key) {
+      if (dashboard) {
+        window.scrollTo(0, 0);
+      }
 
-    if (!dashboard || !hash) {
-      main.current?.focus({ preventScroll: dashboard });
-    }
+      if (!dashboard || !hash) {
+        main.current?.focus({ preventScroll: dashboard });
+      }
 
-    previousKey.current = key;
-  }
-}, [key, dashboard, hash]);
+      previousKey.current = key;
+    }
+  }, [key, dashboard, hash]);
 
   return (
-    <div className="group/app flex min-h-screen flex-col has-[.aid-home]:relative">
+    <div
+      className={`group/app flex min-h-screen flex-col has-[.aid-home]:relative ${dashboard ? "dashboard-route" : ""
+        }`}
+    >
       <a
         className="fixed top-3 left-3 z-[100] -translate-y-[200%] bg-(--panel) px-4 py-3 text-(--text) focus:translate-y-0"
         href={dashboardProfile ? '#profile-settings' : dashboard ? '#overview' : '#main-content'}

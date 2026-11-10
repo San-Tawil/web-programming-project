@@ -163,7 +163,11 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
 
                 <button
                   type="button"
-                  className={button}
+                  className={
+                    action.type === 'leave'
+                      ? 'min-h-11 cursor-pointer rounded-md border border-red-600 bg-(--panel) px-3 text-sm font-semibold text-red-600 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600 disabled:cursor-default disabled:opacity-60 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950/30'
+                      : button
+                  }
                   disabled={action.disabled}
                   aria-label={action.label + ': ' + shift.title}
                   onClick={() => onChange(shift, action.type, status)}

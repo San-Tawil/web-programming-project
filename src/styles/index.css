@@ -11,8 +11,13 @@
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant hover-capable (@media (hover: hover));
 
-html:has(.dashboard-shell) { overflow: hidden; }
-body:has(.dashboard-shell) { min-width: 0; }
+html:has(.dashboard-route) {
+  overflow: hidden;
+}
+
+body:has(.dashboard-shell) {
+  min-width: 0;
+}
 
 .dashboard-shell {
   --bg: #f3f5f2;
@@ -45,12 +50,31 @@ body:has(.dashboard-shell) { min-width: 0; }
   --status-negative: #f3a9ab;
 }
 
-.dashboard-shell :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-.dashboard-badge { color: var(--badge-color, var(--muted)); background: color-mix(in srgb, currentColor 12%, var(--panel)); }
-.dashboard-badge[data-tone="positive"] { --badge-color: var(--status-positive); }
-.dashboard-badge[data-tone="pending"] { --badge-color: var(--status-pending); }
-.dashboard-badge[data-tone="negative"] { --badge-color: var(--status-negative); }
-.dashboard-progress { accent-color: var(--primary); }
+.dashboard-shell :focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.dashboard-badge {
+  color: var(--badge-color, var(--muted));
+  background: color-mix(in srgb, currentColor 12%, var(--panel));
+}
+
+.dashboard-badge[data-tone="positive"] {
+  --badge-color: var(--status-positive);
+}
+
+.dashboard-badge[data-tone="pending"] {
+  --badge-color: var(--status-pending);
+}
+
+.dashboard-badge[data-tone="negative"] {
+  --badge-color: var(--status-negative);
+}
+
+.dashboard-progress {
+  accent-color: var(--primary);
+}
 
 @theme {
   --color-aid-primary: #1f6b4a;
@@ -61,12 +85,21 @@ body:has(.dashboard-shell) { min-width: 0; }
   --animate-opportunity-enter: opportunity-enter 400ms ease-out both;
 
   @keyframes skeleton {
-    to { background-color: var(--muted); }
+    to {
+      background-color: var(--muted);
+    }
   }
 
   @keyframes opportunity-enter {
-    from { opacity: 0; transform: translateX(1rem); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(1rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }
 
@@ -83,12 +116,40 @@ body:has(.dashboard-shell) { min-width: 0; }
     --fx-chip-mint: #bff0cf;
   }
 
-  * { @apply box-border; }
-  a { @apply text-inherit no-underline; }
-  img { @apply block max-w-full; }
-  button, input, textarea { font: inherit; }
-  h1, h2, h3, p { @apply mt-0; }
-  h1 { @apply mb-4 text-[clamp(2.5rem,5vw,4.2rem)] leading-[1.05]; }
-  h2 { @apply mb-4 text-[clamp(2rem,3vw,2.8rem)] leading-[1.1]; }
-  h3 { @apply mb-2 text-[1.2rem]; }
+  * {
+    @apply box-border;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  img {
+    @apply block max-w-full;
+  }
+
+  button,
+  input,
+  textarea {
+    font: inherit;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    @apply mt-0;
+  }
+
+  h1 {
+    @apply mb-4 text-[clamp(2.5rem, 5vw, 4.2rem)] leading-[1.05];
+  }
+
+  h2 {
+    @apply mb-4 text-[clamp(2rem, 3vw, 2.8rem)] leading-[1.1];
+  }
+
+  h3 {
+    @apply mb-2 text-[1.2rem];
+  }
 }

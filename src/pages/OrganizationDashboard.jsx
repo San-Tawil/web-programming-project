@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout, { DashboardSection, useDashboardView } from '../components/DashboardLayout.jsx';
 import { Badge, EmptyState, Modal, ProgressBar, Tabs } from '../components/DashboardUI.jsx';
-import ListingDetails from '../components/ListingDetails.jsx';
 import OpportunityForm from '../components/OpportunityForm.jsx';
 import ShiftCalendar from '../components/ShiftCalendar.jsx';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
@@ -20,34 +19,41 @@ function ShiftRow({ item, signups, programs, onAction }) {
   const status = availability === 'Open' && item.signup === 'approval' ? 'Approval required' : availability;
   return (
     <tr className="grid gap-3 border-t border-(--line) py-4 sm:table-row">
-        <td className="min-w-0 break-words align-top sm:py-4 sm:pr-4">
-          <h3 className="mb-1 text-base font-semibold">{item.title}</h3>
-          {item.date && <p className="mb-0 text-sm text-(--muted)">{shiftDate(item.date)} · {shiftTime(item)}</p>}
-          {parent && <p className="mb-0 text-sm text-(--muted)">Part of {parent.title}</p>}
-          <ListingDetails listing={item} signups={signups} parent={parent} />
-        </td>
-        <td className="align-top sm:py-4 sm:pr-4">
+      <td className="min-w-0 break-words align-top sm:py-4 sm:pr-4">
+        <h3 className="mb-1 text-base font-semibold">
+          <Link
+            to={`/opportunities/${item.id}?from=dashboard&role=organizations`}
+            className="text-(--text) hover:text-(--primary) hover:underline focus-visible:underline"
+          >
+            {item.title}
+          </Link>
+        </h3>
+        {item.date && <p className="mb-0 text-sm text-(--muted)">{shiftDate(item.date)} · {shiftTime(item)}</p>}
+        {parent && <p className="mb-0 text-sm text-(--muted)">Part of {parent.title}</p>}
+
+      </td>
+      <td className="align-top sm:py-4 sm:pr-4">
         <div className="grid min-w-24 gap-1 text-sm">
           <div className="flex items-center gap-2"><Badge label={status} /><span className="tabular-nums text-(--muted)">{participants.length} / {item.capacity}</span></div>
           <ProgressBar value={participants.length} max={item.capacity} label={`Confirmed spots for ${item.title}`} />
         </div>
-        </td>
-        <td className="align-top sm:py-4">
-      <details className="text-sm">
-        <summary className="w-fit cursor-pointer py-2 text-(--primary) underline underline-offset-4">Participants<span className="sr-only"> for {item.title}</span></summary>
-        {participants.length ? (
-          <ul className="mb-2 pl-5">
-            {participants.map(signup => <li key={signup.volunteerId}>{signup.volunteer}</li>)}
-          </ul>
-        ) : <p className="mb-2 text-(--muted)">No confirmed participants yet.</p>}
-      </details>
-      {item.kind === 'shift' && !isClosed(item) && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button type="button" className={button} aria-label={`Edit shift: ${item.title}`} onClick={() => onAction({ mode: 'edit', item })}>Edit shift</button>
-          <button type="button" className={button} aria-label={`Cancel shift: ${item.title}`} onClick={() => onAction({ mode: 'cancel', item })}>Cancel shift</button>
-        </div>
-      )}
-        </td>
+      </td>
+      <td className="align-top sm:py-4">
+        <details className="text-sm">
+          <summary className="w-fit cursor-pointer py-2 text-(--primary) underline underline-offset-4">Participants<span className="sr-only"> for {item.title}</span></summary>
+          {participants.length ? (
+            <ul className="mb-2 pl-5">
+              {participants.map(signup => <li key={signup.volunteerId}>{signup.volunteer}</li>)}
+            </ul>
+          ) : <p className="mb-2 text-(--muted)">No confirmed participants yet.</p>}
+        </details>
+        {item.kind === 'shift' && !isClosed(item) && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" className={button} aria-label={`Edit shift: ${item.title}`} onClick={() => onAction({ mode: 'edit', item })}>Edit shift</button>
+            <button type="button" className={button} aria-label={`Cancel shift: ${item.title}`} onClick={() => onAction({ mode: 'cancel', item })}>Cancel shift</button>
+          </div>
+        )}
+      </td>
     </tr>
   );
 }
@@ -136,8 +142,8 @@ export default function OrganizationDashboard() {
       <button type="button" className={primaryButton} onClick={() => setAction({ mode: 'shift' })}>Add shift</button>
       <button type="button" className={button} onClick={() => setAction({ mode: 'opportunity' })}>Add opportunity</button>
     </div>}>
-            <p role="status" className={listingNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{listingNotice}</p>
-            <Tabs label="Choose a listing view" items={listingTabs} current={listingTab} onChange={tab => { setListingTab(tab); setStatusFilter('All'); }} />
+      <p role="status" className={listingNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{listingNotice}</p>
+      <Tabs label="Choose a listing view" items={listingTabs} current={listingTab} onChange={tab => { setListingTab(tab); setStatusFilter('All'); }} />
       {view === 'listings' && <div className="mb-3 flex flex-wrap gap-3">
         <label className="grid gap-1 text-sm">Search listings
           <input className={button + ' w-full'} type="search" value={search} onChange={event => setSearch(event.target.value)} />
@@ -148,71 +154,89 @@ export default function OrganizationDashboard() {
           </select>
         </label>}
       </div>}
-            {listingTab === 'Completed' ? (
-              visible.length ? <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
-                {visible.map(shift => (
-                  <li key={shift.date} className="flex flex-wrap justify-between gap-2 py-4">
-                    <div><strong>{shift.title}</strong><p className="mb-0 text-(--muted)">{shiftDate(shift.date)}</p></div>
-                    <span className="shrink-0 tabular-nums">{shift.hours} h</span>
-                  </li>
-                ))}
-              </ul> : <EmptyState>{history.length ? 'No completed shifts match your search.' : 'No completed shifts yet.'}</EmptyState>
-            ) : <ListingList key={listingTab} items={visible} signups={signups} programs={programs} onAction={setAction} />}
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
-              {view === 'overview' && listed.length > 5 && <Link to="/organizations/dashboard?section=listings" className={button}>View all ({listed.length})</Link>}
-              <Link className="text-(--primary) underline underline-offset-4" to="/opportunities">View demo catalog</Link>
-            </div>
-          </DashboardSection>
+      {listingTab === 'Completed' ? (
+        visible.length ? <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
+          {visible.map((shift, index) => (
+            <li
+              key={`${shift.date}-${index}`}
+              className="flex flex-wrap items-center justify-between gap-3 py-4"
+            >
+              <div>
+                <strong className="block">{shift.title}</strong>
+                <p className="mb-0 text-(--muted)">
+                  {shiftDate(shift.date)}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="tabular-nums">{shift.hours} h</span>
+
+                <Link
+                  to={`/opportunities/${shift.id}?from=dashboard&role=organizations`}
+                  className="font-semibold text-(--primary) underline underline-offset-4"
+                >
+                  View details
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul> : <EmptyState>{history.length ? 'No completed shifts match your search.' : 'No completed shifts yet.'}</EmptyState>
+      ) : <ListingList key={listingTab} items={visible} signups={signups} programs={programs} onAction={setAction} />}
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+        {view === 'overview' && listed.length > 5 && <Link to="/organizations/dashboard?section=listings" className={button}>View all ({listed.length})</Link>}
+        <Link className="text-(--primary) underline underline-offset-4" to="/opportunities">View demo catalog</Link>
+      </div>
+    </DashboardSection>
   );
   const applicationsCard = (
     <DashboardSection id="applications" title="Applications to review">
-          {view === 'applications' && <div className="mb-3 flex flex-wrap gap-3">
-            <label className="grid gap-1 text-sm">Search applications<input className={button} type="search" value={appSearch} onChange={event => setAppSearch(event.target.value)} /></label>
-            <label className="grid gap-1 text-sm">Status<select className={button} value={appStatus} onChange={event => setAppStatus(event.target.value)}>
-              {['All', 'Pending', 'Accepted', 'Declined'].map(status => <option key={status}>{status}</option>)}
-            </select></label>
-          </div>}
-          <p role="status" className={reviewNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{reviewNotice}</p>
-          {visiblePending.length === 0 && <EmptyState action={<Link to="/organizations/dashboard?section=listings" className="mt-2 inline-block font-semibold text-(--primary) underline">View listings</Link>}>
-            {pending.length ? 'No pending applications match these filters.' : 'No applications to review yet.'}
-          </EmptyState>}
-          {owned.map(item => {
-            const applicants = visiblePending.filter(signup => signup.opportunityId === item.id);
-            if (!applicants.length) return null;
-            const full = listingStatus(item, signups) === 'Full';
+      {view === 'applications' && <div className="mb-3 flex flex-wrap gap-3">
+        <label className="grid gap-1 text-sm">Search applications<input className={button} type="search" value={appSearch} onChange={event => setAppSearch(event.target.value)} /></label>
+        <label className="grid gap-1 text-sm">Status<select className={button} value={appStatus} onChange={event => setAppStatus(event.target.value)}>
+          {['All', 'Pending', 'Accepted', 'Declined'].map(status => <option key={status}>{status}</option>)}
+        </select></label>
+      </div>}
+      <p role="status" className={reviewNotice ? 'mb-3 text-sm font-semibold text-(--primary)' : 'sr-only'}>{reviewNotice}</p>
+      {visiblePending.length === 0 && <EmptyState action={<Link to="/organizations/dashboard?section=listings" className="mt-2 inline-block font-semibold text-(--primary) underline">View listings</Link>}>
+        {pending.length ? 'No pending applications match these filters.' : 'No applications to review yet.'}
+      </EmptyState>}
+      {owned.map(item => {
+        const applicants = visiblePending.filter(signup => signup.opportunityId === item.id);
+        if (!applicants.length) return null;
+        const full = listingStatus(item, signups) === 'Full';
+        return (
+          <div key={item.id} className="border-b border-(--aid-rule) py-3 first:pt-0">
+            <h3 className="mb-1 text-base font-bold break-words">{item.title}</h3>
+            {full && <p className="mb-1 text-sm text-(--muted)">All spots are filled.</p>}
+            <ul className="m-0 list-none p-0">
+              {applicants.map(signup => (
+                <li key={signup.volunteerId} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                  <span className="min-w-0 break-words">{signup.volunteer}</span>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" className={button} disabled={full} aria-label={`Accept ${signup.volunteer} for ${item.title}`} onClick={event => review(event, signup, 'Accepted')}>Accept</button>
+                    <button type="button" className={button} aria-label={`Decline ${signup.volunteer} for ${item.title}`} onClick={event => review(event, signup, 'Declined')}>Decline</button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+      <h3 className="mt-4 mb-2 text-base font-bold">Reviewed</h3>
+      {visibleReviewed.length === 0 ? <p className="m-0 text-sm text-(--muted)">{reviewed.length ? 'No decisions match these filters.' : 'Decisions will appear here.'}</p> : (
+        <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
+          {visibleReviewed.map(signup => {
+            const item = owned.find(listing => listing.id === signup.opportunityId);
             return (
-              <div key={item.id} className="border-b border-(--aid-rule) py-3 first:pt-0">
-                <h3 className="mb-1 text-base font-bold break-words">{item.title}</h3>
-                {full && <p className="mb-1 text-sm text-(--muted)">All spots are filled.</p>}
-                <ul className="m-0 list-none p-0">
-                  {applicants.map(signup => (
-                    <li key={signup.volunteerId} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                      <span className="min-w-0 break-words">{signup.volunteer}</span>
-                      <div className="flex flex-wrap gap-2">
-                        <button type="button" className={button} disabled={full} aria-label={`Accept ${signup.volunteer} for ${item.title}`} onClick={event => review(event, signup, 'Accepted')}>Accept</button>
-                        <button type="button" className={button} aria-label={`Decline ${signup.volunteer} for ${item.title}`} onClick={event => review(event, signup, 'Declined')}>Decline</button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <li key={`${signup.opportunityId}-${signup.volunteerId}`} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm">
+                <span className="min-w-0 break-words"><strong className="block">{signup.volunteer}</strong><span className="text-(--muted)">{item.title}</span></span>
+                <Badge label={signup.status} />
+              </li>
             );
           })}
-          <h3 className="mt-4 mb-2 text-base font-bold">Reviewed</h3>
-          {visibleReviewed.length === 0 ? <p className="m-0 text-sm text-(--muted)">{reviewed.length ? 'No decisions match these filters.' : 'Decisions will appear here.'}</p> : (
-            <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
-              {visibleReviewed.map(signup => {
-                const item = owned.find(listing => listing.id === signup.opportunityId);
-                return (
-                  <li key={`${signup.opportunityId}-${signup.volunteerId}`} className="flex flex-wrap items-start justify-between gap-2 py-2 text-sm">
-                    <span className="min-w-0 break-words"><strong className="block">{signup.volunteer}</strong><span className="text-(--muted)">{item.title}</span></span>
-                    <Badge label={signup.status} />
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </DashboardSection>
+        </ul>
+      )}
+    </DashboardSection>
   );
   const calendar = <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date} />;
   const monthlyHours = Object.entries(history.reduce((months, shift) => {
