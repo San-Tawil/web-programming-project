@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-10 - Opportunity details, cause colors, and guest signup
+
+- Color-coded opportunity cards by cause using shared Tailwind utilities and visible text labels. Added hover and keyboard focus feedback, with card links opening a dedicated detail route.
+- Added `/opportunities/:opportunityId` with preparation guidance, schedule, availability, related shifts, and a demo organization profile. Closed, draft, missing, or reset listings show an unavailable state.
+- Replaced reservation/application controls for guests with Sign up and Log in links. Volunteers return to the selected opportunity after authentication; organization accounts receive a volunteer-account explanation. Shared state also rejects guest join actions.
+- Added accessible headings, breadcrumbs, focus management, live availability feedback, and reduced-motion support. Verified the production build, six automated tests, browser flows, and automated accessibility checks across mobile/desktop widths and both themes.
+
+## 2026-11-09 - Searchable opportunities and organization tools
+
+- Added search, combined cause/city filters, sorting, result counts, reset controls, and empty states to the opportunity list.
+- Added `/organizations/tools` with validated create/edit forms, draft/published/closed visibility, status counts/filtering, and confirmed deletion.
+- Integrated the list, homepage, organization tools, and both dashboards with one shared mock data store while merging the latest main branch. Kept dashboard program/shift creation, signup, approval, login, and registration flows working together.
+- Added capacity protection, unique record IDs, and removal of dependent shifts/signups when a parent opportunity is deleted. Closing a parent also hides its shifts from public discovery.
+- Fixed missing React imports on About, Contact, and Not Found, connected role-specific login routes to the login form, and preserved search input focus when filters change.
+- Aligned Vite with the existing plugins' supported versions, rebuilt the production output, and added setup notes, previews, and regression tests.
+
 ## 2026-11-08 — Separate opportunities and shifts
 
 The organization dashboard greets the active demo organization and offers separate Add opportunity and Add shift actions. Shifts can stand alone or link to an opportunity. Demo account IDs identify listing owners and applicants.
