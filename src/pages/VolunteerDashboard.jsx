@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout, { DashboardSection, useDashboardView } from '../components/DashboardLayout.jsx';
-import { Badge, EmptyState } from '../components/DashboardUI.jsx';
-import ListingDetails from '../components/ListingDetails.jsx';
+import { Badge, EmptyState, Modal } from '../components/DashboardUI.jsx';
 import ShiftCalendar from '../components/ShiftCalendar.jsx';
 import VolunteerProfile, { VolunteerShiftBoard } from '../components/VolunteerProfile.jsx';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
@@ -22,6 +21,7 @@ export default function VolunteerDashboard() {
   const { opportunities, signups, volunteer, plannedByVolunteer, hoursByVolunteer, dispatch } = useDashboardDemo();
   const view = useDashboardView(sections);
   const [notice, setNotice] = useState('');
+  const [reservationToCancel, setReservationToCancel] = useState(null);
   const [appSearch, setAppSearch] = useState('');
   const [appStatus, setAppStatus] = useState('All');
   const history = volunteer.id === initialDemo.volunteer.id ? completedShifts : [];
@@ -66,82 +66,114 @@ export default function VolunteerDashboard() {
     setNotice(`${message} for ${listing.title}.`);
   }
 
-  function leave(event, listing, status) {
-    event.currentTarget.closest('section').focus({ preventScroll: true });
-    changeSignup(listing, 'leave', status);
-  }
-
   const applicationsCard = (
     <DashboardSection id="my-applications" title="My applications">
-        {view === 'my-applications' && <div className="mb-3 flex flex-wrap gap-3">
-          <label className="grid gap-1 text-sm">Search applications<input className={textAction} type="search" value={appSearch} onChange={event => setAppSearch(event.target.value)} /></label>
-          <label className="grid gap-1 text-sm">Status<select className={textAction} value={appStatus} onChange={event => setAppStatus(event.target.value)}>
-            {['All', 'Pending', 'Accepted', 'Declined', 'Cancelled', 'Closed'].map(status => <option key={status}>{status}</option>)}
-          </select></label>
-        </div>}
-        {visibleApplications.length === 0 ? <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>
-          {applications.length ? 'No applications match these filters.' : 'Applications appear here after you apply for a shift.'}
-        </EmptyState> : (
-          <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
-            {visibleApplications.map(({ listing, label }) => {
-              return (
-                <li key={listing.id} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <strong className="min-w-0 break-words">{listing.title}</strong>
-                    <Badge label={label} />
-                  </div>
-                  <p className="mt-1 mb-0 text-sm text-(--muted)">{applicationCopy[label]}</p>
+      {view === 'my-applications' && <div className="mb-3 flex flex-wrap gap-3">
+        <label className="grid gap-1 text-sm">Search applications<input className={textAction} type="search" value={appSearch} onChange={event => setAppSearch(event.target.value)} /></label>
+        <label className="grid gap-1 text-sm">Status<select className={textAction} value={appStatus} onChange={event => setAppStatus(event.target.value)}>
+          {['All', 'Pending', 'Accepted', 'Declined', 'Cancelled', 'Closed'].map(status => <option key={status}>{status}</option>)}
+        </select></label>
+      </div>}
+      {visibleApplications.length === 0 ? <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>
+        {applications.length ? 'No applications match these filters.' : 'Applications appear here after you apply for a shift.'}
+      </EmptyState> : (
+        <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
+          {visibleApplications.map(({ listing, label }) => {
+            return (
+              <li key={listing.id} className="py-3 first:pt-0 last:pb-0">
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <strong className="min-w-0 break-words">{listing.title}</strong>
+                  <Badge label={label} />
+                </div>
+                <p className="mt-1 mb-0 text-sm text-(--muted)">{applicationCopy[label]}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <Link
+                    to={`/opportunities/${listing.id}?from=dashboard&section=my-applications`}
+                    className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline underline-offset-4"
+                  >
+                    View details
+                  </Link>
+
                   {label === 'Pending' && (
-                    <button type="button" aria-label={`Withdraw application for ${listing.title}`} className={`${textAction} mt-2`} onClick={event => leave(event, listing, 'Pending')}>Withdraw application</button>
+                    <button
+                      type="button"
+                      aria-label={`Withdraw application for ${listing.title}`}
+                      className="min-h-11 cursor-pointer rounded-md border border-red-600 bg-(--panel) px-3 text-sm font-semibold text-red-600 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950/30"
+                      onClick={() =>
+                        setReservationToCancel({
+                          ...listing,
+                          signupStatus: 'Pending',
+                        })
+                      }
+                    >
+                      Withdraw application
+                    </button>
                   )}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </DashboardSection>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </DashboardSection>
   );
   const nextCard = (
     <DashboardSection id="next-shift" title="Next confirmed shift">
-        {next ? (
-          <>
-            <h3 className="mb-1 text-base font-bold break-words">{next.title}</h3>
-            <p className="mb-1 text-sm text-(--muted)">{shiftDate(next.date)} · {shiftTime(next)}</p>
-            <p className="mb-2 text-sm break-words">{next.location} · {next.organizer}</p>
-            <ListingDetails key={next.id} listing={next} signups={signups} parent={opportunities.find(item => item.id === next.parentId)} />
-            <button type="button" className={`${textAction} mt-2`} onClick={event => leave(event, next)}>Cancel reservation</button>
-          </>
-        ) : (
-          <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>You have no upcoming confirmed shifts.</EmptyState>
-        )}
-      </DashboardSection>
+      {next ? (
+        <>
+          <h3 className="mb-1 text-base font-bold break-words">
+            {next.title}
+          </h3>
+          <p className="mb-1 text-sm text-(--muted)">{shiftDate(next.date)} · {shiftTime(next)}</p>
+          <p className="mb-2 text-sm break-words">{next.location} · {next.organizer}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <Link
+              to={`/opportunities/${next.id}?from=dashboard&section=my-shifts`}
+              className="font-semibold text-(--primary) underline underline-offset-4"
+            >
+              View details
+            </Link>
+
+            <button
+              type="button"
+              className="min-h-11 cursor-pointer rounded-md border border-red-600 bg-(--panel) px-3 text-sm font-semibold text-red-600 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950/30"
+              onClick={() => setReservationToCancel(next)}
+            >
+              Cancel reservation
+            </button>
+          </div>
+        </>
+      ) : (
+        <EmptyState action={<Link to="/volunteer/dashboard?section=find-shifts" className="mt-2 inline-block font-semibold text-(--primary) underline">Find a shift</Link>}>You have no upcoming confirmed shifts.</EmptyState>
+      )}
+    </DashboardSection>
   );
   const scheduleCards = (
     <>
       <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? shifts[0]?.date} />
       {(programs.length > 0 || cancelled.length > 0) && (
-          <DashboardSection title="Other bookings">
-            <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
-              {[...programs, ...cancelled].map(item => (
-                <li key={item.id} className="py-2 break-words">
-                  <strong>{item.title}</strong>
-                  <span className="block text-sm text-(--muted)">{item.cancelled ? 'Cancelled by organizer' : `${item.organizer} · ${item.location}`}</span>
-                </li>
-              ))}
-            </ul>
-          </DashboardSection>
-        )}
-        <DashboardSection title="Completed shifts">
-          {history.length === 0 && <EmptyState action={<Link to="/volunteer/dashboard?section=hours" className="mt-2 inline-block font-semibold text-(--primary) underline">Log volunteer time</Link>}>Completed shifts will appear here.</EmptyState>}
-          <ul className="m-0 list-none divide-y divide-(--line) p-0 text-sm">
-            {history.map(shift => (
-              <li key={shift.date} className="flex justify-between gap-3 py-2">
-                <span>{shift.title}<span className="block text-(--muted)">{shiftDate(shift.date)}</span></span>
-                <Badge label={shift.hours + ' h'} />
+        <DashboardSection title="Other bookings">
+          <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0">
+            {[...programs, ...cancelled].map(item => (
+              <li key={item.id} className="py-2 break-words">
+                <strong>{item.title}</strong>
+                <span className="block text-sm text-(--muted)">{item.cancelled ? 'Cancelled by organizer' : `${item.organizer} · ${item.location}`}</span>
               </li>
             ))}
           </ul>
         </DashboardSection>
+      )}
+      <DashboardSection title="Completed shifts">
+        {history.length === 0 && <EmptyState action={<Link to="/volunteer/dashboard?section=hours" className="mt-2 inline-block font-semibold text-(--primary) underline">Log volunteer time</Link>}>Completed shifts will appear here.</EmptyState>}
+        <ul className="m-0 list-none divide-y divide-(--line) p-0 text-sm">
+          {history.map(shift => (
+            <li key={shift.date} className="flex justify-between gap-3 py-2">
+              <span>{shift.title}<span className="block text-(--muted)">{shiftDate(shift.date)}</span></span>
+              <Badge label={shift.hours + ' h'} />
+            </li>
+          ))}
+        </ul>
+      </DashboardSection>
     </>
   );
 
@@ -157,8 +189,68 @@ export default function VolunteerDashboard() {
       )}
       {view === 'my-applications' && applicationsCard}
       {view === 'my-shifts' && <div className="grid gap-6">{nextCard}{scheduleCards}</div>}
-      {view === 'find-shifts' && <VolunteerShiftBoard shifts={shifts} signups={signups} mine={mine} onChange={changeSignup} />}
+      {view === 'find-shifts' && (
+        <VolunteerShiftBoard
+          shifts={shifts}
+          signups={signups}
+          mine={mine}
+          onChange={(listing, type, status) => {
+            if (type === 'leave') {
+              setReservationToCancel({ ...listing, signupStatus: status });
+            } else {
+              changeSignup(listing, type, status);
+            }
+          }}
+        />
+      )}
       {view === 'hours' && <VolunteerProfile key={volunteer.id} shifts={shifts} history={history} entries={entries} plannedIds={plannedIds} dispatch={dispatch} />}
+      {reservationToCancel && (
+        <Modal
+          title={
+            reservationToCancel.signupStatus === 'Pending'
+              ? "Withdraw application"
+              : "Cancel reservation"
+          }
+          onClose={() => setReservationToCancel(null)}
+        >
+          <p className="mb-4">
+            Are you sure you want to{" "}
+            {reservationToCancel.signupStatus === 'Pending'
+              ? "withdraw your application"
+              : "cancel your reservation"}{" "}
+            for <strong>{reservationToCancel.title}</strong>?
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              className={textAction}
+              onClick={() => setReservationToCancel(null)}
+            >
+              {reservationToCancel.signupStatus === 'Pending'
+                ? "Keep application"
+                : "Keep reservation"}
+            </button>
+
+            <button
+              type="button"
+              className="min-h-11 cursor-pointer rounded-md bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700"
+              onClick={() => {
+                changeSignup(
+                  reservationToCancel,
+                  'leave',
+                  reservationToCancel.signupStatus
+                );
+                setReservationToCancel(null);
+              }}
+            >
+              {reservationToCancel.signupStatus === 'Pending'
+                ? "Confirm withdrawal"
+                : "Confirm cancellation"}
+            </button>
+          </div>
+        </Modal>
+      )}
     </DashboardLayout>
   );
 }

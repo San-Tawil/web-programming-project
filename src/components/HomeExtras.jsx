@@ -39,7 +39,6 @@ const platformLogos = platforms.map(({ slug, title, href }) => {
 });
 
 export function RegionalPlatforms() {
-  const desktop = useMediaQuery('(min-width: 768px)');
   const reducedMotion = useReducedMotion();
   const [playback, setPlayback] = useState(null);
   const playing = playback ?? !reducedMotion;
@@ -48,13 +47,13 @@ export function RegionalPlatforms() {
       <Container className="py-12 md:py-16">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="region-title">Volunteering across Lebanon and the region</h2>
-          {desktop && <button type="button" className="inline-grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full border border-current"
+          <button type="button" className="inline-grid min-h-11 min-w-11 cursor-pointer place-items-center rounded-full border border-current"
             aria-controls="regional-logo-carousel" aria-label={playing ? 'Pause organization carousel' : 'Play organization carousel'}
             onClick={() => setPlayback(!playing)}>
             <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
-          </button>}
+          </button>
         </div>
-        {desktop ? <div id="regional-logo-carousel">
+        <div id="regional-logo-carousel" className="min-w-0">
           <DeferredContent fallback={
             <div className="flex min-h-[3.25rem] items-center justify-around gap-4 [&>span]:h-8 [&>span]:w-[min(25%,8rem)] [&>span]:rounded-lg" aria-hidden="true">
               <span className="bg-(--line) motion-safe:animate-skeleton" />
@@ -63,17 +62,11 @@ export function RegionalPlatforms() {
             </div>
           }>
             <LogoLoop logos={platformLogos} ariaLabel="Volunteering platforms across Lebanon and the region"
-              speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={56} pauseOnHover={false}
+              speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={40} pauseOnHover={false}
               respectReducedMotion={false}
               intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="pt-2 pb-3 [&_.logoloop__node]:block [&_img]:[filter:brightness(0)_saturate(100%)_invert(30%)_sepia(31%)_saturate(1165%)_hue-rotate(103deg)_brightness(92%)] dark:[&_img]:[filter:brightness(0)_invert(1)]" />
           </DeferredContent>
-        </div> : (
-          <ul className="m-0 grid list-none grid-cols-2 gap-x-4 p-0">
-            {platforms.slice(0, 6).map(({ slug, title, href }) => (
-              <li key={slug}><a href={href} className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">{title}</a></li>
-            ))}
-          </ul>
-        )}
+        </div>
       </Container>
     </section>
   );
@@ -82,8 +75,8 @@ export function RegionalPlatforms() {
 export function VolunteerPhotoBand({ src }) {
   const desktop = useMediaQuery('(min-width: 768px)');
   const reduced = useReducedMotion();
-  const scrollDistance = reduced ? 0 : 0.8;
-  const holdDistance = reduced ? 0 : 0.15;
+  const scrollDistance = desktop ? 0.8 : 0.55;
+  const holdDistance = 0.15;
   const message = (
     <div className="m-auto max-w-xl rounded-xl bg-(--panel) p-6 text-(--text)">
       <h2 id="volunteer-photo-title">Two hours. One shift. Real people.</h2>
@@ -91,7 +84,7 @@ export function VolunteerPhotoBand({ src }) {
       <Link to="/opportunities" className="inline-flex rounded-lg bg-(--primary) px-4 py-3 font-bold text-(--bg)">Browse opportunities</Link>
     </div>
   );
-  if (!desktop) {
+  if (reduced) {
     return (
       <section aria-labelledby="volunteer-photo-title" className="bg-(--panel)">
         <figure className="group/photo relative m-0">
@@ -105,15 +98,15 @@ export function VolunteerPhotoBand({ src }) {
   return (
     <section aria-labelledby="volunteer-photo-title">
       <DeferredContent rootMargin="1200px 0px" fallback={
-        <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}vh` }}>
-          <div className="sticky bg-(--line) motion-safe:animate-skeleton top-0 grid min-h-screen place-items-center p-4 text-center">{message}</div>
+        <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}svh` }}>
+          <div className="sticky bg-(--line) motion-safe:animate-skeleton top-0 grid min-h-svh place-items-center p-4 text-center">{message}</div>
         </div>
       }>
         <figure className="group/photo relative m-0">
           <ScrollExpand src={src} alt="Volunteers carrying boxes of food for distribution" title="Show up."
-            useWindowScroll startWidth={46} startHeight={60} startRadius={24} mediaZoom={1.2}
+            useWindowScroll startWidth={desktop ? 46 : 82} startHeight={desktop ? 60 : 54} startRadius={24} mediaZoom={1.2}
             scrollDistance={scrollDistance} holdDistance={holdDistance} startOffset={0.35} smoothing={0.04}
-            enabled={!reduced} overlayScrim={0.6}>
+            overlayScrim={0.6}>
             {message}
           </ScrollExpand>
           <PhotoCredit photographer="Lagos Food Bank Initiative" source="https://www.pexels.com/photo/happy-volunteers-carrying-boxes-8061641/" />

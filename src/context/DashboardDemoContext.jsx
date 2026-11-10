@@ -5,6 +5,19 @@ import { demoReducer, initialDemo } from '../data/dashboardDemo.js';
 const DashboardDemoContext = createContext(null);
 const sessionKey = 'aidconnect-session';
 
+function profileKey(account) {
+  return 'aidconnect-profile:' + account.id;
+}
+
+function withSavedProfile(account) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(profileKey(account)));
+    return saved ? { ...account, ...saved } : account;
+  } catch {
+    return account;
+  }
+}
+
 function getSavedAccount() {
   try {
     const saved = sessionStorage.getItem(sessionKey)
@@ -21,7 +34,7 @@ function getSavedAccount() {
       return null;
     }
 
-    return account;
+    return withSavedProfile(account);
   } catch {
     return null;
   }
@@ -37,6 +50,11 @@ function getInitialDemo(account) {
     name: account.name,
     location: account.location,
     photo: account.photo,
+    phone: account.phone,
+    website: account.website,
+    cv: account.cv,
+    bio: account.bio,
+    tags: account.tags,
   } : initialDemo.volunteer;
 
   const organization = account.role === 'organizations' ? {
@@ -46,6 +64,8 @@ function getInitialDemo(account) {
     name: account.name,
     location: account.location,
     photo: account.photo,
+    phone: account.phone,
+    website: account.website,
   } : initialDemo.organization;
 
   let demo = demoReducer(initialDemo, {
@@ -58,7 +78,9 @@ function getInitialDemo(account) {
     organization,
   });
 
-  return demo;
+  return account.role === 'organizations'
+    ? demoReducer(demo, { type: 'updateProfile', role: 'organization', changes: organization })
+    : demo;
 }
 
 export function DashboardDemoProvider({ children }) {
@@ -72,7 +94,17 @@ export function DashboardDemoProvider({ children }) {
 
   const accountRole = account?.role ?? null;
 
+  function saveProfile(role, changes) {
+    const accountRole = role === 'organization' ? 'organizations' : role;
+    if (account?.role === accountRole) {
+      const { name, location, phone, website, bio, tags } = changes;
+      localStorage.setItem(profileKey(account), JSON.stringify({ name, location, phone, website, bio, tags }));
+    }
+    dispatch({ type: 'updateProfile', role, changes });
+  }
+
   function selectAccount(nextAccount, rememberMe = false) {
+    if (nextAccount) nextAccount = withSavedProfile(nextAccount);
     const volunteer = nextAccount?.role === 'volunteer' ? {
       id: nextAccount.id === 'volunteer-demo'
         ? initialDemo.volunteer.id
@@ -80,6 +112,11 @@ export function DashboardDemoProvider({ children }) {
       name: nextAccount.name,
       location: nextAccount.location,
       photo: nextAccount.photo,
+      phone: nextAccount.phone,
+      website: nextAccount.website,
+      cv: nextAccount.cv,
+      bio: nextAccount.bio,
+      tags: nextAccount.tags,
     } : initialDemo.volunteer;
 
     const organization = nextAccount?.role === 'organizations' ? {
@@ -89,12 +126,17 @@ export function DashboardDemoProvider({ children }) {
       name: nextAccount.name,
       location: nextAccount.location,
       photo: nextAccount.photo,
+      phone: nextAccount.phone,
+      website: nextAccount.website,
     } : initialDemo.organization;
 
     setAccount(nextAccount);
 
     dispatch({ type: 'selectVolunteer', volunteer });
     dispatch({ type: 'selectOrganization', organization });
+    if (nextAccount?.role === 'organizations') {
+      dispatch({ type: 'updateProfile', role: 'organization', changes: organization });
+    }
 
     localStorage.removeItem(sessionKey);
     sessionStorage.removeItem(sessionKey);
@@ -105,6 +147,8 @@ export function DashboardDemoProvider({ children }) {
         role: nextAccount.role,
         name: nextAccount.name,
         email: nextAccount.email,
+        phone: nextAccount.phone,
+        website: nextAccount.website,
         location: nextAccount.location,
       };
 
@@ -115,7 +159,7 @@ export function DashboardDemoProvider({ children }) {
 
   return (
     <DashboardDemoContext.Provider
-      value={{ ...demo, dispatch, accountRole, selectAccount }}
+      value={{ ...demo, dispatch, accountRole, selectAccount, saveProfile }}
     >
       {children}
     </DashboardDemoContext.Provider>

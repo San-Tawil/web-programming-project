@@ -34,7 +34,7 @@ export function StatCard({ label, value, detail, to, icon: Icon, badge }) {
   </div>;
 }
 
-const tones = { Open: 'positive', Confirmed: 'positive', Reserved: 'positive', Accepted: 'positive', Pending: 'pending', 'Approval required': 'pending', Full: 'negative', Cancelled: 'negative', Declined: 'negative' };
+const tones = { Open: 'positive', Confirmed: 'positive', Reserved: 'positive', Accepted: 'positive', Pending: 'pending', 'Approval required': 'pending', Full: 'negative', 'Full capacity': 'negative', Cancelled: 'negative', Declined: 'negative' };
 export function Badge({ label }) {
   return <span data-tone={tones[label] ?? 'neutral'} className="dashboard-badge inline-flex rounded-full px-2 py-1 text-xs font-semibold">{label}</span>;
 }

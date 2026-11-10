@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
-import { isClosed, listingScheduleError, spotsFilled } from '../data/dashboardDemo.js';
+import { isClosed, listingScheduleError, opportunityEditError, spotsFilled } from '../data/dashboardDemo.js';
 
 const field = 'w-full rounded-md border border-(--line) bg-(--bg) px-3 py-2 text-(--text)';
 const causes = [
@@ -13,6 +13,7 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
   const [parentId, setParentId] = useState(listing?.parentId ?? '');
   const [notice, setNotice] = useState('');
   const isShift = kind === 'shift';
+  const optionalSchedule = !isShift && listing && !listing.date;
   const parents = opportunities.filter(item => item.kind === 'opportunity' && item.organizationId === organization.id);
   const parent = parents.find(item => item.id === parentId);
   const minCapacity = listing ? Math.max(1, spotsFilled(signups, listing.id)) : 1;
@@ -38,13 +39,15 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
       date: data.get('date'), startTime, endTime,
       ...(isShift && { parentId }),
     };
-    const error = listingScheduleError(opportunity, parent);
+    const error = listing && !isShift
+      ? opportunityEditError({ ...opportunity, id: listing.id }, opportunities)
+      : listingScheduleError(opportunity, parent);
     if (error || (listing && isClosed(listing))) {
       setNotice(error || 'Listings that have already started cannot be edited.');
       return;
     }
     dispatch(listing
-      ? { type: 'editShift', opportunityId: listing.id, changes: opportunity }
+      ? { type: isShift ? 'editShift' : 'editOpportunity', opportunityId: listing.id, changes: opportunity }
       : { type: 'post', opportunity });
     onSave(title);
   }
@@ -71,9 +74,9 @@ export default function OpportunityForm({ kind, listing, onSave, onCancel }) {
         </>
       )}
       <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
-        <label>Date <input className={field} type="date" name="date" min={parent?.date > today ? parent.date : today} defaultValue={listing?.date} required /></label>
-        <label>Start time <input className={field} type="time" name="startTime" defaultValue={listing?.startTime} required /></label>
-        <label>End time <input className={field} type="time" name="endTime" defaultValue={listing?.endTime} required /></label>
+        <label>Date <input className={field} type="date" name="date" min={parent?.date > today ? parent.date : today} defaultValue={listing?.date} required={!optionalSchedule} /></label>
+        <label>Start time <input className={field} type="time" name="startTime" defaultValue={listing?.startTime} required={!optionalSchedule} /></label>
+        <label>End time <input className={field} type="time" name="endTime" defaultValue={listing?.endTime} required={!optionalSchedule} /></label>
       </div>
       {!parent && <label>Location <input className={field} name="location" defaultValue={listing?.location} required maxLength={100} /></label>}
       <label>Capacity <input className={field} type="number" name="capacity" min={minCapacity} max={100} defaultValue={listing?.capacity} required /></label>

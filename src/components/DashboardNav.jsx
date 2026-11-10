@@ -2,7 +2,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-    ArrowLeftRight,
     ChevronDown,
     Menu,
     PanelLeftClose,
@@ -19,7 +18,6 @@ import { useDashboardDemo } from "../context/DashboardDemoContext.jsx";
 export default function DashboardNav({
     pageTitle,
     profile,
-    otherRole,
     base,
     collapsed = false,
     setCollapsed,
@@ -86,25 +84,6 @@ export default function DashboardNav({
 
             {/* Right side */}
             <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-
-                {/* Only show the role-switch button inside dashboards */}
-                {!standalone && (
-                    <Link
-                        to={
-                            otherRole === "Volunteer"
-                                ? "/volunteer/dashboard"
-                                : "/organizations/dashboard"
-                        }
-                        aria-label={`View ${otherRole.toLowerCase()} demo`}
-                        className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold hover:bg-(--nav-panel)"
-                    >
-                        <ArrowLeftRight aria-hidden="true" size={17} />
-
-                        <span className="hidden md:inline">
-                            View {otherRole.toLowerCase()} demo
-                        </span>
-                    </Link>
-                )}
 
                 <ThemeSwitch />
 

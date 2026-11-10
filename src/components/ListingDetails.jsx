@@ -19,7 +19,7 @@ export default function ListingDetails({ listing, signups, parent }) {
         )}
         {parent && <div className="flex flex-wrap gap-x-2"><dt>Program</dt><dd>{parent.title}</dd></div>}
         <div className="flex flex-wrap gap-x-2">
-          <dt>Signup</dt><dd>{status === 'Open' ? `${spots} ${spots === 1 ? 'spot' : 'spots'} left · ${listing.signup === 'approval' ? 'Approval required' : 'Open signup'}` : status}</dd>
+          <dt>Signup</dt><dd>{status === 'Open' ? `${spots} ${spots === 1 ? 'spot' : 'spots'} left · ${listing.signup === 'approval' ? 'Approval required' : 'Open signup'}` : status === 'Full' ? 'Full capacity' : status}</dd>
         </div>
         {listing.bring && <div className="flex flex-wrap gap-x-2"><dt>What to bring</dt><dd>{listing.bring}</dd></div>}
       </dl>

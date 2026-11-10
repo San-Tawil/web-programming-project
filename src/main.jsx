@@ -5,23 +5,23 @@ import {
   Routes,
   Route,
   Navigate,
+
   useLocation,
 } from "react-router-dom";
 
 import AdaptiveNavbar from "./components/AdaptiveNavbar.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
-import {
-  DashboardDemoProvider,
-  useDashboardDemo,
-} from "./context/DashboardDemoContext.jsx";
+import { DashboardDemoProvider, useDashboardDemo } from "./context/DashboardDemoContext.jsx";
 import Footer from "./components/Footer.jsx";
 
-const HomePage = lazy(() => import("./pages/HomePage.jsx"));
-const AccountPage = lazy(() => import("./pages/AccountPage.jsx"));
+import HomePage from "./pages/HomePage.jsx";
+
 const OpportunitiesPage = lazy(() => import("./pages/OpportunitiesPage.jsx"));
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
 const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage.jsx"));
+
+const OpportunityFormPage = lazy(() => import("./pages/OpportunityFormPage.jsx"));
 
 const OpportunityDetailsPage = lazy(() =>
   import("./pages/OpportunityDetailsPage.jsx")
@@ -70,6 +70,7 @@ function PageSkeleton({ pathname }) {
 }
 
 function App() {
+  const { accountRole } = useDashboardDemo();
   const { key, pathname, hash, search } = useLocation();
   const dashboard = /^\/(volunteer|organizations)\/dashboard(?:\/profile)?\/?$/.test(pathname);
   const fromDashboard =
@@ -79,24 +80,27 @@ function App() {
   const Content = dashboard ? 'div' : 'main';
   const main = useRef(null);
   const previousKey = useRef(key);
-  const { accountRole } = useDashboardDemo();
+
 
   useEffect(() => {
-  if (previousKey.current !== key) {
-    if (dashboard) {
-      window.scrollTo(0, 0);
-    }
+    if (previousKey.current !== key) {
+      if (dashboard) {
+        window.scrollTo(0, 0);
+      }
 
-    if (!dashboard || !hash) {
+    if (!dashboard) {
       main.current?.focus({ preventScroll: dashboard });
     }
 
-    previousKey.current = key;
-  }
-}, [key, dashboard, hash]);
+      previousKey.current = key;
+    }
+  }, [key, dashboard, hash]);
 
   return (
-    <div className="group/app flex min-h-screen flex-col has-[.aid-home]:relative">
+    <div
+      className={`group/app flex min-h-screen flex-col has-[.aid-home]:relative ${dashboard ? "dashboard-route" : ""
+        }`}
+    >
       <a
         className="fixed top-3 left-3 z-[100] -translate-y-[200%] bg-(--panel) px-4 py-3 text-(--text) focus:translate-y-0"
         href={dashboardProfile ? '#profile-settings' : dashboard ? '#overview' : '#main-content'}
@@ -115,18 +119,7 @@ function App() {
           fallback={<PageSkeleton pathname={pathname} />}
         >
           <Routes>
-            <Route
-              path="/"
-              element={
-                accountRole === "volunteer" ? (
-                  <Navigate to="/volunteer/dashboard" replace />
-                ) : accountRole === "organizations" ? (
-                  <Navigate to="/organizations/dashboard" replace />
-                ) : (
-                  <HomePage />
-                )
-              }
-            />
+            <Route path="/" element={<HomePage />} />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
@@ -135,7 +128,7 @@ function App() {
 
             <Route
               path="/volunteer/login"
-              element={<AccountPage audience="a volunteer" />}
+              element={<Navigate to="/login" replace />}
             />
             <Route
               path="/volunteer/register"
@@ -144,7 +137,7 @@ function App() {
 
             <Route
               path="/organizations/login"
-              element={<AccountPage audience="an organization" />}
+              element={<Navigate to="/login" replace />}
             />
             <Route
               path="/organizations/register"
@@ -153,7 +146,7 @@ function App() {
 
             <Route
               path="/volunteer/dashboard"
-              element={<VolunteerDashboard />}
+              element={accountRole === "organizations" ? <Navigate to="/organizations/dashboard" replace /> : <VolunteerDashboard />}
             />
             <Route
               path="/organizations/dashboard"
@@ -162,7 +155,11 @@ function App() {
 
             <Route
               path="/volunteer/dashboard/profile"
-              element={<VolunteerDashboard />}
+              element={accountRole === "organizations" ? <Navigate to="/organizations/dashboard" replace /> : <VolunteerDashboard />}
+            />
+            <Route
+              path="/organizations/opportunities/new"
+              element={<OpportunityFormPage />}
             />
             <Route
               path="/organizations/dashboard/profile"

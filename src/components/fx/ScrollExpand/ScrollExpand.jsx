@@ -119,9 +119,9 @@ const ScrollExpand = ({
 
     const measure = () => {
       const c = propsRef.current;
-      stageH = c.useWindowScroll ? window.innerHeight : root.clientHeight;
+      stageH = c.useWindowScroll ? stage.clientHeight : root.clientHeight;
       if (stageH <= 0) return;
-      stage.style.height = `${stageH}px`;
+      if (!c.useWindowScroll) stage.style.height = `${stageH}px`;
       track.style.height = `${stageH * (1 + Math.max(0, c.scrollDistance) + Math.max(0, c.holdDistance))}px`;
 
       const w = root.clientWidth || stageH;
