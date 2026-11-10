@@ -5,18 +5,27 @@ AidConnect is a CSC443 Phase 1 frontend for volunteer coordination in Lebanon. V
 - **Team** JavaJunkies
 - **Assigned topic** Volunteer Opportunity Board
 - **Repository** [San-Tawil/web-programming-project](https://github.com/San-Tawil/web-programming-project)
-- **Live demo** Add the public deployment URL here before submitting.
+- **Live demo** [AidConnect](https://aid-connect-web.vercel.app/)
 
 ## Team and page ownership
 
 Record two primary pages or views for each member. The suggested assignments below reflect the available project history. Update them to match your team's final allocation.
 
+ aid-connect-final
 | Team member       | Page or view 1     | Page or view 2                        | Contributions                                                                                                                                                                                |
 | ----------------- | ------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Hassan ElTawil    | Homepage           | Volunteer and organization dashboards | Led homepage development and built workflows for both dashboards. Also worked on the opportunities catalog, contributed to login and registration, and integrated the final project changes. |
 | Melissa T. Mourad | Log in             | Opportunity details                   | Login form and error feedback, session handling, and opportunity details and signup actions.                                                                                                 |
 | Adam M. Al Dayekh | _Add page or view_ | _Add page or view_                    | _Add contributions_                                                                                                                                                                          |
 | Tarek N. Kronfol  | Sign up            | Full-page posting form                | Role-specific registration and the opportunity/shift posting flow.                                                                                                                           |
+=======
+| Team member | Page or view 1 | Page or view 2 | Contributions |
+| --- | --- | --- | --- |
+| Hassan ElTawil | Homepage |Dashboards for both volunteers and organizations | Homepage content and responsive interactions, catalog browsing, dashboard workflows, and integration. |
+| Melissa T. Mourad | Log in | Opportunity details | Login form and error feedback, session handling, and opportunity details and signup actions. |
+| Adam M. Al Dayekh | _Add page or view_ | _Add page or view_ | _Add contributions_ |
+| Tarek N. Kronfol | Sign up | Full-page posting form | Role-specific registration and the opportunity/shift posting flow. |
+ main
 
 ## Run locally
 
