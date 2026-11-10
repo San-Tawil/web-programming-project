@@ -13,7 +13,7 @@ Record two primary pages or views for each member. The suggested assignments bel
 
 | Team member | Page or view 1 | Page or view 2 | Contributions |
 | --- | --- | --- | --- |
-| Hassan ElTawil | Homepage | Opportunities catalog | Homepage content and responsive interactions, catalog browsing, dashboard workflows, and integration. |
+| Hassan ElTawil | Homepage |Dashboards for both volunteers and organizations | Homepage content and responsive interactions, catalog browsing, dashboard workflows, and integration. |
 | Melissa T. Mourad | Log in | Opportunity details | Login form and error feedback, session handling, and opportunity details and signup actions. |
 | Adam M. Al Dayekh | _Add page or view_ | _Add page or view_ | _Add contributions_ |
 | Tarek N. Kronfol | Sign up | Full-page posting form | Role-specific registration and the opportunity/shift posting flow. |
