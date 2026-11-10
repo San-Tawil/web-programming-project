@@ -179,6 +179,7 @@ export default function OrganizationDashboard() {
                     </button>
                   )}
                   <Link className="text-(--primary) underline underline-offset-4" to="/opportunities">View demo catalog</Link>
+                  <Link className="text-(--primary) underline underline-offset-4" to="/organizations/opportunities/new">Open full posting form</Link>
                 </div>
               </DashboardSection>
             </div>
