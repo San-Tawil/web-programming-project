@@ -11,12 +11,21 @@ AidConnect is a CSC443 Phase 1 frontend for volunteer coordination in Lebanon. V
 
 Record two primary pages or views for each member. The suggested assignments below reflect the available project history. Update them to match your team's final allocation.
 
+ aid-connect-final
+| Team member       | Page or view 1     | Page or view 2                        | Contributions                                                                                                                                                                                |
+| ----------------- | ------------------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hassan ElTawil    | Homepage           | Volunteer and organization dashboards | Led homepage development and built workflows for both dashboards. Also worked on the opportunities catalog, contributed to login and registration, and integrated the final project changes. |
+| Melissa T. Mourad | Log in             | Opportunity details                   | Login form and error feedback, session handling, and opportunity details and signup actions.                                                                                                 |
+| Adam M. Al Dayekh | _Add page or view_ | _Add page or view_                    | _Add contributions_                                                                                                                                                                          |
+| Tarek N. Kronfol  | Sign up            | Full-page posting form                | Role-specific registration and the opportunity/shift posting flow.                                                                                                                           |
+=======
 | Team member | Page or view 1 | Page or view 2 | Contributions |
 | --- | --- | --- | --- |
 | Hassan ElTawil | Homepage |Dashboards for both volunteers and organizations | Homepage content and responsive interactions, catalog browsing, dashboard workflows, and integration. |
 | Melissa T. Mourad | Log in | Opportunity details | Login form and error feedback, session handling, and opportunity details and signup actions. |
 | Adam M. Al Dayekh | _Add page or view_ | _Add page or view_ | _Add contributions_ |
 | Tarek N. Kronfol | Sign up | Full-page posting form | Role-specific registration and the opportunity/shift posting flow. |
+ main
 
 ## Run locally
 
@@ -73,6 +82,14 @@ The primary entities are **volunteers**, **organizations**, **opportunities**, *
 
 The app uses React, React Router, Tailwind CSS, and Vite. It includes semantic landmarks, labeled controls, a keyboard skip link, visible focus, status announcements, and reduced-motion behavior. React Bits supplied animation and navigation components, and photo credits appear on the site. [React Bits](https://reactbits.dev/)
 
+## Challenges and how we addressed them
+
+- **Combining overlapping branch changes.** The posting form and opportunity details branches both touched routing and the organization dashboard. We integrated the full-page form and the newer details and login improvements while keeping the working signup routes and participant profiles.
+- **Keeping volunteer and organization actions separate.** Both roles use the same demo state, but their workflows differ. We matched listings to organization IDs, limited organizers to their own listings, and kept volunteer reservations and applications in the volunteer flow.
+- **Keeping opportunities and shifts consistent.** A shift can belong to a larger opportunity or stand alone. We added checks for dates and capacity, and made linked shifts standalone when their parent opportunity is deleted so those shifts remain available.
+- **Improving mobile layout and keyboard navigation.** We found that the opportunity details page inherited the dashboard's scroll lock and that some homepage effects were disabled on small screens. We limited the scroll lock to dashboards, adapted the effects for mobile, and checked the keyboard skip link at desktop and mobile widths.
+- **Supporting direct links after deployment.** React Router handles navigation in the browser. We added a Vercel rewrite so opening or refreshing a URL loads the app and reaches the correct page.
+
 ## Screenshots
 
 ### Homepage
@@ -86,3 +103,19 @@ The app uses React, React Router, Tailwind CSS, and Vite. It includes semantic l
 ### Organization application review
 
 ![Organization dashboard showing a pending application and View profile, Accept, and Decline buttons](docs/screenshots/organization-applications.png)
+
+### Opportunities catalog on desktop
+
+![Desktop opportunity catalog with search and listing cards](docs/screenshots/opportunities.png)
+
+### Opportunity details
+
+![After-school homework club details showing the location, schedule, and signup options](docs/screenshots/opportunity-details.png)
+
+### Volunteer dashboard
+
+![Volunteer dashboard overview with applications, shifts, and hours navigation](docs/screenshots/volunteer-dashboard.png)
+
+### Organization dashboard
+
+![Organization dashboard overview with listing management, applications, and schedule navigation](docs/screenshots/organization-dashboard.png)
