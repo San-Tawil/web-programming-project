@@ -59,11 +59,25 @@ function OpportunityCard({ opportunity, featured, shifts }) {
         {featured && <div><dt>Signup</dt><dd>{opportunity.signup === 'approval' ? 'Application required' : 'Instant reservation'}</dd></div>}
       </dl>
       {featured ? (
-        <Link to={`/opportunities?shift=${encodeURIComponent(opportunity.id)}`}
-          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4">
-          View shift<span className="sr-only">: {title}</span>
+        <Link
+          to={`/opportunities/${opportunity.id}`}
+          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4"
+        >
+          View details<span className="sr-only">: {title}</span>
         </Link>
-      ) : <OpportunitySignup opportunity={opportunity} />}
+      ) : (
+        <OpportunitySignup opportunity={opportunity} />
+      )}
+
+      {!featured && (
+        <Link
+          to={`/opportunities/${opportunity.id}`}
+          className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline underline-offset-4"
+        >
+          View details<span className="sr-only">: {title}</span>
+        </Link>
+      )}
+
       {!featured && shifts.length > 0 && (
         <details className="mt-4 border-t border-(--aid-rule) pt-3">
           <summary className="cursor-pointer font-semibold">Scheduled shifts ({shifts.length})</summary>
@@ -109,20 +123,20 @@ export default function OpportunityGrid({ featured = false, cause, shiftId }) {
   return (
     <ul ref={gridRef} data-animate={!featured || entered} className="mt-6 motion-safe:data-[animate=true]:[&>li]:animate-opportunity-enter grid list-none gap-4 p-0 md:grid-cols-3">
       {listings.map((opportunity, index) => (
-  <li
-    className="group/listing"
-    key={opportunity.id}
-    style={{ animationDelay: `${index * 65}ms` }}
-  >
-    <OpportunityCard
-      opportunity={opportunity}
-      featured={featured}
-      shifts={opportunities.filter(
-        item => item.parentId === opportunity.id
-      )}
-    />
-  </li>
-))}
+        <li
+          className="group/listing"
+          key={opportunity.id}
+          style={{ animationDelay: `${index * 65}ms` }}
+        >
+          <OpportunityCard
+            opportunity={opportunity}
+            featured={featured}
+            shifts={opportunities.filter(
+              item => item.parentId === opportunity.id
+            )}
+          />
+        </li>
+      ))}
     </ul>
   );
 }

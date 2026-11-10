@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Container from '../components/Container.jsx';
 import { findAccount, matchesPassword } from '../data/mockAccounts.js';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
@@ -8,13 +8,21 @@ import volunteerPhoto from '../assets/photos/community-gardening.webp';
 import { Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/brand/aidconnect-logo.webp';
 
+const rememberedEmailKey = 'aidconnect-remembered-email';
+
 export default function Login() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from;
     const { selectAccount } = useDashboardDemo();
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(
+        () => localStorage.getItem(rememberedEmailKey) || ''
+    );
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(
+        () => localStorage.getItem(rememberedEmailKey) !== null
+    );
     const [loginError, setLoginError] = useState('');
     const [checking, setChecking] = useState(false);
 
@@ -33,8 +41,20 @@ export default function Login() {
                 setLoginError('wrong-password');
                 return;
             }
-            selectAccount(account);
-            navigate(`/${account.role}/dashboard`, { replace: true });
+            if (rememberMe) {
+                localStorage.setItem(rememberedEmailKey, account.email);
+            } else {
+                localStorage.removeItem(rememberedEmailKey);
+            }
+            selectAccount(account, rememberMe);
+
+            const destination =
+                account.role === 'volunteer' &&
+                    from === '/volunteer/dashboard?section=find-shifts'
+                    ? from
+                    : `/${account.role}/dashboard`;
+
+            navigate(destination, { replace: true });
         } catch {
             setLoginError('unavailable');
         } finally {

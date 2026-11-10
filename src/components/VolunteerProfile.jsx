@@ -152,10 +152,25 @@ export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
                 <div className="mt-2 flex flex-wrap items-center gap-2"><Badge label={status ?? (availability === 'Open' && shift.signup === 'approval' ? 'Approval required' : availability)} />
                   <span className="text-sm text-(--muted)">{remaining} {remaining === 1 ? 'spot left' : 'spots left'}</span></div>
               </div>
-              <button type="button" className={button} disabled={action.disabled}
-                aria-label={action.label + ': ' + shift.title} onClick={() => onChange(shift, action.type, status)}>
-                {action.label}
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to={`/opportunities/${shift.id}?from=dashboard`}
+                  className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline underline-offset-4"
+                >
+                  View details
+                  <span className="sr-only">: {shift.title}</span>
+                </Link>
+
+                <button
+                  type="button"
+                  className={button}
+                  disabled={action.disabled}
+                  aria-label={action.label + ': ' + shift.title}
+                  onClick={() => onChange(shift, action.type, status)}
+                >
+                  {action.label}
+                </button>
+              </div>
             </li>
           );
         })}

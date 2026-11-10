@@ -6,6 +6,7 @@ import DashboardAvatar from './DashboardAvatar.jsx';
 import DashboardProfileSettings from './DashboardProfileSettings.jsx';
 import { Modal, StatCard, control } from './DashboardUI.jsx';
 import logo from '../assets/brand/aidconnect-logo.webp';
+import DashboardNav from "./DashboardNav.jsx";
 
 export { Card as DashboardSection } from './DashboardUI.jsx';
 
@@ -80,46 +81,15 @@ export default function DashboardLayout({ title, profile, otherRole, sections, m
       <Link to="/opportunities" className={control + ' mt-4'}>Browse catalog</Link>
     </Modal>}
     <div ref={scroller} className="min-w-0 flex-1 overflow-y-auto overscroll-y-contain" data-dashboard-scroll>
-      <header className="sticky top-0 z-20 flex min-h-14 items-center justify-between gap-2 border-b border-(--line) bg-(--panel) px-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2">
-          <button type="button" aria-label="Open dashboard navigation" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)}
-            className={control + ' lg:hidden'}><Menu aria-hidden="true" size={19} /></button>
-          <div className="hidden lg:block">
-            <button type="button" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed}
-              onClick={() => setCollapsed(value => !value)} className={control}>
-              {collapsed ? <PanelLeftOpen aria-hidden="true" size={18} /> : <PanelLeftClose aria-hidden="true" size={18} />}
-            </button>
-          </div>
-          <span className="min-w-0 truncate text-sm font-semibold" title={pageTitle}>{view === 'overview' ? title : pageTitle}</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <Link to={org ? '/volunteer/dashboard' : '/organizations/dashboard'} aria-label={`View ${otherRole.toLowerCase()} demo`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold hover:bg-(--nav-panel)">
-            <ArrowLeftRight aria-hidden="true" size={17} /><span className="hidden md:inline">View {otherRole.toLowerCase()} demo</span>
-          </Link>
-          <ThemeSwitch />
-          <details ref={avatarMenu} className="relative" onBlur={event => {
-            if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
-          }} onKeyDown={event => {
-            if (event.key === 'Escape' && event.currentTarget.open) {
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector('summary').focus();
-            }
-          }}>
-            <summary aria-label={`Account menu for ${profile.name}`} className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-2 hover:bg-(--nav-panel)">
-              <DashboardAvatar profile={profile} className="size-8 text-xs" />
-              <span className="hidden max-w-36 truncate text-sm font-semibold sm:block">{profile.name}</span>
-              <ChevronDown aria-hidden="true" size={14} className="hidden sm:block" />
-            </summary>
-            <div className="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-(--line) bg-(--panel) p-2 shadow-lg">
-              <p className="m-0 break-words px-3 py-2 text-sm font-semibold">{profile.name}</p>
-              <Link to={dashboardSection(base, 'profile')} onClick={() => { avatarMenu.current.open = false; }} className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-(--nav-panel)">
-                <Settings aria-hidden="true" size={16} /> Profile settings
-              </Link>
-            </div>
-          </details>
-        </div>
-      </header>
+      <DashboardNav
+        pageTitle={view === "overview" ? title : pageTitle}
+        profile={profile}
+        otherRole={otherRole}
+        base={base}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        setDrawerOpen={setDrawerOpen}
+      />
       <main id="overview" tabIndex={-1} aria-label={title} className="mx-auto w-full min-w-0 max-w-[96rem] scroll-mt-14 px-4 py-8 sm:px-6 lg:px-8">
         <nav aria-label="Dashboard tabs" className="mb-6 flex flex-wrap gap-x-4 border-b border-(--line)">
           {sections.map(([id, label]) => <Link key={id} to={dashboardSection(base, id)}

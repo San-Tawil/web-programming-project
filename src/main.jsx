@@ -1,10 +1,19 @@
 import React, { lazy, Suspense, useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 
 import AdaptiveNavbar from "./components/AdaptiveNavbar.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
-import { DashboardDemoProvider } from "./context/DashboardDemoContext.jsx";
+import {
+  DashboardDemoProvider,
+  useDashboardDemo,
+} from "./context/DashboardDemoContext.jsx";
 import Footer from "./components/Footer.jsx";
 
 const HomePage = lazy(() => import("./pages/HomePage.jsx"));
@@ -61,19 +70,30 @@ function PageSkeleton({ pathname }) {
 }
 
 function App() {
-  const { key, pathname, hash } = useLocation();
+  const { key, pathname, hash, search } = useLocation();
   const dashboard = /^\/(volunteer|organizations)\/dashboard(?:\/profile)?\/?$/.test(pathname);
+  const fromDashboard =
+    pathname.startsWith("/opportunities/") &&
+    new URLSearchParams(search).get("from") === "dashboard";
   const dashboardProfile = dashboard && /\/profile\/?$/.test(pathname);
   const Content = dashboard ? 'div' : 'main';
   const main = useRef(null);
   const previousKey = useRef(key);
+  const { accountRole } = useDashboardDemo();
 
   useEffect(() => {
-    if (previousKey.current !== key) {
-      if (!dashboard || !hash) main.current?.focus({ preventScroll: dashboard });
-      previousKey.current = key;
+  if (previousKey.current !== key) {
+    if (dashboard) {
+      window.scrollTo(0, 0);
     }
-  }, [key, dashboard, hash]);
+
+    if (!dashboard || !hash) {
+      main.current?.focus({ preventScroll: dashboard });
+    }
+
+    previousKey.current = key;
+  }
+}, [key, dashboard, hash]);
 
   return (
     <div className="group/app flex min-h-screen flex-col has-[.aid-home]:relative">
@@ -83,7 +103,7 @@ function App() {
       >
         Skip to main content
       </a>
-      {!dashboard && <AdaptiveNavbar />}
+      {!dashboard && !fromDashboard && <AdaptiveNavbar />}
       <Content
         ref={main}
         id="main-content"
@@ -95,58 +115,69 @@ function App() {
           fallback={<PageSkeleton pathname={pathname} />}
         >
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/"
+              element={
+                accountRole === "volunteer" ? (
+                  <Navigate to="/volunteer/dashboard" replace />
+                ) : accountRole === "organizations" ? (
+                  <Navigate to="/organizations/dashboard" replace />
+                ) : (
+                  <HomePage />
+                )
+              }
+            />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
-<Route path="/login" element={<Login />} />
-<Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<RegisterPage />} />
 
-<Route
-  path="/volunteer/login"
-  element={<AccountPage audience="a volunteer" />}
-/>
-<Route
-  path="/volunteer/register"
-  element={<RegisterPage audience="a volunteer" />}
-/>
+            <Route
+              path="/volunteer/login"
+              element={<AccountPage audience="a volunteer" />}
+            />
+            <Route
+              path="/volunteer/register"
+              element={<RegisterPage audience="a volunteer" />}
+            />
 
-<Route
-  path="/organizations/login"
-  element={<AccountPage audience="an organization" />}
-/>
-<Route
-  path="/organizations/register"
-  element={<RegisterPage audience="an organization" />}
-/>
+            <Route
+              path="/organizations/login"
+              element={<AccountPage audience="an organization" />}
+            />
+            <Route
+              path="/organizations/register"
+              element={<RegisterPage audience="an organization" />}
+            />
 
-<Route
-  path="/volunteer/dashboard"
-  element={<VolunteerDashboard />}
-/>
-<Route
-  path="/organizations/dashboard"
-  element={<OrganizationDashboard />}
-/>
+            <Route
+              path="/volunteer/dashboard"
+              element={<VolunteerDashboard />}
+            />
+            <Route
+              path="/organizations/dashboard"
+              element={<OrganizationDashboard />}
+            />
 
-<Route
-  path="/volunteer/dashboard/profile"
-  element={<VolunteerDashboard />}
-/>
-<Route
-  path="/organizations/dashboard/profile"
-  element={<OrganizationDashboard />}
-/>
+            <Route
+              path="/volunteer/dashboard/profile"
+              element={<VolunteerDashboard />}
+            />
+            <Route
+              path="/organizations/dashboard/profile"
+              element={<OrganizationDashboard />}
+            />
 
-<Route
-  path="/opportunities/:id"
-  element={<OpportunityDetailsPage />}
-/>
+            <Route
+              path="/opportunities/:id"
+              element={<OpportunityDetailsPage />}
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </Content>
-      {!dashboard && <Footer />}
+      {!dashboard && !fromDashboard && <Footer />}
     </div>
   );
 }
