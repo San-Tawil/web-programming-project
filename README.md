@@ -5,7 +5,7 @@ AidConnect is a CSC443 Phase 1 frontend for volunteer coordination in Lebanon. V
 - **Team** JavaJunkies
 - **Assigned topic** Volunteer Opportunity Board
 - **Repository** [San-Tawil/web-programming-project](https://github.com/San-Tawil/web-programming-project)
-- **Live demo** Add the public deployment URL here before submitting.
+- **Live demo** [AidConnect](https://aid-connect-web.vercel.app/)
 
 ## Team and page ownership
 
