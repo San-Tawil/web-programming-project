@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ArrowLeftRight, ArrowUpRight, CalendarDays, ChevronDown, ClipboardList, Clock3, LayoutDashboard, ListChecks, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react';
+import { CalendarDays, ChevronDown, ClipboardList, Clock3, LayoutDashboard, ListChecks, Menu, PanelLeftClose, PanelLeftOpen, Settings } from 'lucide-react';
 import ThemeSwitch from './ThemeSwitch.jsx';
 import DashboardAvatar from './DashboardAvatar.jsx';
 import DashboardProfileSettings from './DashboardProfileSettings.jsx';
-import { Modal, StatCard, control } from './DashboardUI.jsx';
+import { Modal, StatCard } from './DashboardUI.jsx';
 import logo from '../assets/brand/aidconnect-logo.webp';
+import DashboardNav from "./DashboardNav.jsx";
 
 export { Card as DashboardSection } from './DashboardUI.jsx';
 
@@ -36,21 +37,21 @@ export function dashboardSection(path, id) {
 }
 
 export default function DashboardLayout({ title, profile, otherRole, sections, metrics, action, children }) {
-  const { pathname, search, hash } = useLocation();
+  const { key, hash } = useLocation();
   const org = otherRole === 'Volunteer';
   const base = org ? '/organizations/dashboard' : '/volunteer/dashboard';
   const view = useDashboardView(sections);
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const scroller = useRef(null);
-  const avatarMenu = useRef(null);
+  const main = useRef(null);
   const pageTitle = view === 'profile' ? 'Profile settings' : sections.find(([id]) => id === view)?.[1];
   const items = [...sections, ['profile', 'Profile settings']];
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0, behavior: 'instant' });
-    if (avatarMenu.current) avatarMenu.current.open = false;
-  }, [pathname, search, hash]);
+    if (!hash) main.current?.focus({ preventScroll: true });
+  }, [key, hash]);
 
   function navItems(iconOnly = false, close) {
     return items.map(([id, label]) => {
@@ -67,60 +68,23 @@ export default function DashboardLayout({ title, profile, otherRole, sections, m
   return <div className="dashboard-shell flex h-dvh min-w-0 bg-(--bg) font-body text-(--text)">
     <aside className={`hidden shrink-0 flex-col overflow-y-auto border-r border-(--line) bg-(--panel) p-3 lg:flex ${collapsed ? 'w-18' : 'w-64'}`}>
       <Link to="/" aria-label="AidConnect home" className={`flex min-h-12 items-center gap-2 rounded-lg px-2 font-semibold ${collapsed ? 'justify-center' : ''}`}>
-        <img src={logo} alt="" className="size-8 rounded-md object-cover" />{!collapsed && 'AidConnect'}
+        <img src={logo} alt="" width="32" height="32" className="size-8 shrink-0 rounded-full object-contain" />{!collapsed && 'AidConnect'}
       </Link>
       <nav aria-label="Dashboard sections" className="mt-6 grid gap-1">{navItems(collapsed)}</nav>
-      <Link to="/opportunities" aria-label="Browse catalog" title={collapsed ? 'Browse catalog' : undefined}
-        className={`mt-auto flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold hover:bg-(--nav-panel) ${collapsed ? 'justify-center' : ''}`}>
-        <ArrowUpRight aria-hidden="true" size={18} className="shrink-0" />{!collapsed && 'Browse catalog'}
-      </Link>
     </aside>
     {drawerOpen && <Modal title="AidConnect" drawer onClose={() => setDrawerOpen(false)}>
       <nav aria-label="Mobile dashboard sections" className="grid gap-1">{navItems(false, () => setDrawerOpen(false))}</nav>
-      <Link to="/opportunities" className={control + ' mt-4'}>Browse catalog</Link>
     </Modal>}
     <div ref={scroller} className="min-w-0 flex-1 overflow-y-auto overscroll-y-contain" data-dashboard-scroll>
-      <header className="sticky top-0 z-20 flex min-h-14 items-center justify-between gap-2 border-b border-(--line) bg-(--panel) px-3 sm:px-6">
-        <div className="flex min-w-0 items-center gap-2">
-          <button type="button" aria-label="Open dashboard navigation" aria-haspopup="dialog" onClick={() => setDrawerOpen(true)}
-            className={control + ' lg:hidden'}><Menu aria-hidden="true" size={19} /></button>
-          <div className="hidden lg:block">
-            <button type="button" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} aria-expanded={!collapsed}
-              onClick={() => setCollapsed(value => !value)} className={control}>
-              {collapsed ? <PanelLeftOpen aria-hidden="true" size={18} /> : <PanelLeftClose aria-hidden="true" size={18} />}
-            </button>
-          </div>
-          <span className="min-w-0 truncate text-sm font-semibold" title={pageTitle}>{view === 'overview' ? title : pageTitle}</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <Link to={org ? '/volunteer/dashboard' : '/organizations/dashboard'} aria-label={`View ${otherRole.toLowerCase()} demo`}
-            className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold hover:bg-(--nav-panel)">
-            <ArrowLeftRight aria-hidden="true" size={17} /><span className="hidden md:inline">View {otherRole.toLowerCase()} demo</span>
-          </Link>
-          <ThemeSwitch />
-          <details ref={avatarMenu} className="relative" onBlur={event => {
-            if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
-          }} onKeyDown={event => {
-            if (event.key === 'Escape' && event.currentTarget.open) {
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector('summary').focus();
-            }
-          }}>
-            <summary aria-label={`Account menu for ${profile.name}`} className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-2 hover:bg-(--nav-panel)">
-              <DashboardAvatar profile={profile} className="size-8 text-xs" />
-              <span className="hidden max-w-36 truncate text-sm font-semibold sm:block">{profile.name}</span>
-              <ChevronDown aria-hidden="true" size={14} className="hidden sm:block" />
-            </summary>
-            <div className="absolute right-0 z-30 mt-2 w-56 rounded-xl border border-(--line) bg-(--panel) p-2 shadow-lg">
-              <p className="m-0 break-words px-3 py-2 text-sm font-semibold">{profile.name}</p>
-              <Link to={dashboardSection(base, 'profile')} onClick={() => { avatarMenu.current.open = false; }} className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm hover:bg-(--nav-panel)">
-                <Settings aria-hidden="true" size={16} /> Profile settings
-              </Link>
-            </div>
-          </details>
-        </div>
-      </header>
-      <main id="overview" tabIndex={-1} aria-label={title} className="mx-auto w-full min-w-0 max-w-[96rem] scroll-mt-14 px-4 py-8 sm:px-6 lg:px-8">
+      <DashboardNav
+        pageTitle={view === "overview" ? title : pageTitle}
+        profile={profile}
+        base={base}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        setDrawerOpen={setDrawerOpen}
+      />
+      <main ref={main} id="overview" tabIndex={-1} aria-label={title} className="mx-auto w-full min-w-0 max-w-[96rem] scroll-mt-14 px-4 py-8 sm:px-6 lg:px-8">
         <nav aria-label="Dashboard tabs" className="mb-6 flex flex-wrap gap-x-4 border-b border-(--line)">
           {sections.map(([id, label]) => <Link key={id} to={dashboardSection(base, id)}
             aria-current={view === id ? 'page' : undefined}
@@ -143,7 +107,7 @@ export default function DashboardLayout({ title, profile, otherRole, sections, m
         </>}
         {view === 'profile' ? <DashboardProfileSettings key={profile.id} profile={profile} role={org ? 'organization' : 'volunteer'} /> :
           <>{view !== 'overview' && <h1 className="mb-4 text-2xl font-semibold">{pageTitle}</h1>}{children ?? <Outlet />}</>}
-        <p className="mt-6 mb-0 text-xs text-(--muted)">Course demo. Dashboard changes reset on refresh.</p>
+        <p className="mt-6 mb-0 text-xs text-(--muted)">Course demo. Listings and activity reset on refresh.</p>
       </main>
     </div>
   </div>;

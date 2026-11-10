@@ -18,6 +18,19 @@ export const mockAccounts = [
   },
 ];
 
+export function isValidPhone(phone) {
+  return /^\+?[0-9().\s-]+$/.test(phone) && /^\d{7,15}$/.test(phone.replace(/^00/, '').replace(/\D/g, ''));
+}
+
+export function isValidWebsite(website) {
+  if (!/^https?:\/\/[^\s]+$/i.test(website)) return false;
+  try {
+    return Boolean(new URL(website).hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function findAccount(email) {
   const target = email.trim().toLowerCase();
   const account = [...mockAccounts, ...readAccounts()].find(item => item.email === target);
@@ -49,7 +62,7 @@ export async function matchesPassword(account, password) {
 }
 
 export async function addAccount({
-  role, name, email, password, location = "", contactName = "", description = "", cv, photo,
+  role, name, email, password, phone = "", website = "", location = "", contactName = "", description = "", cv, photo,
 }) {
   const salt = crypto.randomUUID();
   const account = {
@@ -60,6 +73,8 @@ export async function addAccount({
     salt,
     hash: await passwordHash(password, salt),
     location: location.trim(),
+    phone: phone.trim(),
+    website: website.trim(),
     ...(role === "organizations" && {
       contactName: contactName.trim(),
       description: description.trim(),

@@ -21,6 +21,7 @@ const volunteer = { id: 'maya-haddad', name: 'Maya Haddad' };
 export const initialDemo = {
   organization,
   organizationProfiles: {},
+  volunteerRatings: {},
   volunteer,
   plannedByVolunteer: {},
   hoursByVolunteer: {},
@@ -57,9 +58,39 @@ export const initialDemo = {
 };
 
 export const completedShifts = [
-  { title: 'Neighborhood garden day', cause: 'Community support', date: '2026-08-22', month: 'Aug', hours: 2 },
-  { title: 'Community food packing', cause: 'Food support', date: '2026-09-12', month: 'Sep', hours: 3 },
-  { title: 'Coastal cleanup', cause: 'Environment', date: '2026-10-24', month: 'Oct', hours: 3 },
+  {
+    id: 'completed-garden-day',
+    title: 'Neighborhood garden day',
+    cause: 'Community support',
+    date: '2026-08-22',
+    month: 'Aug',
+    hours: 2,
+    location: 'Sidon, South Lebanon',
+    description:
+      'Prepare planting beds and water seedlings with neighborhood volunteers.',
+  },
+  {
+    id: 'completed-food-packing',
+    title: 'Community food packing',
+    cause: 'Food support',
+    date: '2026-09-12',
+    month: 'Sep',
+    hours: 3,
+    location: 'Beirut',
+    description:
+      'Sort pantry staples and assemble grocery boxes for families in the community.',
+  },
+  {
+    id: 'completed-coastal-cleanup',
+    title: 'Coastal cleanup',
+    cause: 'Environment',
+    date: '2026-10-24',
+    month: 'Oct',
+    hours: 3,
+    location: 'Ramlet el Baida, Beirut',
+    description:
+      'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.',
+  },
 ];
 
 export function shiftDate(date) {
@@ -77,7 +108,7 @@ function demoDate(daysFromToday) {
 }
 
 export function isClosed(listing) {
-  return Boolean(listing.cancelled) || Boolean(listing.date && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
+  return Boolean(listing.cancelled || listing.closed) || Boolean(listing.date && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
 }
 
 export function listingScheduleError(listing, parent) {
@@ -86,6 +117,18 @@ export function listingScheduleError(listing, parent) {
   if (!Number.isFinite(+start) || start <= new Date()) return 'Choose a date and start time in the future.';
   if (!Number.isFinite(+end) || end <= start) return 'End time must be after the start time.';
   if (parent?.date && start < new Date(`${parent.date}T${parent.startTime}`)) return 'A shift cannot start before its program.';
+  return '';
+}
+
+export function opportunityEditError(opportunity, opportunities) {
+  if (!opportunity.date && !opportunity.startTime && !opportunity.endTime) return '';
+  const error = listingScheduleError(opportunity);
+  if (error) return error;
+  const start = new Date(opportunity.date + 'T' + opportunity.startTime);
+  if (opportunities.some(item => item.parentId === opportunity.id && !item.cancelled &&
+    new Date(item.date + 'T' + item.startTime) < start)) {
+    return 'The opportunity cannot start after one of its linked shifts.';
+  }
   return '';
 }
 
@@ -141,6 +184,23 @@ export function demoReducer(state, action) {
     return { ...state, hoursByVolunteer: { ...state.hoursByVolunteer, [id]: updated } };
   }
 
+  if (action.type === 'rateVolunteer') {
+    const { volunteerId, stars } = action;
+    const organizationId = state.organization.id;
+    const eligible = state.signups.some(signup =>
+      signup.volunteerId === volunteerId && isConfirmed(signup) &&
+      state.opportunities.some(item => item.id === signup.opportunityId && item.organizationId === organizationId)
+    );
+    if (!eligible || !Number.isInteger(stars) || stars < 1 || stars > 5) return state;
+    return {
+      ...state,
+      volunteerRatings: {
+        ...state.volunteerRatings,
+        [volunteerId]: { ...state.volunteerRatings[volunteerId], [organizationId]: stars },
+      },
+    };
+  }
+
   if (action.type === 'updateProfile') {
     const { role, changes } = action;
     if (role === 'organization') {
@@ -158,7 +218,11 @@ export function demoReducer(state, action) {
       ...state,
       volunteer: { ...state.volunteer, ...changes },
       signups: state.signups.map(signup =>
-        signup.volunteerId === state.volunteer.id ? { ...signup, volunteer: changes.name } : signup
+        signup.volunteerId === state.volunteer.id ? {
+          ...signup,
+          ...changes,
+          volunteer: changes.name ?? signup.volunteer,
+        } : signup
       ),
     };
   }
@@ -175,7 +239,7 @@ export function demoReducer(state, action) {
     if ((parentId && !parent) || listingScheduleError(action.opportunity, parent)) return state;
     const opportunity = {
       ...action.opportunity,
-      id: `demo-${state.opportunities.length}`,
+      id: `demo-${crypto.randomUUID()}`,
       organizationId: state.organization.id,
       organizer: state.organization.name,
     };
@@ -195,6 +259,32 @@ export function demoReducer(state, action) {
       ? planned.filter(id => id !== opportunity.id)
       : [...planned, opportunity.id];
     return { ...state, plannedByVolunteer: { ...state.plannedByVolunteer, [state.volunteer.id]: updated } };
+  }
+
+  if (['editOpportunity', 'closeOpportunity', 'deleteOpportunity'].includes(action.type)) {
+    if (opportunity.kind !== 'opportunity' || opportunity.organizationId !== state.organization.id) return state;
+    if (action.type === 'deleteOpportunity') {
+      return {
+        ...state,
+        opportunities: state.opportunities.filter(item => item.id !== opportunity.id).map(item =>
+          item.parentId === opportunity.id ? { ...item, parentId: '' } : item
+        ),
+        signups: state.signups.filter(signup => signup.opportunityId !== opportunity.id),
+      };
+    }
+    if (closed) return state;
+    if (action.type === 'closeOpportunity') {
+      return { ...state, opportunities: state.opportunities.map(item =>
+        item.id === opportunity.id ? { ...item, closed: true } : item
+      ) };
+    }
+    const updated = { ...opportunity, ...action.changes };
+    if (updated.capacity < filled || opportunityEditError(updated, state.opportunities)) return state;
+    return { ...state, opportunities: state.opportunities.map(item => {
+      if (item.id === opportunity.id) return updated;
+      if (item.parentId !== opportunity.id) return item;
+      return { ...item, cause: updated.cause, location: updated.location, description: updated.description };
+    }) };
   }
 
   if (action.type === 'editShift' || action.type === 'cancelShift') {
@@ -217,7 +307,7 @@ export function demoReducer(state, action) {
     const status = opportunity.signup === 'approval' ? 'Pending' : 'Reserved';
     return {
       ...state,
-      signups: [...state.signups, { opportunityId: opportunity.id, volunteerId: state.volunteer.id, volunteer: state.volunteer.name, status }],
+      signups: [...state.signups, { opportunityId: opportunity.id, volunteerId: state.volunteer.id, volunteer: state.volunteer.name, phone: state.volunteer.phone, website: state.volunteer.website, location: state.volunteer.location, photo: state.volunteer.photo, cv: state.volunteer.cv, bio: state.volunteer.bio, tags: state.volunteer.tags, status }],
     };
   }
 

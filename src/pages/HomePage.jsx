@@ -91,7 +91,7 @@ export default function HomePage() {
       </section>
       <section aria-label="AidConnect mission">
         <Container className="py-12">
-          <DeferredContent fallback={<h2 className="mx-auto max-w-4xl">{mission}</h2>}>
+          <DeferredContent fallback={<h2 className="mx-auto my-5 max-w-4xl text-[clamp(1.6rem,4vw,3rem)] leading-[1.5] font-extrabold text-ink">{mission}</h2>}>
             <ScrollReveal mode="enter" splitBy="words" effect="rise" stagger={0.04} duration={0.6}
               baseRotation={0} enableBlur={false} baseOpacity={0.15}
               textClassName="font-display font-extrabold text-ink" containerClassName="mx-auto max-w-4xl">{mission}</ScrollReveal>
@@ -100,8 +100,8 @@ export default function HomePage() {
       </section>
       <section aria-labelledby="featured-title">
         <Container className="py-12 md:py-16">
-          <h2 id="featured-title">Featured shifts</h2>
-          <p className="text-(--muted)">Sample listings for the course demo</p>
+          <h2 id="featured-title">Latest opportunities and shifts</h2>
+          <p className="text-(--muted)">Browse recent listings from volunteer organizations.</p>
           <OpportunityGrid featured />
           <Link to="/opportunities" className="mt-4 inline-block font-semibold underline">See all opportunities</Link>
         </Container>
