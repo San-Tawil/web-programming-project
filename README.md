@@ -19,6 +19,12 @@ Run `npm run dev`, `npm run build`, or `npm run preview` from the project folder
 - `ThemeSwitch.jsx` flips a single dark-mode setting. Tailwind's `dark:` classes change the colors, and the browser remembers the choice.
 - `DeferredContent.jsx` waits until a homepage effect is close to view before loading it.
 
+### Dashboard demo
+
+Open `/volunteer/dashboard` or `/organizations/dashboard` from the account placeholders. Reserve the coastal cleanup for instant signup, or apply to the homework club and accept the application from the organization dashboard. Both pages use the same in-memory demo data. Refreshing resets the demo. The hours chart uses sample data.
+
+Organizations can add an undated opportunity or a scheduled shift. Shifts can stand alone or be attached to an opportunity. The dashboard reads the greeting and listing ownership from the demo account, so login can supply the same account fields in Phase 2.
+
 ## React Bits handoff
 
 The app already had GSAP. ScrollReveal uses its bundled ScrollTrigger plugin, and BubbleMenu uses GSAP for its opening transition. This integration adds no dependencies.

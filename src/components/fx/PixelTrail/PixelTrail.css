@@ -1,9 +1,0 @@
-/* Source: React Bits (reactbits.dev) */
-@layer components {
-.pixel-canvas {
-  position: absolute;
-  z-index: 1;
-}
-
-
-}

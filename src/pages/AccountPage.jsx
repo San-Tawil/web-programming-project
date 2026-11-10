@@ -14,7 +14,7 @@ export default function AccountPage({ signUp = false, audience }) {
   return (
     <Container className="py-12">
       <h1>{audience ? `${action} as ${audience}` : action}</h1>
-      <p>This page is a placeholder.</p>
+      <p>{signUp ? 'Choose the type of account you want to create.' : 'This page is a placeholder.'}</p>
       {audience ? (
         <Link className="underline" to={`/${path}`}>Back to account options</Link>
       ) : (
