@@ -1,8 +1,8 @@
 import React from 'react';
 
-const labelClasses = 'grid gap-[0.45rem] font-medium text-(--muted)';
+const labelClasses = 'grid min-w-0 grid-cols-1 content-start gap-[0.45rem] font-medium text-(--muted)';
 const fieldClasses = 'w-full rounded-xl border border-(--line) bg-white/2 px-[0.9rem] py-[0.8rem] text-(--text) focus:outline-2 focus:outline-offset-2 focus:outline-(--primary)';
-const errorClasses = 'text-sm text-red-700 dark:text-red-300';
+const errorClasses = 'text-sm font-normal text-rose-800 dark:text-rose-300';
 
 // Shared field wrapper so every form on the site (register, opportunities,
 // and later login) renders its label, input, and error text the same way.

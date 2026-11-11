@@ -6,8 +6,6 @@ import DeferredContent from './DeferredContent.jsx';
 import PhotoCredit from './PhotoCredit.jsx';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import useMediaQuery from '../hooks/useMediaQuery.js';
-import useCssVar from '../hooks/useCssVar.js';
-const PixelTrail = lazy(() => import('./fx/PixelTrail/PixelTrail.jsx'));
 const LogoLoop = lazy(() => import('./fx/LogoLoop/LogoLoop.jsx'));
 const ScrollExpand = lazy(() => import('./fx/ScrollExpand/ScrollExpand.jsx'));
 
@@ -55,7 +53,7 @@ export function RegionalPlatforms() {
             <span aria-hidden="true">{playing ? 'Ⅱ' : '▶'}</span>
           </button>
         </div>
-        <div id="regional-logo-carousel">
+        <div id="regional-logo-carousel" className="min-w-0">
           <DeferredContent fallback={
             <div className="flex min-h-[3.25rem] items-center justify-around gap-4 [&>span]:h-8 [&>span]:w-[min(25%,8rem)] [&>span]:rounded-lg" aria-hidden="true">
               <span className="bg-(--line) motion-safe:animate-skeleton" />
@@ -64,7 +62,7 @@ export function RegionalPlatforms() {
             </div>
           }>
             <LogoLoop logos={platformLogos} ariaLabel="Volunteering platforms across Lebanon and the region"
-              speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={56} pauseOnHover={false}
+              speed={playing ? 50 : 0} direction="left" logoHeight={32} gap={40} pauseOnHover={false}
               respectReducedMotion={false}
               intro={false} fadeOut scaleOnHover={false} draggable labels="none" className="pt-2 pb-3 [&_.logoloop__node]:block [&_img]:[filter:brightness(0)_saturate(100%)_invert(30%)_sepia(31%)_saturate(1165%)_hue-rotate(103deg)_brightness(92%)] dark:[&_img]:[filter:brightness(0)_invert(1)]" />
           </DeferredContent>
@@ -75,9 +73,10 @@ export function RegionalPlatforms() {
 }
 
 export function VolunteerPhotoBand({ src }) {
+  const desktop = useMediaQuery('(min-width: 768px)');
   const reduced = useReducedMotion();
-  const scrollDistance = reduced ? 0 : 0.8;
-  const holdDistance = reduced ? 0 : 0.15;
+  const scrollDistance = desktop ? 0.8 : 0.55;
+  const holdDistance = 0.15;
   const message = (
     <div className="m-auto max-w-xl rounded-xl bg-(--panel) p-6 text-(--text)">
       <h2 id="volunteer-photo-title">Two hours. One shift. Real people.</h2>
@@ -85,18 +84,29 @@ export function VolunteerPhotoBand({ src }) {
       <Link to="/opportunities" className="inline-flex rounded-lg bg-(--primary) px-4 py-3 font-bold text-(--bg)">Browse opportunities</Link>
     </div>
   );
+  if (reduced) {
+    return (
+      <section aria-labelledby="volunteer-photo-title" className="bg-(--panel)">
+        <figure className="group/photo relative m-0">
+          <LoadingImage src={src} alt="Volunteers carrying boxes of food for distribution" loading="lazy" className="aspect-video max-h-72 w-full object-cover" />
+          <PhotoCredit photographer="Lagos Food Bank Initiative" source="https://www.pexels.com/photo/happy-volunteers-carrying-boxes-8061641/" />
+        </figure>
+        {message}
+      </section>
+    );
+  }
   return (
     <section aria-labelledby="volunteer-photo-title">
       <DeferredContent rootMargin="1200px 0px" fallback={
-        <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}vh` }}>
-          <div className="sticky bg-(--line) motion-safe:animate-skeleton top-0 grid min-h-screen place-items-center p-4 text-center">{message}</div>
+        <div style={{ minHeight: `${100 * (1 + scrollDistance + holdDistance)}svh` }}>
+          <div className="sticky bg-(--line) motion-safe:animate-skeleton top-0 grid min-h-svh place-items-center p-4 text-center">{message}</div>
         </div>
       }>
         <figure className="group/photo relative m-0">
           <ScrollExpand src={src} alt="Volunteers carrying boxes of food for distribution" title="Show up."
-            useWindowScroll startWidth={46} startHeight={60} startRadius={24} mediaZoom={1.2}
+            useWindowScroll startWidth={desktop ? 46 : 82} startHeight={desktop ? 60 : 54} startRadius={24} mediaZoom={1.2}
             scrollDistance={scrollDistance} holdDistance={holdDistance} startOffset={0.35} smoothing={0.04}
-            enabled={!reduced} overlayScrim={0.6}>
+            overlayScrim={0.6}>
             {message}
           </ScrollExpand>
           <PhotoCredit photographer="Lagos Food Bank Initiative" source="https://www.pexels.com/photo/happy-volunteers-carrying-boxes-8061641/" />
@@ -107,24 +117,10 @@ export function VolunteerPhotoBand({ src }) {
 }
 
 export function OrganizationTrail({ photo }) {
-  const reduced = useReducedMotion();
-  const fine = useMediaQuery('(min-width: 768px) and (pointer: fine)');
-  const color = useCssVar('--fx-on-accent');
-  const trailColor = useCssVar('--primary');
-
   return (
     <figure className="group/photo relative m-0">
       <div className="relative block h-52 overflow-hidden rounded-xl md:bg-(--primary)">
         <LoadingImage src={photo} alt="Volunteers sorting clothes and food at a donation center" className="absolute inset-0 size-full object-cover" />
-        {!reduced && fine && color && trailColor && (
-          <div aria-hidden="true" className="absolute inset-0">
-            <DeferredContent className="h-full">
-              <PixelTrail gridSize={44} trailSize={0.08} maxAge={450} interpolate={5}
-                gooeyFilter={{ strength: 2 }} gap={0.1} shine={0.3} glow={0.2}
-                color={color} trailColor={trailColor} />
-            </DeferredContent>
-          </div>
-        )}
       </div>
       <PhotoCredit photographer="Julia M Cameron" source="https://www.pexels.com/photo/people-sorting-donations-6994963/" />
     </figure>

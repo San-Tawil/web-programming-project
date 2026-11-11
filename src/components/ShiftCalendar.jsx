@@ -23,6 +23,8 @@ export default function ShiftCalendar({ shifts, initialDate }) {
   const [view, setView] = useState('month');
   const [cursor, setCursor] = useState(() => initialDate ? new Date(initialDate + 'T00:00:00') : new Date());
   const [selected, setSelected] = useState(null);
+  const today = new Date();
+  const todayKey = dateKey(today);
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
   const weekly = view === 'week';
@@ -57,12 +59,32 @@ export default function ShiftCalendar({ shifts, initialDate }) {
             {option}
           </button>
         ))}
+        <button type="button" className={button} onClick={() => { setCursor(today); setSelected(todayKey); }}>Today</button>
+        {selected && <button type="button" className={button} onClick={() => setSelected(null)}>Show all dates</button>}
       </div>
       <div className="mb-3 flex items-center justify-between gap-2">
         <button type="button" className={button} aria-label={`Previous ${view}`} onClick={() => move(-1)}>‹</button>
         <p role="status" className="m-0 text-center text-sm font-semibold">{title}</p>
         <button type="button" className={button} aria-label={`Next ${view}`} onClick={() => move(1)}>›</button>
       </div>
+      <div className="flex flex-col">
+        <div className="mb-4 border-b border-(--aid-rule) pb-3 sm:order-last sm:mt-4 sm:mb-0 sm:border-t sm:border-b-0 sm:pt-3 sm:pb-0">
+          <h3 className="mb-0 text-sm font-semibold">{selected ? `Agenda · ${shiftDate(selected)}` : 'Shift agenda'}</h3>
+          <div aria-live="polite">
+            {shown.length === 0 ? (
+              <p className="mt-2 mb-0 text-sm text-(--muted)">No shifts scheduled for {selected ? 'this day' : `this ${view}`}.</p>
+            ) : (
+              <ul className="mt-2 mb-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
+                {shown.map(shift => (
+                  <li key={shift.id} className="py-2 break-words">
+                    <strong>{shift.title}</strong>
+                    <span className="block text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       <table className="w-full table-fixed border-collapse text-center text-sm">
         <caption className="sr-only">{title} shift dates</caption>
         <thead className="text-xs text-(--muted)">
@@ -78,9 +100,9 @@ export default function ShiftCalendar({ shifts, initialDate }) {
                 return (
                   <td key={weekday} className="h-10">
                     {(weekly || date.getMonth() === month) && (
-                      <button type="button" aria-pressed={selected === key}
+                      <button type="button" aria-pressed={selected === key} aria-current={key === todayKey ? 'date' : undefined}
                         aria-label={`${shiftDate(key)}, ${count} scheduled shifts`}
-                        className={`mx-auto grid min-h-9 w-full max-w-10 cursor-pointer place-items-center rounded-md border border-transparent text-sm hover:border-(--line) focus-visible:outline-2 focus-visible:outline-(--primary) aria-pressed:border-(--primary) ${count ? 'bg-(--nav-panel) font-bold text-(--primary)' : 'bg-transparent text-(--text)'}`}
+                        className={`mx-auto grid min-h-9 w-full max-w-10 cursor-pointer place-items-center rounded-md border border-transparent text-sm hover:border-(--line) focus-visible:outline-2 focus-visible:outline-(--primary) aria-pressed:border-(--primary) aria-[current=date]:underline ${count ? 'bg-(--nav-panel) font-bold text-(--primary)' : 'bg-transparent text-(--text)'}`}
                         onClick={() => setSelected(current => current === key ? null : key)}>
                         {date.getDate()}
                       </button>
@@ -92,23 +114,6 @@ export default function ShiftCalendar({ shifts, initialDate }) {
           ))}
         </tbody>
       </table>
-      <div className="mt-4 border-t border-(--aid-rule) pt-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="mb-0 text-sm font-semibold">{selected ? shiftDate(selected) : weekly ? 'This week' : 'This month'}</h3>
-          {selected && <button type="button" className={button} onClick={() => setSelected(null)}>Show all</button>}
-        </div>
-        {shown.length === 0 ? (
-          <p className="mt-2 mb-0 text-sm text-(--muted)">No shifts scheduled for {selected ? 'this day' : `this ${view}`}.</p>
-        ) : (
-          <ul className="m-0 list-none divide-y divide-(--aid-rule) p-0 text-sm">
-            {shown.map(shift => (
-              <li key={shift.id} className="py-2">
-                <strong>{shift.title}</strong>
-                <span className="block text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </DashboardSection>
   );

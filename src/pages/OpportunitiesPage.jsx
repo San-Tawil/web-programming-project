@@ -11,7 +11,7 @@ import { WorkspacePage, buttonClass, fieldClass } from '../components/Opportunit
 function ListingCard({ item }) {
   return <article className={`group relative flex h-full flex-col rounded-2xl border border-t-4 border-(--line) ${causeBorder(item.cause)} bg-(--aid-surface) p-6 hover:shadow-lg focus-within:ring-2 focus-within:ring-(--primary) motion-safe:transition motion-safe:hover:-translate-y-1`}>
     <div className="mb-5 flex flex-wrap gap-2"><CauseBadge cause={item.cause} /><span className="text-xs text-(--muted)">{item.kind === 'shift' ? 'Scheduled shift' : 'Opportunity'}</span></div>
-    <p className="mb-2 text-sm text-(--muted)">{item.organization}</p>
+    <p className="mb-2 text-sm text-(--muted)">{item.organizer || item.organization}</p>
     <h2 className="mb-3 break-words"><Link to={`/opportunities/${item.id}`} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none group-hover:underline">{item.title}<span className="sr-only"> - view opportunity details</span></Link></h2>
     <p className="leading-relaxed text-(--muted)">{item.description}</p>
     <dl className="mt-auto grid gap-3 border-t border-(--line) py-4 text-sm [&_dd]:m-0 [&_dd]:font-semibold [&_dt]:text-(--muted) [&>div]:flex [&>div]:justify-between [&>div]:gap-3">
@@ -27,11 +27,12 @@ function ListingCard({ item }) {
 
 export default function OpportunitiesPage() {
   const { opportunities } = useOpportunities();
-  const { accountRole } = useDashboardDemo();
+  const { accountRole, organization } = useDashboardDemo();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState(() => params.get('q') || '');
   const cause = params.get('cause') || '';
   const city = params.get('city') || '';
+  const shiftId = params.get('shift');
   const sort = params.get('sort') || 'date';
   useEffect(() => { document.title = 'Find opportunities | AidConnect'; }, []);
   function filter(key, value) {
@@ -39,9 +40,9 @@ export default function OpportunitiesPage() {
     if (value) next.set(key, value); else next.delete(key);
     setParams(next, { replace: true });
   }
-  const published = opportunities.filter(item => isPublished(item, opportunities));
+  const published = opportunities.filter(item => isPublished(item, opportunities) && (accountRole !== 'organizations' || item.organizationId === organization.id) && (!shiftId || item.id === shiftId));
   const cities = [...new Set(published.map(item => item.city))].sort();
-  const listings = published.filter(item => (!cause || item.cause === cause) && (!city || item.city === city) && `${item.title} ${item.description} ${item.organization} ${item.location} ${item.city}`.toLowerCase().includes(query.trim().toLowerCase()))
+  const listings = published.filter(item => (!cause || item.cause === cause) && (!city || item.city === city) && `${item.title} ${item.description} ${item.organizer || item.organization} ${item.location} ${item.city}`.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((a, b) => sort === 'title' ? a.title.localeCompare(b.title) : sort === 'hours' ? (a.hours || 24) - (b.hours || 24) : (a.date || '9999').localeCompare(b.date || '9999'));
   return <WorkspacePage>
     <header className="mb-8 max-w-3xl"><p className="text-sm font-bold uppercase tracking-widest text-(--primary)">Small actions. Shared impact.</p><h1>Find your next<br />way to give back.</h1><p className="text-lg leading-relaxed text-(--muted)">Discover volunteer opportunities across Lebanon. Find a cause you care about and a role that fits your time.</p><p className="text-sm text-(--muted)">Demo listings for the course project.</p></header>

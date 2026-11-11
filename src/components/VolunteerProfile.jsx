@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { shiftDate, shiftTime, spotsFilled } from '../data/dashboardDemo.js';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Badge, EmptyState } from './DashboardUI.jsx';
+import { listingStatus, shiftDate, shiftTime, signupAction, spotsFilled } from '../data/dashboardDemo.js';
 
-const goal = 40;
-const row = 'flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6';
+const row = 'flex flex-wrap items-center justify-between gap-3 py-3';
 const button = 'min-h-11 cursor-pointer rounded-lg border border-(--line) bg-(--panel) px-3 text-sm font-semibold text-(--text) hover:border-(--primary) disabled:cursor-default disabled:opacity-60';
+const field = 'min-h-11 w-full min-w-0 rounded-lg border border-(--line) bg-(--bg) px-3 text-(--text)';
 const hoursLabel = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 
 function shiftHours({ startTime, endTime }) {
@@ -14,166 +16,169 @@ function shiftHours({ startTime, endTime }) {
   return (minutes(endTime) - minutes(startTime)) / 60;
 }
 
-function HoursBar({ logged, planned, max }) {
-  const loggedWidth = Math.min(100, logged / max * 100);
-  const plannedWidth = Math.min(100 - loggedWidth, planned / max * 100);
-  return (
-    <div className="flex h-2.5 overflow-hidden rounded-full bg-(--nav-panel)" aria-hidden="true">
-      <div className="bg-(--primary)" style={{ width: loggedWidth + '%' }} />
-      <div className="bg-[repeating-linear-gradient(135deg,transparent_0_3px,var(--primary)_3px_5px)]" style={{ width: plannedWidth + '%' }} />
-    </div>
-  );
-}
-
-export default function VolunteerProfile({ volunteer, shifts, completedShifts, signups, mine, dispatch }) {
-  const [available, setAvailable] = useState(true);
-  const [plannedIds, setPlannedIds] = useState([]);
-  const [filter, setFilter] = useState('All');
-  const [photoUrl, setPhotoUrl] = useState('');
-  useEffect(() => {
-    if (!volunteer.photo) return;
-    const url = URL.createObjectURL(volunteer.photo);
-    setPhotoUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [volunteer.photo]);
+export default function VolunteerProfile({ shifts, history, entries, plannedIds, dispatch }) {
+  const [notice, setNotice] = useState('');
   const plannedShifts = shifts.filter(shift => plannedIds.includes(shift.id));
-  const logged = completedShifts.reduce((total, shift) => total + shift.hours, 0);
+  const logged = [...history, ...entries].reduce((total, shift) => total + shift.hours, 0);
   const planned = plannedShifts.reduce((total, shift) => total + shiftHours(shift), 0);
-  const projected = logged + planned;
-  const causes = [...new Set(shifts.map(shift => shift.cause))];
-  const byCause = [...new Set([...completedShifts, ...plannedShifts].map(shift => shift.cause))].map(cause => ({
-    cause,
-    logged: completedShifts.filter(shift => shift.cause === cause).reduce((total, shift) => total + shift.hours, 0),
-    planned: plannedShifts.filter(shift => shift.cause === cause).reduce((total, shift) => total + shiftHours(shift), 0),
-  }));
-  const causeMax = Math.max(1, ...byCause.map(item => item.logged + item.planned));
+  const today = new Date().toLocaleDateString('sv-SE');
 
-  function togglePlan(id) {
-    setPlannedIds(current => current.includes(id) ? current.filter(item => item !== id) : [...current, id]);
+  function logTime(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const title = data.get('task').trim();
+    const date = data.get('date');
+    const hours = Number(data.get('hours'));
+    if (!title || !date || date > today || !Number.isFinite(hours) || hours <= 0 || hours > 24) {
+      setNotice('Enter an activity, a completed date, and up to 24 hours.');
+      return;
+    }
+    dispatch({ type: 'logHours', entry: { id: crypto.randomUUID(), title, date, hours } });
+    form.reset();
+    setNotice('Time logged.');
   }
 
   return (
-    <div className="grid min-w-0 gap-5 lg:col-span-2">
-      <section aria-label="Volunteer profile" className="overflow-hidden rounded-xl border border-(--line) bg-(--aid-surface)">
-        <header className={row}>
-          <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-(--nav-panel) text-sm font-bold text-(--primary)">
-              {photoUrl ? (
-                <img src={photoUrl} alt="" className="size-full rounded-full object-cover" />
-              ) : volunteer.name.split(' ').map(part => part[0]).slice(0, 2).join('')}
-            </span>
-            <div>
-              <h2 className="mb-1 font-display text-xl">Hello, {volunteer.name}</h2>
-              <p className="mb-0 text-sm text-(--muted)">Volunteer · {volunteer.location || 'Location not provided'}</p>
-            </div>
+    <section id="hours" aria-labelledby="hours-title" tabIndex={-1} className="min-w-0 scroll-mt-32 rounded-xl border border-(--line) bg-(--panel) p-4 sm:p-5 lg:scroll-mt-20">
+      <h2 id="hours-title" className="mb-1 font-display text-xl font-bold">Hours &amp; planning</h2>
+      <p className="mb-4 text-sm text-(--muted)">Log time you spent volunteering or estimate time for a future shift.</p>
+      <dl className="m-0 grid grid-cols-3 divide-x divide-(--line) rounded-lg border border-(--line) bg-(--bg)">
+        {[
+          ['Logged', logged],
+          ['Planned', planned],
+          ['Projected', logged + planned],
+        ].map(([label, hours]) => (
+          <div key={label} className="p-3">
+            <dt className="text-sm text-(--muted)">{label}</dt>
+            <dd className="mt-1 ml-0 text-xl font-bold tabular-nums">{hoursLabel.format(hours)} h</dd>
           </div>
-          <label className="flex min-h-11 cursor-pointer items-center gap-2 text-sm text-(--muted)">
-            <input type="checkbox" role="switch" className="peer sr-only" checked={available} onChange={event => setAvailable(event.target.checked)} />
-            Available for shifts
-            <span aria-hidden="true" className="relative h-5 w-9 rounded-full border border-(--line) bg-(--nav-panel) after:absolute after:top-0.5 after:left-0.5 after:size-3.5 after:rounded-full after:bg-(--muted) peer-checked:bg-(--primary) peer-checked:after:translate-x-4 peer-checked:after:bg-(--bg) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--primary)" />
-          </label>
-        </header>
-        <dl className="m-0 grid grid-cols-3 divide-x divide-(--line) border-y border-(--line)">
-          {[
-            ['Logged', logged],
-            ['Planned total', projected],
-            ['Still to plan', Math.max(0, goal - projected)],
-          ].map(([label, hours]) => (
-            <div key={label} className="px-4 py-3 sm:px-6">
-              <dt className="text-xs text-(--muted) sm:text-sm">{label}</dt>
-              <dd className="mt-1 ml-0 font-display text-xl font-bold tabular-nums sm:text-2xl">{hoursLabel.format(hours)} h</dd>
+        ))}
+      </dl>
+      <div className="mt-5 grid gap-6 xl:grid-cols-2">
+        <div>
+          <h3 className="mb-2 text-base">Log volunteer time</h3>
+          <form className="grid gap-3 text-sm [&_label]:grid [&_label]:min-w-0 [&_label]:gap-1" onSubmit={logTime}>
+            <label>Activity<input name="task" className={field} placeholder="e.g. Packed grocery boxes" required maxLength={100} /></label>
+            <div className="grid grid-cols-2 gap-3">
+              <label>Date<input name="date" type="date" className={field} defaultValue={today} max={today} required /></label>
+              <label>Hours<input name="hours" type="number" className={field} placeholder="e.g. 1.5" min="0.01" max="24" step="any" required /></label>
             </div>
-          ))}
-        </dl>
-        <div className="px-4 py-4 sm:px-6">
-          <div className="mb-3 flex flex-wrap justify-between gap-2 text-sm">
-            <h3 className="mb-0 text-sm">Hours this year</h3>
-            <span className="text-(--muted)">{hoursLabel.format(projected)} of {goal} h demo goal</span>
-          </div>
-          <HoursBar logged={logged} planned={planned} max={goal} />
-          <p className="mt-2 mb-0 text-xs text-(--muted)">Solid · Logged <span className="ml-3">Striped · Planned</span></p>
+            <div className="flex flex-wrap items-center gap-3">
+              <button type="submit" className="min-h-11 cursor-pointer rounded-lg border-0 bg-(--primary) px-4 font-semibold text-(--bg)">Log time</button>
+              <span role="status" className="text-sm text-(--muted)">{notice}</span>
+            </div>
+          </form>
+          {entries.length > 0 && (
+            <ul aria-label="Your time entries" className="mt-3 mb-0 list-none divide-y divide-(--line) p-0">
+              {entries.slice().reverse().map(entry => (
+                <li key={entry.id} className={row}>
+                  <div className="min-w-0 break-words"><strong>{entry.title}</strong><span className="block text-sm text-(--muted)">{shiftDate(entry.date)} · {hoursLabel.format(entry.hours)} h</span></div>
+                  <button type="button" className={button} aria-label={'Remove time entry for ' + entry.title} onClick={() => { dispatch({ type: 'removeHours', id: entry.id }); setNotice('Time entry removed.'); }}>Remove</button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <div className={row + ' border-y border-(--line)'}>
-          <h3 className="mb-0 text-base">Plan your shifts</h3>
-          <span className="text-sm text-(--muted)" role="status">{plannedShifts.length} of {shifts.length} selected</span>
-        </div>
-        <ul className="m-0 list-none divide-y divide-(--line) p-0">
-          {shifts.map(shift => (
-            <li key={shift.id}>
-              <label className={row + ' min-h-14 cursor-pointer hover:bg-(--panel)'}>
-                <span className="flex min-w-0 flex-1 items-start gap-3">
-                  <input type="checkbox" checked={plannedIds.includes(shift.id)} onChange={() => togglePlan(shift.id)} className="mt-1 size-4 shrink-0 accent-(--primary)" />
-                  <span>
-                    <strong className="block text-sm">{shift.title}</strong>
-                    <span className="block text-xs text-(--muted)">{shift.cause} · {shiftDate(shift.date)}</span>
+        <div>
+          <h3 className="mb-1 text-base">Plan future shifts</h3>
+          <p className="mb-2 text-sm text-(--muted)">Planning estimates hours. To sign up, use <Link to="/volunteer/dashboard?section=find-shifts" className="underline">Find shifts</Link>.</p>
+          <ul className="m-0 list-none divide-y divide-(--line) p-0">
+            {shifts.map(shift => (
+              <li key={shift.id}>
+                <label className={row + ' cursor-pointer text-sm'}>
+                  <span className="flex min-w-0 flex-1 items-start gap-2">
+                    <input type="checkbox" checked={plannedIds.includes(shift.id)} onChange={() => dispatch({ type: 'togglePlan', opportunityId: shift.id })} className="mt-1 size-4 shrink-0 accent-(--primary)" />
+                    <span className="break-words">{shift.title}</span>
                   </span>
-                </span>
-                <span className="rounded-full border border-(--line) px-2 py-0.5 text-xs tabular-nums">{hoursLabel.format(shiftHours(shift))} h</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-        <div className="border-t border-(--line) px-4 py-4 sm:px-6">
-          <h3 className="mb-3 text-base">Hours by cause</h3>
-          {byCause.length === 0 && <p className="mb-0 text-sm text-(--muted)">No logged or planned hours yet.</p>}
-          <ul className="m-0 grid list-none gap-3 p-0">
-            {byCause.map(item => (
-              <li key={item.cause} className="grid grid-cols-[minmax(5rem,1fr)_2fr_auto] items-center gap-3 text-sm">
-                <span>{item.cause}</span>
-                <HoursBar {...item} max={causeMax} />
-                <span className="text-(--muted) tabular-nums">{hoursLabel.format(item.logged + item.planned)} h</span>
+                  <span className="text-(--muted)">{hoursLabel.format(shiftHours(shift))} h</span>
+                </label>
               </li>
             ))}
           </ul>
+          {!shifts.length && <p className="m-0 text-sm text-(--muted)">No upcoming shifts to plan yet.</p>}
         </div>
-        <p className="m-0 border-t border-(--line) px-4 py-3 text-sm text-(--muted) sm:px-6">Planning is separate from booking. Use the shift board to sign up.</p>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section aria-labelledby="shift-board-title" className="overflow-hidden rounded-xl border border-(--line) bg-(--aid-surface)">
-        <div className={row + ' border-b border-(--line)'}>
-          <h2 id="shift-board-title" className="mb-0 font-display text-xl">Shift board</h2>
-          <div aria-label="Filter shifts by cause" role="group" className="flex flex-wrap gap-2">
-            {['All', ...causes].map(cause => (
-              <button type="button" key={cause} aria-pressed={filter === cause} onClick={() => setFilter(cause)}
-                className={button + ' aria-pressed:border-(--primary) aria-pressed:bg-(--nav-panel) aria-pressed:text-(--primary)'}>
-                {cause}
-              </button>
-            ))}
-          </div>
+export function VolunteerShiftBoard({ shifts, signups, mine, onChange }) {
+  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const causes = [...new Set(shifts.map(shift => shift.cause))];
+  const currentFilter = causes.includes(filter) ? filter : 'All';
+  const visible = shifts.filter(shift => (currentFilter === 'All' || shift.cause === currentFilter) &&
+    shift.title.toLowerCase().includes(search.trim().toLowerCase()) &&
+    (statusFilter === 'All' || listingStatus(shift, signups) === statusFilter));
+
+  return (
+    <section id="find-shifts" aria-labelledby="shift-board-title" tabIndex={-1} className="min-w-0 scroll-mt-32 rounded-xl border border-(--line) bg-(--panel) p-4 sm:p-5 lg:scroll-mt-20">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 id="shift-board-title" className="mb-1 font-display text-xl font-bold">Find shifts</h2>
+          <p className="m-0 text-sm text-(--muted)">Reserve to confirm your place now. Apply when an organizer needs to approve your signup.</p>
         </div>
-        {causes.length === 0 && <p className="m-0 p-4 text-sm text-(--muted)">No shifts are listed yet.</p>}
-        {causes.filter(cause => filter === 'All' || filter === cause).map(cause => (
-          <div key={cause} className="border-b border-(--line) last:border-b-0">
-            <h3 className="mb-0 px-4 pt-4 text-base sm:px-6">{cause}</h3>
-            <ul className="m-0 list-none divide-y divide-(--line) p-0">
-              {shifts.filter(shift => shift.cause === cause).map(shift => {
-                const status = mine.find(signup => signup.opportunityId === shift.id)?.status;
-                const filled = spotsFilled(signups, shift.id);
-                const full = filled >= shift.capacity;
-                const canLeave = status && status !== 'Declined';
-                const actionLabel = canLeave ? 'Leave' : status === 'Declined' ? 'Declined' : full ? 'Full' : shift.signup === 'approval' ? 'Apply' : 'Sign up';
-                return (
-                  <li key={shift.id} className={row}>
-                    <div className="min-w-0 flex-1">
-                      <strong className="block text-sm">{shift.title}</strong>
-                      <span className="block text-xs text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)}</span>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-(--muted)">
-                        <div className="w-20 sm:w-28"><HoursBar logged={filled} planned={0} max={shift.capacity} /></div>
-                        <span>{filled} of {shift.capacity} spots{status && ` · ${status}`}</span>
-                      </div>
-                    </div>
-                    <button type="button" className={button} disabled={status === 'Declined' || (!status && full)}
-                      aria-label={`${actionLabel}: ${shift.title}`}
-                      onClick={() => dispatch({ type: canLeave ? 'leave' : 'join', opportunityId: shift.id })}>
-                      {actionLabel}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </section>
-    </div>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <label className="grid gap-1 text-sm font-semibold">Search shifts
+          <input className={field} type="search" value={search} onChange={event => setSearch(event.target.value)} />
+        </label>
+        <label className="grid gap-1 text-sm font-semibold">Cause
+          <select value={currentFilter} className={field} onChange={event => setFilter(event.target.value)}>
+            <option value="All">All causes</option>
+            {causes.map(cause => <option key={cause}>{cause}</option>)}
+          </select>
+        </label>
+        <label className="grid gap-1 text-sm font-semibold">Availability
+          <select value={statusFilter} className={field} onChange={event => setStatusFilter(event.target.value)}>
+            {['All', 'Open', 'Full'].map(status => <option key={status}>{status}</option>)}
+          </select>
+        </label>
+      </div>
+      {visible.length === 0 && <div className="mt-4"><EmptyState action={<button type="button" className={button + ' mt-2'} onClick={() => { setSearch(''); setFilter('All'); setStatusFilter('All'); }}>Clear filters</button>}>No shifts match these filters.</EmptyState></div>}
+      <ul className="mt-3 mb-0 list-none divide-y divide-(--line) p-0">
+        {visible.map(shift => {
+          const status = mine.find(signup => signup.opportunityId === shift.id)?.status;
+          const availability = listingStatus(shift, signups);
+          const action = signupAction(shift, status, availability);
+          const remaining = Math.max(0, shift.capacity - spotsFilled(signups, shift.id));
+          return (
+            <li key={shift.id} className={row}>
+              <div className="min-w-0 flex-1 break-words">
+                <strong className="block">{shift.title}</strong>
+                <span className="block text-sm text-(--muted)">{shiftDate(shift.date)} · {shiftTime(shift)} · {shift.location}</span>
+                <div className="mt-2 flex flex-wrap items-center gap-2"><Badge label={status ?? (availability === 'Open' && shift.signup === 'approval' ? 'Approval required' : availability)} />
+                  <span className="text-sm text-(--muted)">{remaining} {remaining === 1 ? 'spot left' : 'spots left'}</span></div>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  to={`/opportunities/${shift.id}?from=dashboard`}
+                  className="inline-flex min-h-11 items-center font-semibold text-(--primary) underline underline-offset-4"
+                >
+                  View details
+                  <span className="sr-only">: {shift.title}</span>
+                </Link>
+
+                <button
+                  type="button"
+                  className={
+                    action.type === 'leave'
+                      ? 'min-h-11 cursor-pointer rounded-md border border-red-600 bg-(--panel) px-3 text-sm font-semibold text-red-600 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600 disabled:cursor-default disabled:opacity-60 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-950/30'
+                      : button
+                  }
+                  disabled={action.disabled}
+                  aria-label={action.label + ': ' + shift.title}
+                  onClick={() => onChange(shift, action.type, status)}
+                >
+                  {action.label}
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

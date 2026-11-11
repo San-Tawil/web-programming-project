@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-11 - Local integration of main and opportunity details
+
+- Combined main's dashboard navigation, persistent sessions, profile settings, ownership isolation, hour tracking/planning, posting forms, participant profiles, and shift edit/cancel workflows with the searchable, cause-colored opportunity catalog and organization tools.
+- Kept main's detail route and dashboard return links, added organization profiles and preparation guidance, and preserved guest login/signup return paths.
+- Separated dashboard and organization-tools form components so their props and validation remain compatible. Shared capacity, scheduling, visibility and ownership checks run against the same data store.
+- Preserved dashboard program deletion/closure behavior and tools' explicitly confirmed cascading deletion/visibility behavior. Added regression coverage for both contracts.
+- Prepared on local `review/opportunities-main` for review; no remote branch or main update was made.
+
 ## 2026-11-10 - Opportunity details, cause colors, and guest signup
 
 - Color-coded opportunity cards by cause using shared Tailwind utilities and visible text labels. Added hover and keyboard focus feedback, with card links opening a dedicated detail route.
@@ -15,6 +23,24 @@
 - Added capacity protection, unique record IDs, and removal of dependent shifts/signups when a parent opportunity is deleted. Closing a parent also hides its shifts from public discovery.
 - Fixed missing React imports on About, Contact, and Not Found, connected role-specific login routes to the login form, and preserved search input focus when filters change.
 - Aligned Vite with the existing plugins' supported versions, rebuilt the production output, and added setup notes, previews, and regression tests.
+
+## 2026-11-10 — Signup, volunteer profiles, and homepage updates
+
+**Author** Hassan El-Tawil
+
+- Added phone numbers and optional website URLs to volunteer and organization signup. Signup and profile settings use a searchable country calling-code dropdown and a separate phone number field with a gray example. Login keeps the email and password fields.
+- Added editable phone and website fields to both dashboards' profile settings. Volunteers can also add a bio, up to eight tags, and a PDF CV up to 5 MB. Signed-in profile details persist per account in the same browser. Uploaded files last until refresh.
+- Added a dedicated volunteer profile view for organizations reviewing their own pending or reviewed applications. It shows the volunteer's photo, bio, tags, location, phone, website, downloadable CV, and completed-shift count. In the current demo, volunteer edits update the profile shown on existing applications.
+- Added a 1–5 star rating after an organization confirms a volunteer for one of its listings. Each organization can update its own rating, and the profile shows the average and rating count. The completed-shift count combines recorded demo history with confirmed, uncancelled shifts whose scheduled end time has passed. Ratings reset on refresh.
+- Replaced the catalog's dashboard link with Log in and Sign up for signed-out visitors. Listing cards show Log in to join, while signed-in volunteers can reserve or apply.
+- Added the full-page posting form from `Post/Edit-Oppurtunity-Form`, with an Opportunity/Shift toggle, a posting confirmation, and an Add another action. The organization dashboard links to it.
+- Added Edit, Close, and Delete to My opportunities. Closing preserves applications and linked shifts. Deleting removes the opportunity and its applications and makes its linked shifts standalone.
+- Updated the homepage to show the three latest open shifts or opportunities, including newly posted organization listings. Signed-in users can also visit the homepage. Listings reset on refresh in the demo.
+- Reduced likely sources of startup layout shifts by loading the homepage with the app, matching the navigation and mission placeholders to their final layouts, and avoiding late font swaps. Updated image fetch priority markup for React 18.
+- Enabled the regional organization carousel and expanding photo animation on mobile. The carousel supports swiping and playback controls. The photo uses a shorter scroll distance and stable viewport height on mobile. Both respect reduced-motion preferences.
+- Improved visible keyboard focus and dashboard focus after navigation. Routed role-specific login links to the working login form, added a recovery link on missing pages, and announced demo contact submissions to screen readers.
+- Fixed rendering for About and Contact us, restored scrolling on opportunity details opened from the dashboard, removed the dashboard demo role switch, and made the sidebar logo circular with a fixed size.
+
 
 ## 2026-11-08 — Separate opportunities and shifts
 

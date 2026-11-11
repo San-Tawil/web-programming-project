@@ -91,7 +91,7 @@ export default function HomePage() {
       </section>
       <section aria-label="AidConnect mission">
         <Container className="py-12">
-          <DeferredContent fallback={<h2 className="mx-auto max-w-4xl">{mission}</h2>}>
+          <DeferredContent fallback={<h2 className="mx-auto my-5 max-w-4xl text-[clamp(1.6rem,4vw,3rem)] leading-[1.5] font-extrabold text-ink">{mission}</h2>}>
             <ScrollReveal mode="enter" splitBy="words" effect="rise" stagger={0.04} duration={0.6}
               baseRotation={0} enableBlur={false} baseOpacity={0.15}
               textClassName="font-display font-extrabold text-ink" containerClassName="mx-auto max-w-4xl">{mission}</ScrollReveal>
@@ -100,25 +100,25 @@ export default function HomePage() {
       </section>
       <section aria-labelledby="featured-title">
         <Container className="py-12 md:py-16">
-          <h2 id="featured-title">Featured opportunities</h2>
-          <p className="text-(--muted)">Sample listings for the course demo</p>
+          <h2 id="featured-title">Latest opportunities and shifts</h2>
+          <p className="text-(--muted)">Browse recent listings from volunteer organizations.</p>
           <OpportunityGrid featured />
           <Link to="/opportunities" className="mt-4 inline-block font-semibold underline">See all opportunities</Link>
         </Container>
       </section>
 
-      <VolunteerPhotoBand src={distributionPhoto} />
-
       <section aria-labelledby="how-title" className="border-t border-(--aid-rule)">
         <Container className="py-12">
-          <h2 id="how-title">Pick a cause. Show up. Log your hours.</h2>
+          <h2 id="how-title">How it works</h2>
           <ol className="grid gap-6 pl-5 sm:grid-cols-3">
-            <li><strong>Find a role.</strong> Browse by cause, location, or time commitment.</li>
-            <li><strong>Get in touch.</strong> Check what the organization needs and how to apply.</li>
-            <li><strong>Show up.</strong> Give your time and help with the work on the day.</li>
+            <li><strong>Find a shift.</strong> Check the date, meeting location, and signup type.</li>
+            <li><strong>Reserve a spot or apply.</strong> Open signup confirms your spot immediately. Approval-required shifts need a decision from the organizer.</li>
+            <li><strong>See your status in your dashboard.</strong> Check your reservations and whether your applications are pending, accepted, or declined.</li>
           </ol>
         </Container>
       </section>
+
+      <VolunteerPhotoBand src={distributionPhoto} />
 
       <Container className="flex justify-center py-10 md:py-16">
         <div className="w-full max-w-[25rem]">
@@ -163,8 +163,11 @@ export default function HomePage() {
         <Container className="grid items-center gap-8 py-12 md:grid-cols-[1.25fr_1fr]">
           <div className="relative z-10">
           <h2 id="organization-title">Run a drive or a cleanup? Post it here.</h2>
-          <p>Tell local volunteers what you need, where to show up, and how much time to set aside.</p>
-          <Link to="/organizations/register" className="inline-flex rounded-md bg-aid-primary px-5 py-3 font-semibold text-white hover:underline">Post an opportunity</Link>
+          <p>Try posting shifts and reviewing volunteer applications in the organization demo.</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link to="/organizations/dashboard" className="inline-flex rounded-md bg-aid-primary px-5 py-3 font-semibold text-white hover:underline">Try the organization dashboard</Link>
+            <Link to="/organizations/register" className="inline-flex min-h-11 items-center font-semibold underline">Post an opportunity</Link>
+          </div>
           </div>
           <OrganizationTrail photo={sortingPhoto} />
         </Container>

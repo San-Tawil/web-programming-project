@@ -2,16 +2,17 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authDestination } from "../data/authDestination.js";
 import FormField from "./FormField.jsx";
+import PhoneField, { readPhone } from "./PhoneField.jsx";
 import { useDashboardDemo } from "../context/DashboardDemoContext.jsx";
-import { findAccount, addAccount } from "../data/mockAccounts.js";
+import { findAccount, addAccount, isValidPhone, isValidWebsite } from "../data/mockAccounts.js";
 
 const emptyForm = {
   firstName: "", lastName: "", organizationName: "", contactName: "",
-  email: "", location: "", description: "", password: "", confirmPassword: "",
+  email: "", website: "", location: "", description: "", password: "", confirmPassword: "",
 };
 const uploadClasses = "min-w-0 cursor-pointer text-sm text-(--muted) file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-(--nav-panel) file:px-3 file:py-2 file:font-semibold file:text-(--primary) hover:file:bg-(--line)";
 
-function validate(form, emailIsValid, isOrganization) {
+function validate(form, emailIsValid, isOrganization, { number, phone, code, invalidCode }) {
   const errors = {};
   if (isOrganization) {
     if (!form.organizationName.trim()) errors.organizationName = "Enter your organization name.";
@@ -19,6 +20,13 @@ function validate(form, emailIsValid, isOrganization) {
   } else {
     if (!form.firstName.trim()) errors.firstName = "Enter your first name.";
     if (!form.lastName.trim()) errors.lastName = "Enter your last name.";
+  }
+  if (!code || invalidCode) errors.phone = "Select a country calling code.";
+  else if (!number || number.startsWith('+') || !isValidPhone(phone)) {
+    errors.phone = "Enter a phone number with 7 to 15 digits.";
+  }
+  if (form.website.trim() && !isValidWebsite(form.website.trim())) {
+    errors.website = "Enter a website URL starting with https:// or http://.";
   }
   if (!emailIsValid) errors.email = "Enter a valid email address.";
   else if (findAccount(form.email))
@@ -56,11 +64,12 @@ export default function RegisterForm({ role, children }) {
     event.preventDefault();
     if (saving) return;
     const emailField = event.currentTarget.elements.namedItem("email");
-    const nextErrors = validate(form, emailField.validity.valid, isOrganization);
+    const phone = readPhone(event.currentTarget.elements, 'phone');
+    const nextErrors = validate(form, emailField.validity.valid, isOrganization, phone);
     setErrors(nextErrors);
     const firstError = Object.keys(nextErrors)[0];
     if (firstError) {
-      event.currentTarget.elements.namedItem(firstError).focus();
+      event.currentTarget.elements.namedItem(firstError === 'phone' && !phone.code ? 'phone-code' : firstError).focus();
       return;
     }
 
@@ -71,6 +80,8 @@ export default function RegisterForm({ role, children }) {
         role,
         name: isOrganization ? form.organizationName : `${form.firstName.trim()} ${form.lastName.trim()}`,
         email: form.email,
+        phone: phone.phone,
+        website: form.website,
         password: form.password,
         location: form.location,
         contactName: form.contactName,
@@ -93,7 +104,7 @@ export default function RegisterForm({ role, children }) {
 
   return (
     <form
-      className="grid gap-4 rounded-[22px] border border-(--line) bg-(--panel) p-5 sm:p-6"
+      className="grid min-w-0 gap-5"
       aria-label={isOrganization ? "Organization sign up" : "Volunteer sign up"}
       noValidate
       onSubmit={handleSubmit}
@@ -149,12 +160,15 @@ export default function RegisterForm({ role, children }) {
         autoComplete="email"
         pattern=".+@.+\..+"
         required
-        className="aria-invalid:border-red-600 dark:aria-invalid:border-red-300"
+        className="aria-invalid:border-rose-800/60 dark:aria-invalid:border-rose-300/60"
         placeholder="you@example.com"
         value={form.email}
         onChange={handleChange}
         error={errors.email}
       />
+      <PhoneField name="phone" required error={errors.phone} />
+      <FormField label="Website URL (optional)" name="website" type="url" autoComplete="url" maxLength={500}
+        placeholder="https://example.com" value={form.website} onChange={handleChange} error={errors.website} />
       <FormField
         label={isOrganization ? "City or area *" : "City or area (optional)"}
         name="location"
@@ -213,7 +227,7 @@ export default function RegisterForm({ role, children }) {
           </div>
         </>
       )}
-      {errors.form && <p role="alert" className="m-0 text-sm text-red-700 dark:text-red-300">{errors.form}</p>}
+      {errors.form && <p role="alert" className="m-0 text-sm text-rose-800 dark:text-rose-300">{errors.form}</p>}
       <button
         type="submit"
         disabled={saving}

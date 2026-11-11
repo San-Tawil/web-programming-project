@@ -11,8 +11,8 @@ export function OpportunitiesProvider({ children }) {
       ? { type: 'updateOpportunity', opportunityId: id, values }
       : { type: 'post', opportunity: { ...values, kind: 'opportunity', signup: 'open' } });
   }
-  function removeOpportunity(id) { dispatch({ type: 'deleteOpportunity', opportunityId: id }); }
-  return <OpportunitiesContext.Provider value={{ opportunities, organization, saveOpportunity, removeOpportunity }}>{children}</OpportunitiesContext.Provider>;
+  function removeOpportunity(id) { dispatch({ type: 'deleteToolOpportunity', opportunityId: id }); }
+  return <OpportunitiesContext.Provider value={{ opportunities: opportunities.map(item => ({ ...item, hours: item.startTime && item.endTime ? (new Date(`2000-01-01T${item.endTime}`) - new Date(`2000-01-01T${item.startTime}`)) / 3600000 : item.hours, organization: item.organizer, city: item.city || item.location, displayStatus: item.cancelled || item.closed ? 'Closed' : item.status || 'Published' })), organization, saveOpportunity, removeOpportunity }}>{children}</OpportunitiesContext.Provider>;
 }
 
 export function useOpportunities() { return useContext(OpportunitiesContext); }

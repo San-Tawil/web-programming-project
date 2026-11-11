@@ -8,7 +8,7 @@ import useReducedMotion from '../hooks/useReducedMotion.js';
 
 const BubbleMenu = lazy(() => import('./fx/BubbleMenu/BubbleMenu.jsx'));
 const Navbar = lazy(() => import('./Navbar.jsx'));
-const navigationFallback = <nav aria-label="Site pages"><Link to="/">Home</Link> · <Link to="/opportunities">Find opportunities</Link></nav>;
+const navigationFallback = <nav aria-label="Site pages" className="md:flex md:min-h-[81px] md:items-center md:gap-2 md:group-has-[.aid-home]/app:fixed md:group-has-[.aid-home]/app:inset-x-0 md:group-has-[.aid-home]/app:top-0 md:group-has-[.aid-home]/app:z-20 md:group-has-[.aid-home]/app:text-white"><Link to="/">Home</Link> · <Link to="/opportunities">Find opportunities</Link></nav>;
 const items = [
   { label: 'Home', to: '/' },
   { label: 'Find opportunities', to: '/opportunities' },
