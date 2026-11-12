@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Container from "../components/Container.jsx";
 import RegisterForm from "../components/RegisterForm.jsx";
 import RoleToggle from "../components/RoleToggle.jsx";
@@ -32,6 +32,7 @@ const toggleOptions = roles.map(({ path, name }) => ({ value: path, label: name 
 
 export default function RegisterPage({ audience }) {
   const navigate = useNavigate();
+  const { state } = useLocation();
   const [preview, setPreview] = useState(previews[0]);
   const role = roles.find((item) => item.label === audience) ?? roles[0];
 
@@ -45,7 +46,7 @@ export default function RegisterPage({ audience }) {
           </h1>
           <p className="text-(--muted)">{role.blurb}</p>
           <p className="text-sm text-(--muted)">
-            Already have an account? <Link className="underline" to="/login">Log in</Link>
+            Already have an account? <Link className="underline" to="/login" state={state}>Log in</Link>
           </p>
         </div>
         <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
@@ -54,7 +55,7 @@ export default function RegisterPage({ audience }) {
               label="Account type"
               options={toggleOptions}
               value={role.path}
-              onChange={(path) => navigate(`/${path}/register`, { replace: true })}
+              onChange={(path) => navigate(`/${path}/register`, { replace: true, state })}
             />
           </RegisterForm>
         </div>

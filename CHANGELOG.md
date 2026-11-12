@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026-11-12 - Integration review and contribution documentation
+
+**Author** Adam M. Al Dayekh (`adamdayekh945`)
+
+- Verified the review branch contains main at `06e2dc5`; documented commit evidence and preserved team work.
+- Filled Adam's contribution row while preserving teammates' credits, added author labels to his changelog entries, and consolidated outdated README instructions.
+- Clarified dashboard versus tools deletion/closure behavior, mock access limitations, and PR versus main deployment status.
+- Recorded current checks in `docs/integration-review.md`.
+
+## 2026-11-11 - Local integration of main and opportunity details
+
+**Author** Adam M. Al Dayekh (`adamdayekh945`)
+
+- Combined main's dashboard navigation, persistent sessions, profile settings, ownership isolation, hour tracking/planning, posting forms, participant profiles, and shift edit/cancel workflows with the searchable, cause-colored opportunity catalog and organization tools.
+- Kept main's detail route and dashboard return links, added organization profiles and preparation guidance, and preserved guest login/signup return paths.
+- Separated dashboard and organization-tools form components so their props and validation remain compatible. Shared capacity, scheduling, visibility and ownership checks run against the same data store.
+- Preserved dashboard program deletion/closure behavior and tools' explicitly confirmed cascading deletion/visibility behavior. Added regression coverage for both contracts.
+- Prepared on `review/opportunities-main`, then pushed for review in PR #6. This integrated main into the review branch; it did not merge the PR into main.
+
+## 2026-11-10 - Opportunity details, cause colors, and guest signup
+
+**Author** Adam M. Al Dayekh (`adamdayekh945`)
+
+- Color-coded opportunity cards by cause using shared Tailwind utilities and visible text labels. Added hover and keyboard focus feedback, with card links opening a dedicated detail route.
+- Added `/opportunities/:opportunityId` with preparation guidance, schedule, availability, related shifts, and a demo organization profile. Closed, draft, missing, or reset listings show an unavailable state.
+- Replaced reservation/application controls for guests with Sign up and Log in links. Volunteers return to the selected opportunity after authentication; organization accounts receive a volunteer-account explanation. Shared state also rejects guest join actions.
+- Added accessible headings, breadcrumbs, focus management, live availability feedback, and reduced-motion support. Verified the production build, six automated tests, browser flows, and automated accessibility checks across mobile/desktop widths and both themes.
+
+## 2026-11-09 - Searchable opportunities and organization tools
+
+**Author** Adam M. Al Dayekh (`adamdayekh945`)
+
+- Added search, combined cause/city filters, sorting, result counts, reset controls, and empty states to the opportunity list.
+- Added `/organizations/tools` with validated create/edit forms, draft/published/closed visibility, status counts/filtering, and confirmed deletion.
+- Integrated the list, homepage, organization tools, and both dashboards with one shared mock data store while merging the latest main branch. Kept dashboard program/shift creation, signup, approval, login, and registration flows working together.
+- Added capacity protection, unique record IDs, and removal of dependent shifts/signups when a parent opportunity is deleted. Closing a parent also hides its shifts from public discovery.
+- Fixed missing React imports on About, Contact, and Not Found, connected role-specific login routes to the login form, and preserved search input focus when filters change.
+- Aligned Vite with the existing plugins' supported versions, rebuilt the production output, and added setup notes, previews, and regression tests.
+
 ## 2026-11-10 — Signup, volunteer profiles, and homepage updates
 
 **Author** Hassan El-Tawil

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { authDestination } from "../data/authDestination.js";
 import FormField from "./FormField.jsx";
 import PhoneField, { readPhone } from "./PhoneField.jsx";
 import { useDashboardDemo } from "../context/DashboardDemoContext.jsx";
@@ -42,6 +43,7 @@ function validate(form, emailIsValid, isOrganization, { number, phone, code, inv
 export default function RegisterForm({ role, children }) {
   const isOrganization = role === "organizations";
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { selectAccount } = useDashboardDemo();
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
@@ -92,7 +94,7 @@ export default function RegisterForm({ role, children }) {
         return;
       }
       selectAccount(account);
-      navigate(`/${account.role}/dashboard`, { replace: true });
+      navigate(authDestination(account.role, state?.returnTo), { replace: true });
     } catch {
       setErrors({ form: "Your account could not be saved in this browser. Try again." });
     } finally {

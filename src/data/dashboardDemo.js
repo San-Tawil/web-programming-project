@@ -1,3 +1,5 @@
+import { initialOpportunities } from './opportunities.js';
+
 // Phase 1 mock listings. The IDs can carry over to the team's shared opportunity data.
 const listings = [
   { id: 'coastal-cleanup', cause: 'Environment', title: 'Coastal cleanup', location: 'Ramlet el Baida, Beirut', time: '2 hours · One shift', description: 'Walk the shoreline with a small team, collect litter, and sort recyclables at the end of the shift.', bring: 'Water, sun protection, and closed-toe shoes.' },
@@ -27,12 +29,16 @@ export const initialDemo = {
   hoursByVolunteer: {},
   opportunities: [
     ...listings.map((listing, index) => ({
+      ...initialOpportunities.find(item => item.id === listing.id),
       ...listing,
+      status: 'Published',
+      organization: organization.name,
       kind: 'shift',
       date: demoDate(5 + index),
       startTime: '09:00',
       endTime: '11:00',
       ...times[listing.id],
+      hours: listing.id === 'food-packing' || listing.id === 'garden-day' ? 3 : listing.id === 'homework-club' ? 1 : 2,
       capacity: 8,
       organizationId: organization.id,
       organizer: organization.name,
@@ -40,6 +46,10 @@ export const initialDemo = {
     })),
     {
       id: 'community-tutoring',
+      city: 'Beirut',
+      status: 'Published',
+      organization: organization.name,
+      requirements: 'Contact the program coordinator to arrange a suitable tutoring session.',
       kind: 'opportunity',
       title: 'Community tutoring program',
       cause: 'Education',
@@ -108,7 +118,7 @@ function demoDate(daysFromToday) {
 }
 
 export function isClosed(listing) {
-  return Boolean(listing.cancelled || listing.closed) || Boolean(listing.date && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
+  return Boolean(listing.cancelled || listing.closed || listing.status === 'Closed' || listing.status === 'Draft') || Boolean(listing.date && new Date(`${listing.date}T${listing.startTime}`) <= new Date());
 }
 
 export function listingScheduleError(listing, parent) {
@@ -210,7 +220,7 @@ export function demoReducer(state, action) {
         organization: profile,
         organizationProfiles: { ...state.organizationProfiles, [profile.id]: profile },
         opportunities: state.opportunities.map(item =>
-          item.organizationId === profile.id ? { ...item, organizer: profile.name } : item
+          item.organizationId === profile.id ? { ...item, organizer: profile.name, organization: profile.name } : item
         ),
       };
     }
@@ -240,6 +250,11 @@ export function demoReducer(state, action) {
     const opportunity = {
       ...action.opportunity,
       id: `demo-${crypto.randomUUID()}`,
+      status: action.opportunity.status || 'Published',
+      city: action.opportunity.city || action.opportunity.location,
+      requirements: action.opportunity.requirements || 'Ask the organizer about preparation and meeting details.',
+      organization: state.organization.name,
+      hours: (new Date(`2000-01-01T${action.opportunity.endTime}`) - new Date(`2000-01-01T${action.opportunity.startTime}`)) / 3600000,
       organizationId: state.organization.id,
       organizer: state.organization.name,
     };
@@ -251,6 +266,29 @@ export function demoReducer(state, action) {
   const filled = spotsFilled(state.signups, opportunity.id);
   const full = filled >= opportunity.capacity;
   const closed = isClosed(opportunity);
+
+  // Organization tools supplement the dashboard actions without changing their contracts.
+  if (action.type === 'updateOpportunity' && opportunity.organizationId === state.organization.id) {
+    if (isClosed({ ...opportunity, status: 'Published' })) return state;
+    const changes = { ...action.values };
+    const updated = { ...opportunity, ...changes, id: opportunity.id, organizationId: opportunity.organizationId };
+    if (changes.hours && updated.startTime) {
+      const [hours, minutes] = updated.startTime.split(':').map(Number);
+      const end = hours * 60 + minutes + Number(changes.hours) * 60;
+      if (end >= 1440) return state;
+      updated.endTime = `${String(Math.floor(end / 60)).padStart(2, '0')}:${String(end % 60).padStart(2, '0')}`;
+    }
+    const parent = state.opportunities.find(item => item.id === updated.parentId);
+    const error = updated.kind === 'shift' ? listingScheduleError(updated, parent) : opportunityEditError(updated, state.opportunities);
+    if (updated.capacity < filled || error) return state;
+    return { ...state, opportunities: state.opportunities.map(item => item.id === updated.id ? updated : item) };
+  }
+  if (action.type === 'deleteToolOpportunity' && opportunity.organizationId === state.organization.id) {
+    const removed = new Set([opportunity.id, ...state.opportunities.filter(item => item.parentId === opportunity.id).map(item => item.id)]);
+    return { ...state, opportunities: state.opportunities.filter(item => !removed.has(item.id)),
+      signups: state.signups.filter(item => !removed.has(item.opportunityId)),
+      plannedByVolunteer: Object.fromEntries(Object.entries(state.plannedByVolunteer).map(([id, planned]) => [id, planned.filter(item => !removed.has(item))])) };
+  }
 
   if (action.type === 'togglePlan') {
     if (opportunity.kind !== 'shift' || closed) return state;
@@ -302,7 +340,7 @@ export function demoReducer(state, action) {
     const alreadyJoined = state.signups.some(item =>
       item.opportunityId === opportunity.id && item.volunteerId === state.volunteer.id
     );
-    if (closed || full || alreadyJoined) return state;
+    if (closed || full || alreadyJoined || !isPublished(opportunity, state.opportunities)) return state;
 
     const status = opportunity.signup === 'approval' ? 'Pending' : 'Reserved';
     return {
@@ -334,4 +372,12 @@ export function demoReducer(state, action) {
   }
 
   return state;
+}
+
+export function isPublished(item, opportunities) {
+  const visible = record => record && record.status !== 'Draft' && record.status !== 'Closed' && !record.closed && !record.cancelled;
+  const parent = opportunities.find(record => record.id === item?.parentId);
+  // Dashboard closure stops the program; tools visibility also hides linked shifts.
+  const parentVisible = parent && parent.status !== 'Draft' && parent.status !== 'Closed';
+  return Boolean(visible(item) && (!item.parentId || parentVisible));
 }

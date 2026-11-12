@@ -1,8 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "../components/DashboardUI.jsx";
 import { useParams, Link, useSearchParams } from "react-router-dom";
-import { causeColors } from "../components/OpportunityGrid.jsx";
+import CauseBadge, { causeBorder } from "../components/CauseBadge.jsx";
+import OrganizationProfile from "../components/OrganizationProfile.jsx";
 import { useDashboardDemo } from "../context/DashboardDemoContext.jsx";
 import DashboardNav from "../components/DashboardNav.jsx";
 import {
@@ -13,6 +14,7 @@ import {
   spotsFilled,
   listingStatus,
   signupAction,
+  isPublished,
 } from "../data/dashboardDemo.js";
 import Container from "../components/Container.jsx";
 import {
@@ -50,7 +52,9 @@ export default function OpportunityDetailsPage() {
   const opportunity =
     opportunities.find(item => item.id === id && (!organizationView || item.organizationId === organization.id)) ?? completedShift;
 
-  if (!opportunity) {
+  useEffect(() => { document.title = `${opportunity?.title || 'Opportunity not found'} | AidConnect`; }, [opportunity?.title]);
+
+  if (!opportunity || (!fromDashboard && opportunity.status === 'Draft')) {
     return <Container className="py-10">
       <h1>Opportunity not found</h1>
       <Link to="/opportunities" className="text-(--primary) underline">Back to opportunities</Link>
@@ -127,13 +131,8 @@ export default function OpportunityDetailsPage() {
                     : "Back to opportunities"}
           </Link>
 
-          <div className="mb-8">
-            <span
-              className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold text-[#11201a] ${causeColors[opportunity.cause] ?? "bg-[#f6ef9a]"
-                }`}
-            >
-              {opportunity.cause}
-            </span>
+          <div className={`mb-8 rounded-2xl border border-t-4 border-(--line) ${causeBorder(opportunity.cause)} bg-(--panel) p-6`}>
+            <CauseBadge cause={opportunity.cause} />
 
             <h1 className="mt-4 text-3xl font-bold text-(--text)">
               {opportunity.title}
@@ -141,7 +140,7 @@ export default function OpportunityDetailsPage() {
 
             {!completedShift && (
               <p className="mt-2 text-(--muted)">
-                Organized by {opportunity.organizer ?? "Not specified"}
+                Organized by <a href="#organization-profile" className="font-semibold underline">{opportunity.organizer ?? "Not specified"}</a>
               </p>
             )}
           </div>
@@ -164,17 +163,18 @@ export default function OpportunityDetailsPage() {
                   </p>
                 )}
 
-                {opportunity.bring && (
+                {(opportunity.bring || opportunity.requirements) && (
                   <div className="mt-6">
                     <h3 className="font-semibold text-(--text)">
                       What to bring
                     </h3>
                     <p className="mt-2 text-(--muted)">
-                      {opportunity.bring}
+                      {opportunity.bring || opportunity.requirements}
                     </p>
                   </div>
                 )}
               </div>
+              {!completedShift && <OrganizationProfile opportunity={opportunity} />}
             </div>
 
             {/* Right side */}
@@ -249,7 +249,7 @@ export default function OpportunityDetailsPage() {
                 accountRole === "volunteer" ? (
                 <button
                   type="button"
-                  disabled={action.disabled}
+                  disabled={action.disabled || (action.type === 'join' && !isPublished(opportunity, opportunities))}
                   onClick={() => {
                     if (action.type === "leave") {
                       setShowConfirmation(true);
@@ -274,7 +274,7 @@ export default function OpportunityDetailsPage() {
                 <Link
                   to="/login"
                   state={{
-                    from: "/volunteer/dashboard?section=find-shifts",
+                    returnTo: `/opportunities/${opportunity.id}`,
                   }}
                   className={`inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-3 font-semibold ${fromDashboard
                     ? "bg-(--primary) text-(--bg)"
@@ -283,7 +283,7 @@ export default function OpportunityDetailsPage() {
                 >
                   Log in to join
                 </Link>
-                <Link to="/register" className="inline-flex min-h-11 items-center rounded-xl border border-(--line) px-4 py-3 font-semibold">Sign up</Link>
+                <Link to="/register" state={{ returnTo: `/opportunities/${opportunity.id}` }} className="inline-flex min-h-11 items-center rounded-xl border border-(--line) px-4 py-3 font-semibold">Sign up</Link>
                 </div>
               ) : null}
             </div>

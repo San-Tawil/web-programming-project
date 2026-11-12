@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { authDestination } from "../data/authDestination.js";
 import Container from '../components/Container.jsx';
 
 import { findAccount, matchesPassword } from '../data/mockAccounts.js';
@@ -55,7 +56,7 @@ export default function Login() {
 
             selectAccount(account, rememberMe);
 
-            const destination =
+            const destination = location.state?.returnTo ? authDestination(account.role, location.state.returnTo) :
                 account.role === 'volunteer' &&
                 from === '/volunteer/dashboard?section=find-shifts'
                     ? from
@@ -154,7 +155,7 @@ export default function Login() {
                                     >
                                         No account uses this email. Please check your email or{' '}
                                         <Link
-                                            to="/register"
+                                            to="/register" state={location.state}
                                             className="font-semibold text-(--primary) underline decoration-transparent underline-offset-4 hover:decoration-current focus-visible:decoration-current"
                                         >
                                             register
@@ -261,7 +262,7 @@ export default function Login() {
                         <p className="mt-6 mb-0 text-center text-sm text-(--muted)">
                             Don't have an account?{' '}
                             <Link
-                                to="/register"
+                                to="/register" state={location.state}
                                 className="font-semibold text-(--primary) underline decoration-transparent underline-offset-4 hover:decoration-current focus-visible:decoration-current"
                             >
                                 Register

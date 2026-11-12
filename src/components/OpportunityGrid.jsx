@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import CauseBadge from './CauseBadge.jsx';
+import { buttonClass } from './OpportunityUI.jsx';
 import { useDashboardDemo } from '../context/DashboardDemoContext.jsx';
 import {
   isClosed,
@@ -7,6 +9,7 @@ import {
   shiftDate,
   shiftTime,
   signupAction,
+  isPublished,
 } from '../data/dashboardDemo.js';
 // All listings use the same card so visitors can compare the details in the same order.
 export const causeColors = {
@@ -19,12 +22,14 @@ export const causeColors = {
   'Arts and culture': 'bg-[#efbaf1]',
 };
 
-function OpportunitySignup({ opportunity }) {
+export function OpportunitySignup({ opportunity }) {
   const { accountRole, signups, volunteer, dispatch } = useDashboardDemo();
-  if (!accountRole) {
-    return <Link to="/login" className="mt-4 inline-flex min-h-11 w-fit items-center font-semibold text-(--primary) underline">Log in to join</Link>;
-  }
-  if (accountRole !== 'volunteer') return null;
+  const returnTo = `/opportunities/${opportunity.id}`;
+  if (!accountRole) return <div className="mt-4 flex flex-wrap gap-3">
+    <Link to="/volunteer/register" state={{ returnTo }} className={buttonClass}>Sign up<span className="sr-only"> to join {opportunity.title}</span></Link>
+    <Link to="/login" state={{ returnTo }} className={buttonClass}>Log in<span className="sr-only"> to join {opportunity.title}</span></Link>
+  </div>;
+  if (accountRole !== 'volunteer') return <p className="mt-4 mb-0 text-sm text-(--muted)">Use a volunteer account to join this opportunity.</p>;
 
   const signup = signups.find(item => item.opportunityId === opportunity.id && item.volunteerId === volunteer.id);
   const status = listingStatus(opportunity, signups);
@@ -33,7 +38,7 @@ function OpportunitySignup({ opportunity }) {
   return (
     <div className="mt-4 flex flex-wrap items-center gap-3">
       <button type="button" disabled={action.disabled}
-        className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60"
+        className="min-h-11 cursor-pointer rounded-md border-0 bg-aid-primary px-3 font-semibold text-white disabled:cursor-default disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--primary)"
         onClick={() => dispatch({ type: action.type, opportunityId: opportunity.id })}>
         {action.label}
       </button>
@@ -103,9 +108,10 @@ function OpportunityCard({ opportunity, featured, shifts }) {
 
 export default function OpportunityGrid({ featured = false, cause, shiftId, search = '' }) {
   const { opportunities: allOpportunities, accountRole, organization } = useDashboardDemo();
+  const published = allOpportunities.filter(item => isPublished(item, allOpportunities));
   const opportunities = accountRole === 'organizations'
-    ? allOpportunities.filter(item => item.organizationId === organization.id)
-    : allOpportunities;
+    ? published.filter(item => item.organizationId === organization.id)
+    : published;
   const query = search.trim().toLowerCase();
   const matching = opportunities.filter(item => !item.parentId && (!cause || item.cause === cause) &&
     [item.title, item.cause, item.location].some(value => value?.toLowerCase().includes(query)));

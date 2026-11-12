@@ -86,13 +86,18 @@ function getInitialDemo(account) {
 export function DashboardDemoProvider({ children }) {
   const [account, setAccount] = useState(getSavedAccount);
 
-  const [demo, dispatch] = useReducer(
+  const [demo, reducerDispatch] = useReducer(
     demoReducer,
     account,
     getInitialDemo
   );
 
   const accountRole = account?.role ?? null;
+
+  function dispatch(action) {
+    if (action.type === 'join' && accountRole !== 'volunteer') return;
+    reducerDispatch(action);
+  }
 
   function saveProfile(role, changes) {
     const accountRole = role === 'organization' ? 'organizations' : role;

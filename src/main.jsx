@@ -12,10 +12,13 @@ import {
 import AdaptiveNavbar from "./components/AdaptiveNavbar.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import { DashboardDemoProvider, useDashboardDemo } from "./context/DashboardDemoContext.jsx";
+import { OpportunitiesProvider } from "./context/OpportunitiesContext.jsx";
 import Footer from "./components/Footer.jsx";
 
 import HomePage from "./pages/HomePage.jsx";
 
+const OrganizationToolsPage = lazy(() => import("./pages/OrganizationToolsPage.jsx"));
+const OrganizationOverviewPage = lazy(() => import("./pages/OpportunityDetailPage.jsx"));
 const OpportunitiesPage = lazy(() => import("./pages/OpportunitiesPage.jsx"));
 const AboutPage = lazy(() => import("./pages/AboutPage.jsx"));
 const ContactPage = lazy(() => import("./pages/ContactPage.jsx"));
@@ -71,7 +74,7 @@ function PageSkeleton({ pathname }) {
 
 function App() {
   const { accountRole } = useDashboardDemo();
-  const { key, pathname, hash, search } = useLocation();
+  const { pathname, hash, search } = useLocation();
   const dashboard = /^\/(volunteer|organizations)\/dashboard(?:\/profile)?\/?$/.test(pathname);
   const fromDashboard =
     pathname.startsWith("/opportunities/") &&
@@ -79,22 +82,23 @@ function App() {
   const dashboardProfile = dashboard && /\/profile\/?$/.test(pathname);
   const Content = dashboard ? 'div' : 'main';
   const main = useRef(null);
-  const previousKey = useRef(key);
+  const previousKey = useRef(pathname + hash);
 
 
   useEffect(() => {
-    if (previousKey.current !== key) {
+    if (previousKey.current !== pathname + hash) {
       if (dashboard) {
         window.scrollTo(0, 0);
       }
 
     if (!dashboard) {
-      main.current?.focus({ preventScroll: dashboard });
+      main.current?.focus({ preventScroll: true });
+      if (!hash) window.scrollTo({ top: 0, behavior: 'instant' });
     }
 
-      previousKey.current = key;
+      previousKey.current = pathname + hash;
     }
-  }, [key, dashboard, hash]);
+  }, [pathname, dashboard, hash]);
 
   return (
     <div
@@ -121,6 +125,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/opportunities" element={<OpportunitiesPage />} />
+            <Route path="/organizations/tools" element={<OrganizationToolsPage />} />
+            <Route path="/opportunities/:opportunityId/organization" element={<OrganizationOverviewPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<Login />} />
@@ -184,7 +190,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider>
       <BrowserRouter>
         <DashboardDemoProvider>
-          <App />
+          <OpportunitiesProvider><App /></OpportunitiesProvider>
         </DashboardDemoProvider>
       </BrowserRouter>
     </ThemeProvider>
