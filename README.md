@@ -9,14 +9,12 @@ AidConnect is a CSC443 Phase 1 frontend for volunteer coordination in Lebanon. V
 
 ## Team and page ownership
 
-Record two primary pages or views for each member. The suggested assignments below reflect the available project history. Update them to match your team's final allocation.
-
- aid-connect-final
+The table records page ownership and overlapping contributions in this integrated branch. Supporting commits are listed in [the integration review](docs/integration-review.md).
 | Team member | Page or view 1 | Page or view 2 | Contributions |
 | --- | --- | --- | --- |
 | Hassan ElTawil | Homepage | Volunteer and organization dashboards | Led homepage development and built workflows for both dashboards. Also worked on the opportunities catalog, contributed to login and registration, and integrated the final project changes. |
 | Melissa T. Mourad | Log in | Opportunity details | Login form and error feedback, session handling, and opportunity details and signup actions. |
-| Adam M. Al Dayekh | _Add page or view_ | _Add page or view_ | _Add contributions_ |
+| Adam M. Al Dayekh | Opportunity catalog enhancements | Organization tools | Search, cause/city filters, sorting, cause-colored cards, organization tools CRUD, organization profile additions, guest authentication return paths, accessibility improvements, and integration/regression tests. Builds on the existing catalog, details, and dashboard work. |
 | Tarek N. Kronfol | Sign up | Full-page posting form | Role-specific registration and the opportunity/shift posting flow. |
 
 ## Run locally
@@ -58,6 +56,8 @@ The production build goes to `dist/`. Use the preview URL to try the production 
 | ------------------------------------- | --------------------------------------------------------------------------------------- |
 | Homepage                              | `/`                                                                                     |
 | Opportunity catalog                   | `/opportunities`                                                                        |
+| Organization tools | `/organizations/tools` |
+| Organization overview | `/opportunities/:opportunityId/organization` |
 | Opportunity or shift details          | `/opportunities/:id`                                                                    |
 | Volunteer profile details             | **View profile** under organization Applications or select a participant under Listings |
 | Add or edit listings                  | `/organizations/opportunities/new` to post, or **Edit** under organization Listings     |
@@ -78,7 +78,7 @@ The app uses React, React Router, Tailwind CSS, and Vite. It includes semantic l
 
 - **Combining overlapping branch changes.** The posting form and opportunity details branches both touched routing and the organization dashboard. We integrated the full-page form and the newer details and login improvements while keeping the working signup routes and participant profiles.
 - **Keeping volunteer and organization actions separate.** Both roles use the same demo state, but their workflows differ. We matched listings to organization IDs, limited organizers to their own listings, and kept volunteer reservations and applications in the volunteer flow.
-- **Keeping opportunities and shifts consistent.** A shift can belong to a larger opportunity or stand alone. We added checks for dates and capacity, and made linked shifts standalone when their parent opportunity is deleted so those shifts remain available.
+- **Keeping opportunities and shifts consistent.** A shift can belong to a larger opportunity or stand alone. We added checks for dates and capacity, and preserved linked shifts when a parent is deleted from the dashboard. Organization tools instead explicitly confirms cascading deletion of the parent, its shifts, and signups.
 - **Improving mobile layout and keyboard navigation.** We found that the opportunity details page inherited the dashboard's scroll lock and that some homepage effects were disabled on small screens. We limited the scroll lock to dashboards, adapted the effects for mobile, and checked the keyboard skip link at desktop and mobile widths.
 - **Supporting direct links after deployment.** React Router handles navigation in the browser. We added a Vercel rewrite so opening or refreshing a URL loads the app and reaches the correct page.
 
@@ -112,77 +112,41 @@ The app uses React, React Router, Tailwind CSS, and Vite. It includes semantic l
 
 ![Organization dashboard overview with listing management, applications, and schedule navigation](docs/screenshots/organization-dashboard.png)
 
+## Opportunity catalog and organization tools
 
-## Opportunity list and organization tools (Phase 1)
+- `/opportunities` supports search, combined cause/city filters, sorting, counts, reset controls and empty states. Cause-colored cards have text labels and keyboard-accessible links.
+- `/organizations/tools` manages the active demo organization's listings: create/edit, draft/published/closed visibility, status filtering and confirmed deletion. New organization accounts see their own records.
+- `/opportunities/:id` preserves the existing detail page, dashboard return navigation and reservation/withdrawal confirmations, and adds preparation guidance and an organization profile. The earlier overview remains at `/opportunities/:opportunityId/organization`.
+- Guests see signup/login links; volunteers return to the selected opportunity after authentication. Organization accounts cannot use volunteer signup actions.
 
-- `/opportunities`: searchable published listings; combined cause/city filters; date, duration, and title sorting; result counts, reset and empty states; cause-colored cards linking to full opportunity details.
-- `/organizations/tools`: AidConnect Community's demo workspace; create and edit validated opportunities; draft/published/closed states; deletion with confirmation; live counts and status filtering.
-- Desktop, mobile and footer navigation link to the tools. The homepage's featured cards use the same shared data.
+`DashboardDemoProvider` owns the shared reducer. `OpportunitiesProvider` adapts tools to the same data used by the catalog and dashboards. Navigation preserves listing changes; refresh restores the seed listings. This is a frontend demo, not server-enforced authentication or authorization. Organization tools remains a demo workspace, including when accessed without a signed-in account.
 
-### Run locally
+### Integration behavior
 
-Use Node.js 22.12+ (or 20.19+), then run `npm ci` and `npm run dev` from the repository root. Open the URL Vite prints and visit the routes above. `npm run build` creates `dist/`; `npm run preview` serves that build. Production hosting must rewrite application routes to `index.html` for BrowserRouter deep links.
+The dashboard/full-page `OpportunityForm` and tools' `OrganizationOpportunityForm` remain separate because their fields and workflows differ. Both use shared schedule and capacity validation.
 
-### Data and course alignment
+| Action | Result |
+| --- | --- |
+| Close a program in dashboard | Stops program signup; retains linked shifts. |
+| Delete a program in dashboard | Removes the program and its applications; linked shifts become standalone. |
+| Mark a program Closed or Draft in tools | Hides it and its linked shifts from public discovery; blocks new signup. |
+| Delete a program in tools | Confirmation explains that linked shifts and signups are also removed. |
 
-`DashboardDemoProvider` owns one in-memory reducer store for opportunities, shifts, and signups. `OpportunitiesProvider` adapts organization tools to that same store; the list, homepage, and both dashboards share changes. `src/data/opportunities.js` supplies preparation details and city metadata for the seed records. Navigation preserves changes; refreshing restores the seed data. Organization ownership follows main's active account and isolates newly registered organizations from the seed listings. No real opportunities are published and no backend requests are sent.
+Closed/cancelled listings can still be opened on the canonical detail route so existing signup status and cancellation actions remain available. Missing records and public draft links show an unavailable view. Profile text and login sessions follow the existing browser-storage behavior; listing changes, reservations and hours reset on refresh.
 
-The list covers the brief's List View; organization tools covers the Add/Edit Form and mock CRUD. Shared components receive props, controlled forms validate text/date/numeric inputs, and `useEffect` updates page titles. Semantic sections/articles, heading order, labels, time elements, linked validation messages, live feedback, keyboard focus and native dialog behavior follow Chapters 3–4. Responsive Grid/Flexbox, theme variables, Tailwind utilities and breakpoints follow Chapters 5–8. Events, conditional display, array filtering/mapping and immutable object updates apply Chapters 9–10 through React.
+### Review walkthrough
 
-These two pages do not by themselves satisfy the whole team's submission: the brief separately requires two distinct detail routes, login/register, other assigned views, team names/contribution attribution, deployment and screenshots. Expandable listing details are not claimed as separate detail pages.
+1. Browse as a guest: combine filters, reset, try an empty search, and open a card using the keyboard. Check signup/login links.
+2. Sign in as `maya@example.com`; reserve a shift, cancel it, and apply to an approval-based listing. Check dashboard entries and profile settings.
+3. Sign in as `team@aidconnect.example`; review an application, create/edit a scheduled listing with the existing posting form, and check participants.
+4. Open Organization tools. Try required-field validation, then create a future published listing. Find it in the catalog, edit it, close/publish it, and test cancel/confirm deletion.
+5. Register a new organization and verify it cannot manage the seeded organization's listings.
+6. Repeat key routes at mobile and desktop widths. Refresh to check the documented reset/persistence behavior.
 
-### Manual acceptance walkthrough
+### Verification and contribution evidence
 
-1. Filter opportunities by Education and Beirut; search for homework. Reset and try an unmatched search, then open a card by clicking its body or focusing its title and pressing Enter.
-2. Open Organization tools. Create an empty role to see labeled validation errors; enter valid fields and choose Published.
-3. Navigate to Find opportunities and search for the new title. Open its details.
-4. Return to tools, edit the title, then close the role. Confirm it disappears from the public list. Publish again to restore it.
-5. Delete it; cancel once to verify it remains, then confirm. Refresh to restore the sample data.
-6. Repeat at mobile/tablet/desktop widths, in light/dark mode, and using the keyboard.
+See [Integration review](docs/integration-review.md) for the main commit included, contribution evidence, preserved files, checks, and limitations. [PR #6](https://github.com/San-Tawil/web-programming-project/pull/6) contains the integration; check its current GitHub status before assuming these changes are on `main`. The live demo link above is separate from the PR preview.
 
-### Page previews and verification
+Current combined previews: [Catalog](docs/screenshots/combined-catalog.png), [Details](docs/screenshots/combined-detail.png), [Dashboard](docs/screenshots/combined-dashboard.png), [Organization tools](docs/screenshots/combined-tools.png). The earlier main catalog screenshot is preserved as `docs/screenshots/opportunities-main.png`.
 
-![Opportunity list](docs/screenshots/opportunities.png)
-![Organization tools](docs/screenshots/organization-tools.png)
-
-Verified with a production build and Chromium interaction checks: combined filters, empty results, detail disclosure, continuous search typing, required-field validation, create/edit, cross-route data sharing, publish/close, deletion cancellation/confirmation, and no horizontal overflow at 320, 390, 768 and 1366 pixels. Light and dark layouts were reviewed. Vite was aligned to version 7 to match the existing plugins' supported peer dependency range.
-
-
-### Main integration
-
-Merged main's registration, login, role toggle, volunteer dashboard and organization dashboard. Both creation forms remain available: the dashboard creates programs and scheduled shifts; tools edit visibility and listing details. Published records can be joined/applied to from the searchable list. Closing a parent hides its shifts from public discovery; deleting it removes its shifts and associated signups. Capacity edits cannot undercut confirmed reservations. Ongoing programs may omit date and hours. New records use unique IDs even after deletions.
-
-About, Contact and Not Found now explicitly import React, fixing route crashes under the existing Vite JSX configuration. Contact remains the team's existing frontend placeholder; it does not send messages.
-
-Integration verification: `node --test tests/opportunities.test.js` covers capacity limits, unique IDs after deletion, schedule updates, parent visibility and cascading deletion. Production-browser checks cover signup/approval, both registration/login roles, cross-page creation and editing, responsive routes and errors. Role-specific login links now open the working login form.
-
-
-### Opportunity discovery and details
-
-Cards use shared cause colors with visible text labels, so color is not the only cue. Hover and keyboard focus highlight cards; a real React Router link opens `/opportunities/:opportunityId`. Separate signup/login controls remain independently keyboard accessible. The detail page includes preparation guidance, timing, availability, related shifts, and a labeled organization profile with demo data. Missing, closed or draft IDs show an unavailable state.
-
-Guests see Sign up and Log in instead of reservation/application buttons. Logged-in volunteers can reserve/apply; organization accounts receive an explanation. The shared context also rejects guest join actions. Login and registration return volunteers to the selected opportunity through a restricted internal return path. This remains Phase 1 mock authentication, with main's remembered-email and session/local storage behavior preserved.
-
-Both pages use existing React hooks, React Router, and Tailwind theme utilities. Headings, landmarks, breadcrumbs, visible labels, focus indicators, reduced-motion support and live availability feedback provide accessible navigation. Run `node --test tests/*.test.js` for the reducer and return-path checks.
-
-![Opportunity detail and organization profile](docs/screenshots/opportunity-detail.png)
-
-Verified: production build; six Node tests; guest/volunteer/organization action visibility; card click and keyboard navigation; login/signup return paths; unavailable IDs; and 320/390/768/1366-pixel layouts. Automated axe checks of the list and both scheduled/flexible detail variants reported no WCAG 2 A/AA or 2.1 AA violations in the page main content in either theme. Automated checks complement the keyboard and visual review; they do not establish complete accessibility conformance.
-
-
-## Local combined review - 2026-11-11
-
-This local review combines `opportunity-list/organization-details` at `50a967c` with main at `06e2dc5` on `review/opportunities-main`. Nothing from this review has been pushed or merged on GitHub.
-
-- Main's dashboard navigation, participant profiles/ratings, profile settings, shift edits/cancellations, hours/planning, scheduled posting forms, Contact confirmation, and persistent sessions remain available.
-- The searchable, cause-colored catalog, guest signup/login return paths, and `/organizations/tools` remain available. The main detail route `/opportunities/:id` combines main's reservation/withdrawal confirmation and dashboard return navigation with the organization profile and volunteer guidance. The earlier overview is retained at `/opportunities/:opportunityId/organization`.
-- Main's `OpportunityForm` remains the dashboard/full-page form; `OrganizationOpportunityForm` is the tools editor. Both use the same reducer and schedule/capacity validation.
-- Dashboard program deletion keeps linked shifts standalone, as main specifies. Tools deletion explicitly confirms removing linked shifts and signups. Dashboard closure retains linked shifts; tools visibility can hide a program and its linked shifts. These actions keep their respective confirmation behavior.
-- New sessions and saved text profiles use main's browser storage. Demo listings, reservations, applications and logged hours still reset on refresh.
-
-To review, run `npm.cmd run dev` and open Vite's local URL. Use `npm.cmd run lint`, `npm.cmd test`, and `npm.cmd run build` for checks. A local merge commit can be reviewed independently of the published branch.
-
-
-Review previews: [Combined catalog](docs/screenshots/combined-catalog.png), [Combined detail](docs/screenshots/combined-detail.png), [Dashboard](docs/screenshots/combined-dashboard.png), [Organization tools](docs/screenshots/combined-tools.png). Main's earlier catalog screenshot is retained as `docs/screenshots/opportunities-main.png`.
-
-Integration checks passed: lint, 13 Node tests, production build, and production browser flows covering reservations/cancellation, applications/approval, remembered sessions, profile persistence, posting/editing/cancelling shifts, tools CRUD, organization isolation, and desktop/mobile routes.
+The list and tools apply the course's list-view and add/edit-form concepts through React props, controlled forms, state, effects and immutable updates. Tailwind provides responsive layouts and themes. Accessible labels, headings, focus indicators and status messages support keyboard and screen-reader use. Earlier branch accessibility checks are historical evidence, not a claim of complete accessibility conformance or a fresh accessibility audit of every integrated route.
