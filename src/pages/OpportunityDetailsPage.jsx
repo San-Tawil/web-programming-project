@@ -36,6 +36,8 @@ export default function OpportunityDetailsPage() {
   } = useDashboardDemo();
   const [searchParams] = useSearchParams();
   const [showConfirmation, setShowConfirmation] = useState(false);
+  
+// Check where the user came from to show the correct navigation
   const fromDashboard = searchParams.get("from") === "dashboard";
   const fromOrganization =
     fromDashboard && accountRole === "organizations";
@@ -44,9 +46,13 @@ export default function OpportunityDetailsPage() {
   const fromMyApplications =
     fromDashboard && searchParams.get("section") === "my-applications";
   const organizationView = accountRole === "organizations";
+ 
+  //Check if shift is completed
   const completedShift = (!organizationView || organization.id === initialDemo.organization.id) && completedShifts.find(
   (shift) => shift.id === id
 );
+
+// Find the selected opportunity or completed shift
   const opportunity =
     opportunities.find(item => item.id === id && (!organizationView || item.organizationId === organization.id)) ?? completedShift;
 
@@ -57,6 +63,7 @@ export default function OpportunityDetailsPage() {
     </Container>;
   }
 
+  //Calculate the remaining available spots
   const availableSpots =
     opportunity.capacity == null
       ? null
@@ -64,12 +71,13 @@ export default function OpportunityDetailsPage() {
         0,
         opportunity.capacity - spotsFilled(signups, opportunity.id)
       );
+  // Check if the current volunteer has signed up
   const signup = signups.find(
     (item) =>
       item.opportunityId === opportunity.id &&
       item.volunteerId === volunteer.id
   );
-
+  // Determine the listing status and available signup action
   const status = completedShift
     ? null
     : listingStatus(opportunity, signups);
@@ -291,6 +299,7 @@ export default function OpportunityDetailsPage() {
         </Container>
       </section>
 
+      {/* Confirm before withdrawing an application or cancelling a reservation */}
       {showConfirmation && (
         <Modal
           title={

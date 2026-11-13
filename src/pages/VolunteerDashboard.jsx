@@ -24,6 +24,7 @@ export default function VolunteerDashboard() {
   const [reservationToCancel, setReservationToCancel] = useState(null);
   const [appSearch, setAppSearch] = useState('');
   const [appStatus, setAppStatus] = useState('All');
+  // Get the volunteer's shifts, applications, bookings, and logged hours
   const history = volunteer.id === initialDemo.volunteer.id ? completedShifts : [];
   const entries = hoursByVolunteer[volunteer.id] ?? [];
   const shifts = opportunities.filter(item => item.kind === 'shift' && !isClosed(item));
@@ -37,6 +38,7 @@ export default function VolunteerDashboard() {
   const pendingApplications = applications.filter(signup =>
     signup.status === 'Pending' && opportunities.some(item => item.id === signup.opportunityId && !isClosed(item))
   );
+  // Filter applications based on their status and the search
   const visibleApplications = applications.flatMap(({ opportunityId, status }) => {
     const listing = opportunities.find(item => item.id === opportunityId);
     if (!listing) return [];
@@ -45,6 +47,7 @@ export default function VolunteerDashboard() {
       !listing.title.toLowerCase().includes(appSearch.trim().toLowerCase()))) return [];
     return [{ listing, label }];
   });
+  // Prepare the volunteer's dashboard statistics
   const plannedIds = plannedByVolunteer[volunteer.id] ?? [];
   const next = upcoming[0];
   const metrics = [
@@ -54,6 +57,7 @@ export default function VolunteerDashboard() {
     { label: 'Planned shifts', value: shifts.filter(shift => plannedIds.includes(shift.id)).length, href: '#hours', detail: 'Edit plan' },
   ];
 
+  // Handle shift signups, applications, and cancellations
   function changeSignup(listing, type, status) {
     if (isClosed(listing)) {
       setNotice(`Signup has closed for ${listing.title}.`);
@@ -66,6 +70,7 @@ export default function VolunteerDashboard() {
     setNotice(`${message} for ${listing.title}.`);
   }
 
+  // Display the volunteer's applications
   const applicationsCard = (
     <DashboardSection id="my-applications" title="My applications">
       {view === 'my-applications' && <div className="mb-3 flex flex-wrap gap-3">
@@ -117,6 +122,7 @@ export default function VolunteerDashboard() {
       )}
     </DashboardSection>
   );
+  // Display the next confirmed shift
   const nextCard = (
     <DashboardSection id="next-shift" title="Next confirmed shift">
       {next ? (
@@ -148,6 +154,7 @@ export default function VolunteerDashboard() {
       )}
     </DashboardSection>
   );
+  // Display the shift calendar, other bookings, and completed shifts
   const scheduleCards = (
     <>
       <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date ?? shifts[0]?.date} />
@@ -177,6 +184,7 @@ export default function VolunteerDashboard() {
     </>
   );
 
+  // Display the selected dashboard section
   return (
     <DashboardLayout title="Volunteer dashboard" profile={volunteer} otherRole="Organization" sections={sections} metrics={metrics}
       action={<Link className="rounded-lg bg-(--primary) px-4 py-3 text-sm font-semibold text-(--bg) hover:underline" to="/volunteer/dashboard?section=find-shifts">Find a shift</Link>}>
@@ -204,6 +212,8 @@ export default function VolunteerDashboard() {
         />
       )}
       {view === 'hours' && <VolunteerProfile key={volunteer.id} shifts={shifts} history={history} entries={entries} plannedIds={plannedIds} dispatch={dispatch} />}
+      
+      {/* Confirm before withdrawing an application or cancelling a reservation */}
       {reservationToCancel && (
         <Modal
           title={

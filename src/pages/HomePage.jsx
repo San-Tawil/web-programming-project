@@ -22,10 +22,11 @@ import PhotoCredit from '../components/PhotoCredit.jsx';
 import OpportunityGrid from '../components/OpportunityGrid.jsx';
 import { OrganizationTrail, RegionalPlatforms, VolunteerPhotoBand } from '../components/HomeExtras.jsx';
 
-
+// Lazy load the scroll animation component
 const ScrollReveal = lazy(() => import('../components/fx/ScrollReveal/ScrollReveal.jsx'));
 const mission = 'Lebanon runs on people who show up. AidConnect makes it easier to find the shift that fits your week.';
 
+// Define the volunteering causes and their images
 const causes = [
   { name: 'Environment', description: 'Clean up shorelines and care for shared spaces.', image: cleanupPhoto, alt: 'Volunteers cleaning up litter on a beach', credit: { photographer: 'Ron Lach', source: 'https://www.pexels.com/photo/people-on-beach-holding-white-sack-9035238/' } },
   { name: 'Food support', description: 'Sort supplies and pack food for neighbors.', image: packingPhoto, alt: 'Volunteers preparing food rations together', credit: { photographer: 'cottonbro studio', source: 'https://www.pexels.com/photo/people-preparing-food-rations-in-the-box-6590928/' } },
@@ -39,18 +40,22 @@ const causes = [
   { name: 'Accessibility', description: 'Help make local events welcoming and accessible.', image: accessibilityPhoto, alt: 'A woman assisting a man who uses a wheelchair', credit: { photographer: 'SHVETS production', source: 'https://www.pexels.com/photo/a-woman-pushing-a-wheelchair-with-man-8415522/' } },
 ];
 
+// Define the colors used for the cause cards
 const causeColors = ['#a9dfb5', '#ffc5a6', '#a8d9f4', '#ffd0da', '#f5dd9f', '#c9df9c', '#dbcbf5', '#efbaf1', '#a2e2dd', '#ffc9e2'];
 
 export default function HomePage() {
   const gallery = useRef(null);
 
+  // Scroll the cause gallery left or right
   function scrollCauses(direction) {
     const rail = gallery.current;
     const card = rail.firstElementChild;
     if (card) rail.scrollBy({ left: direction * (card.offsetWidth + parseFloat(getComputedStyle(rail).columnGap)) });
   }
+  // Display the homepage sections
   return (
     <div className="aid-home flex flex-1 flex-col font-body [&_:is(h1,h2,h3)]:font-display [&_:is(h1,h2,h3)]:tracking-[-0.02em] [&_:focus-visible]:outline-2 [&_:focus-visible]:outline-offset-4">
+      {/* Display the main banner and navigation buttons */}
       <section aria-labelledby="home-title" className="relative isolate flex flex-1 flex-col bg-(--bg) text-(--text)">
         <div className="absolute inset-0 after:pointer-events-none after:absolute after:inset-0 after:bg-aid-scrim/65 after:content-['']">
           <LoadingImage src={volunteerPhoto} srcSet={`${volunteerPhotoSmall} 768w, ${volunteerPhoto} 1440w`} sizes="100vw"
@@ -80,6 +85,7 @@ export default function HomePage() {
         </Container>
       </section>
 
+      {/* Display the platform statistics */}
       <section aria-label="What the demo covers" className="border-y border-(--line) bg-(--panel) text-(--text)">
         <Container className="py-5">
           <dl className="m-0 grid grid-cols-3 text-center [&>div]:flex [&>div]:flex-col-reverse [&>div]:gap-1 [&>div]:px-2 [&>div+div]:border-s [&>div+div]:border-(--line) [&_dt]:text-sm [&_dt]:text-(--muted) [&_dd]:m-0 [&_dd]:text-[1.75rem] [&_dd]:font-extrabold [&_dd]:text-(--primary)">
@@ -89,6 +95,8 @@ export default function HomePage() {
           </dl>
         </Container>
       </section>
+
+      {/* Display the mission statement with a scroll animation */}
       <section aria-label="AidConnect mission">
         <Container className="py-12">
           <DeferredContent fallback={<h2 className="mx-auto my-5 max-w-4xl text-[clamp(1.6rem,4vw,3rem)] leading-[1.5] font-extrabold text-ink">{mission}</h2>}>
@@ -98,6 +106,8 @@ export default function HomePage() {
           </DeferredContent>
         </Container>
       </section>
+
+      {/* Display the latest volunteering opportunities */}
       <section aria-labelledby="featured-title">
         <Container className="py-12 md:py-16">
           <h2 id="featured-title">Latest opportunities and shifts</h2>
@@ -126,6 +136,7 @@ export default function HomePage() {
         </div>
       </Container>
 
+      {/* Display the volunteering causes in a scrollable gallery */}
       <section aria-labelledby="causes-title">
         <Container className="py-12">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -159,6 +170,7 @@ export default function HomePage() {
 
       <RegionalPlatforms />
 
+      {/* Display the organization section with links to post opportunities */}
       <section aria-labelledby="organization-title" className="border-y border-(--line) bg-(--panel) text-(--text)">
         <Container className="grid items-center gap-8 py-12 md:grid-cols-[1.25fr_1fr]">
           <div className="relative z-10">

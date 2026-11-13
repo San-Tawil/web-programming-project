@@ -14,6 +14,7 @@ const primaryButton = 'min-h-11 cursor-pointer rounded-md border-0 bg-(--primary
 const listingTabs = ['My shifts', 'My opportunities', 'Completed'];
 const sections = [['overview', 'Overview'], ['listings', 'Listings'], ['applications', 'Applications'], ['schedule', 'Schedule']];
 
+// Display a listing with its status, participants, and available actions
 function ShiftRow({ item, signups, programs, onAction, canViewProfiles }) {
   const participants = signups.filter(signup => signup.opportunityId === item.id && isConfirmed(signup));
   const parent = programs.find(program => program.id === item.parentId);
@@ -76,6 +77,7 @@ function ShiftRow({ item, signups, programs, onAction, canViewProfiles }) {
   );
 }
 
+// Display the organization's listings in a table
 function ListingList({ items, signups, programs, onAction, canViewProfiles }) {
   if (!items.length) return <EmptyState>No listings match this view.</EmptyState>;
 
@@ -103,6 +105,8 @@ export default function OrganizationDashboard() {
   const [appStatus, setAppStatus] = useState('All');
   const [listingNotice, setListingNotice] = useState('');
   const [reviewNotice, setReviewNotice] = useState('');
+
+  // Get the organization's shifts, opportunities, and applications
   const owned = opportunities.filter(item => item.organizationId === organization.id);
   const history = organization.id === initialDemo.organization.id ? completedShifts : [];
   const shifts = owned.filter(item => item.kind === 'shift')
@@ -131,6 +135,8 @@ export default function OrganizationDashboard() {
       `${signup.volunteer} ${owned.find(item => item.id === signup.opportunityId)?.title}`.toLowerCase().includes(appSearch.trim().toLowerCase()));
   const visiblePending = pending.filter(matchesApplication);
   const visibleReviewed = reviewed.filter(matchesApplication);
+
+  // Prepare the organization's dashboard statistics
   const recordedHours = history.reduce((total, shift) => total + shift.hours, 0);
   const metrics = [
     { label: 'Applications to review', value: pending.length, href: '#applications', detail: 'Review applications', badge: pending.length ? 'Pending' : undefined },
@@ -138,8 +144,11 @@ export default function OrganizationDashboard() {
     { label: 'Volunteer hours logged', value: recordedHours, href: '#listings', detail: 'Manage listings' },
     { label: 'Open listings', value: owned.filter(item => listingStatus(item, signups) === 'Open').length, href: '#listings', detail: 'View listings' },
   ];
+
+  // Set the title of the modal based on the selected action
   const dialogTitle = { shift: 'Add a shift', opportunity: 'Add an opportunity', edit: action?.item?.kind === 'opportunity' ? 'Edit opportunity' : 'Edit shift', cancel: 'Cancel shift', close: 'Close opportunity', delete: 'Delete opportunity' }[action?.mode];
 
+  // Handle accepting or declining volunteer applications
   function review(event, signup, status) {
     const item = owned.find(listing => listing.id === signup.opportunityId);
     if (isClosed(item) || (status === 'Accepted' && listingStatus(item, signups) === 'Full')) {
@@ -151,6 +160,7 @@ export default function OrganizationDashboard() {
     setReviewNotice(`${status} ${signup.volunteer} for ${item.title}.`);
   }
 
+  // Update the selected tab and show a message after a listing action
   function finishListing(message) {
     if (action.mode === 'opportunity' || action.item?.kind === 'opportunity') setListingTab('My opportunities');
     else setListingTab('My shifts');
@@ -158,6 +168,7 @@ export default function OrganizationDashboard() {
     setAction(null);
   }
 
+  // Cancel a shift if signup is still open
   function cancelShift() {
     if (isClosed(action.item)) {
       finishListing(`Signup has already closed for ${action.item.title}.`);
@@ -167,6 +178,7 @@ export default function OrganizationDashboard() {
     finishListing(`${action.item.title} was cancelled.`);
   }
 
+  // Display and manage the organization's shifts and opportunities
   const listingsCard = (
     <DashboardSection id="listings" title="Manage listings" actions={view === 'listings' && <div className="flex flex-wrap gap-2">
       <button type="button" className={primaryButton} onClick={() => setAction({ mode: 'shift' })}>Add shift</button>
@@ -200,6 +212,8 @@ export default function OrganizationDashboard() {
             </div>
           </DashboardSection>
   );
+
+  // Display pending and reviewed volunteer applications
   const applicationsCard = (
     <DashboardSection id="applications" title="Applications to review">
       {view === 'applications' && <div className="mb-3 flex flex-wrap gap-3">
@@ -255,12 +269,16 @@ export default function OrganizationDashboard() {
       )}
     </DashboardSection>
   );
+
+  // Prepare the shift calendar and monthly volunteer hours
   const calendar = <ShiftCalendar shifts={upcoming} initialDate={upcoming[0]?.date} />;
   const monthlyHours = Object.entries(history.reduce((months, shift) => {
     months[shift.month] = (months[shift.month] ?? 0) + shift.hours;
     return months;
   }, {}));
   const busiestMonth = Math.max(1, ...monthlyHours.map(([, hours]) => hours));
+  
+  // Display the selected organization dashboard section
   return (
     <DashboardLayout title="Organization dashboard" profile={organization} otherRole="Volunteer" sections={sections} metrics={metrics}
       action={
@@ -293,6 +311,7 @@ export default function OrganizationDashboard() {
       ) : applicationsCard)}
       {view === 'schedule' && calendar}
 
+      {/* Show the form or confirmation modal for the selected listing action */}
       {action && <Modal key={action.item?.id ?? action.mode} title={dialogTitle} onClose={() => setAction(null)}>
         {action.mode === 'close' || action.mode === 'delete' ? <>
           <p className="mb-4 break-words">

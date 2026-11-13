@@ -17,6 +17,7 @@ export default function Login() {
     const from = location.state?.from;
     const { selectAccount } = useDashboardDemo();
 
+    //Fill in the email if the user chose 'Remember me' before
     const [email, setEmail] = useState(
         () => localStorage.getItem(rememberedEmailKey) || ''
     );
@@ -32,6 +33,7 @@ export default function Login() {
         e.preventDefault();
         if (checking) return;
 
+        //check the email first so we can show the right error
         const account = findAccount(email);
 
         if (!account) {
@@ -46,7 +48,7 @@ export default function Login() {
                 setLoginError('wrong-password');
                 return;
             }
-
+            //Only save the email when 'Remember me' is checked. Otherwise remove it from localStorage
             if (rememberMe) {
                 localStorage.setItem(rememberedEmailKey, account.email);
             } else {
@@ -55,6 +57,8 @@ export default function Login() {
 
             selectAccount(account, rememberMe);
 
+            //Return volunteers to 'Find shifts' if they came from there
+            // Otherewise go to dashboard
             const destination =
                 account.role === 'volunteer' &&
                 from === '/volunteer/dashboard?section=find-shifts'
